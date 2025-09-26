@@ -5,8 +5,22 @@ import time
 # Load the cascade for the eye
 eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
+# Check if cascade file loaded successfully
+if eye_cascade.empty():
+    print("Error: Could not load haarcascade_eye.xml file")
+    print("Please ensure the file is in the same directory as this script")
+    exit(1)
+
 # Load the input video
 cap = cv2.VideoCapture(0)
+
+# Check if camera opened successfully
+if not cap.isOpened():
+    print("Error: Could not open camera. Please check:")
+    print("1. Camera is connected and not being used by another application")
+    print("2. Camera permissions are granted")
+    print("3. Try changing the camera index (0, 1, 2, etc.)")
+    exit(1)
 
 # Define the counter to keep track of the number of consecutive frames with closed eyes
 counter = 0
@@ -15,7 +29,9 @@ counter = 0
 threshold = 30
 
 # Start the media
+print("Starting media playback...")
 pyautogui.press('play')
+print("Media playback started. Press 'q' to quit.")
 
 while True:
     # Capture a frame from the video
