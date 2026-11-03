@@ -1,0 +1,69 @@
+name: EyePause Windows
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Eyedetection/**'
+      - '.github/workflows/eyepause-windows.yml'
+  pull_request:
+    paths:
+      - 'Eyedetection/**'
+      - '.github/workflows/eyepause-windows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-package:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: Eyedetection
+        shell: pwsh
+    env:
+      QT_QPA_PLATFORM: offscreen
+      MPLCONFIGDIR: ${{ runner.temp }}/eyepause-matplotlib
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: Eyedetection/requirements-lock.txt
+      - name: Install pinned environment
+        run: |
+          python -m pip install -r requirements-lock.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install --no-deps -e .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip check
+      - name: Download and verify versioned model
+        run: python scripts/download_model.py
+      - name: Lint and format
+        run: |
+          python -m ruff check src scripts tests packaging/entrypoint.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m ruff format --check src scripts tests packaging/entrypoint.py
+      - name: Automated tests
+        run: python -m pytest -q
+      - name: Model and dependency smoke test
+        run: python -m eyepause --self-test
+      - name: Synthetic trace evaluation
+        run: python -m eyepause.benchmark trace examples/demo-trace.jsonl --output build/trace-report.json
+      - name: Build portable application
+        run: python scripts/build.py
+      - name: Verify portable application
+        run: python scripts/verify_portable.py dist/EyePause-0.1.0-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EyePause-windows-x64
+          path: |
+            Eyedetection/dist/*.zip
+            Eyedetection/build/portable-demo.png
+            Eyedetection/build/trace-report.json
+            Eyedetection/build/portable-verification.json
+          if-no-files-found: error
+
