@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "width": 400,
+  "height": 400,
+  "regions": [
+    {
+      "region_id": "line-1",
+      "text": "Merchant: Vision Cafe",
+      "box": [
+        10,
+        10,
+        350,
+        30
+      ]
+    },
+    {
+      "region_id": "line-2",
+      "text": "Date: 2026-11-03",
+      "box": [
+        10,
+        40,
+        350,
+        60
+      ]
+    },
+    {
+      "region_id": "line-3",
+      "text": "Muffin 4.00",
+      "box": [
+        10,
+        70,
+        350,
+        90
+      ]
+    },
+    {
+      "region_id": "line-4",
+      "text": "Subtotal: 4.00",
+      "box": [
+        10,
+        100,
+        350,
+        120
+      ]
+    },
+    {
+      "region_id": "line-5",
+      "text": "Total: 4.40",
+      "box": [
+        10,
+        130,
+        350,
+        150
+      ]
+    },
+    {
+      "region_id": "line-6",
+      "text": "Thank you",
+      "box": [
+        10,
+        160,
+        350,
+        180
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "image": "shapes.png",
+  "regions": [
+    {
+      "region_id": "shape-face",
+      "category": "face",
+      "box": [
+        12.2,
+        10.1,
+        42.8,
+        36.7
+      ]
+    },
+    {
+      "region_id": "shape-plate",
+      "category": "plate",
+      "box": [
+        60,
+        42,
+        105,
+        58
+      ]
+    },
+    {
+      "region_id": "shape-text",
+      "category": "sensitive_text",
+      "box": [
+        -3,
+        70,
+        55.2,
+        88
+      ]
+    }
+  ]
+}

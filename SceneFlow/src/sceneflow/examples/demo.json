@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "line": {
+    "start": [
+      50,
+      0
+    ],
+    "end": [
+      50,
+      100
+    ]
+  },
+  "frames": [
+    {
+      "timestamp": 0,
+      "tracks": [
+        {
+          "track_id": "alpha",
+          "box": [
+            18,
+            48,
+            22,
+            52
+          ]
+        },
+        {
+          "track_id": "outside",
+          "box": [
+            18,
+            148,
+            22,
+            152
+          ]
+        },
+        {
+          "track_id": "stationary",
+          "box": [
+            8,
+            28,
+            12,
+            32
+          ]
+        },
+        {
+          "track_id": "missing",
+          "box": [
+            18,
+            58,
+            22,
+            62
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 1,
+      "tracks": [
+        {
+          "track_id": "alpha",
+          "box": [
+            48,
+            48,
+            52,
+            52
+          ]
+        },
+        {
+          "track_id": "outside",
+          "box": [
+            78,
+            148,
+            82,
+            152
+          ]
+        },
+        {
+          "track_id": "stationary",
+          "box": [
+            8,
+            28,
+            12,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 2,
+      "tracks": [
+        {
+          "track_id": "alpha",
+          "box": [
+            78,
+            48,
+            82,
+            52
+          ]
+        },
+        {
+          "track_id": "outside",
+          "box": [
+            78,
+            148,
+            82,
+            152
+          ]
+        },
+        {
+          "track_id": "stationary",
+          "box": [
+            8,
+            28,
+            12,
+            32
+          ]
+        },
+        {
+          "track_id": "missing",
+          "box": [
+            78,
+            58,
+            82,
+            62
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": 3,
+      "tracks": [
+        {
+          "track_id": "alpha",
+          "box": [
+            18,
+            48,
+            22,
+            52
+          ]
+        },
+        {
+          "track_id": "outside",
+          "box": [
+            78,
+            148,
+            82,
+            152
+          ]
+        },
+        {
+          "track_id": "stationary",
+          "box": [
+            8,
+            28,
+            12,
+            32
+          ]
+        },
+        {
+          "track_id": "missing",
+          "box": [
+            78,
+            58,
+            82,
+            62
+          ]
+        }
+      ]
+    }
+  ]
+}

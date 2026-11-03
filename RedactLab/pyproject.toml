@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=75,<85"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionplayground-redactlab"
+version = "0.1.0.dev0"
+description = "Apply reviewed detection regions to image copies and export inspectable redaction masks."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+authors = [{name = "Samuel"}]
+dependencies = ["pillow>=11,<14"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "setuptools>=75,<85"]
+
+[project.scripts]
+redactlab = "redactlab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+redactlab = ["examples/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["redactlab"]

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=75,<85"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionplayground-sceneflow"
+version = "0.1.0.dev0"
+description = "Turn supplied object tracks into timestamped boundary-crossing events."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+authors = [{name = "Samuel"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "setuptools>=75,<85"]
+
+[project.scripts]
+sceneflow = "sceneflow.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sceneflow = ["examples/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sceneflow"]

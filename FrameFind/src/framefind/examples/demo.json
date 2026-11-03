@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "query": [
+    1,
+    0,
+    0
+  ],
+  "k": 2,
+  "items": [
+    {
+      "item_id": "red-car",
+      "embedding": [
+        1,
+        0,
+        0
+      ],
+      "uri": "illustration/red.png"
+    },
+    {
+      "item_id": "blue-car",
+      "embedding": [
+        0.8,
+        0.2,
+        0
+      ],
+      "uri": "illustration/blue.png"
+    },
+    {
+      "item_id": "forest",
+      "embedding": [
+        0,
+        0,
+        1
+      ],
+      "uri": "illustration/forest.png"
+    }
+  ]
+}

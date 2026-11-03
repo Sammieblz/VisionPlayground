@@ -1,0 +1,10 @@
+# Pinned runtime + development dependencies for Python 3.12/3.13.
+# Install this file, then install this project with --no-deps --no-build-isolation.
+colorama==0.4.6; sys_platform == "win32"
+iniconfig==2.3.1
+packaging==26.3
+pluggy==1.7.0
+Pygments==2.21.0
+pytest==9.2.0
+ruff==0.17.3
+setuptools==84.2.1

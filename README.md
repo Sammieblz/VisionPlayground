@@ -22,6 +22,6 @@ See the project's [verification matrix](Eyedetection/docs/VALIDATION.md) for the
 
 ## Repository structure
 
-Projects are self-contained folders with packaged source, tests, documentation, and reproducible tooling. EyePause retains the original `Eyedetection` folder path; the initial scripts are archived within that project for provenance.
+Projects are self-contained folders with packaged source, tests, documentation, and reproducible tooling. EyePause retains the original `Eyedetection` folder path; the initial scripts are archived within that project for provenance.  
 
 Future projects will be listed here as they are built. Shared infrastructure will be extracted when multiple projects need it.
