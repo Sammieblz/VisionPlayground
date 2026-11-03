@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionplayground-eyepause"
+version = "0.1.0"
+description = "Local eye-closure detection and Windows media playback control"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+authors = [{name = "Samuel"}]
+dependencies = [
+  "PySide6-Essentials>=6.8,<7",
+  "mediapipe>=0.10.32,<2",
+  "opencv-contrib-python>=4.11,<6",
+  "numpy>=2,<3",
+  "winrt-Windows.Media.Control>=4; sys_platform == 'win32'",
+  "winrt-Windows.Media>=4; sys_platform == 'win32'",
+  "winrt-Windows.Foundation>=4; sys_platform == 'win32'",
+  "winrt-Windows.Foundation.Collections>=4; sys_platform == 'win32'",
+  "winrt-Windows.Storage.Streams>=4; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.25", "pytest-qt>=4.4", "ruff>=0.11", "pyinstaller>=6.12"]
+
+[project.scripts]
+eyepause = "eyepause.__main__:main"
+eyepause-benchmark = "eyepause.benchmark:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+eyepause = ["assets/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+

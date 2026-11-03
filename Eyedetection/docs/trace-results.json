@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "reports": [
+    {
+      "mode": "trace",
+      "settings": {
+        "camera_index": 0,
+        "preview": true,
+        "pause_seconds": 2.0,
+        "resume_seconds": 0.5,
+        "left_closed": 0.2,
+        "left_open": 0.24,
+        "right_closed": 0.2,
+        "right_open": 0.24
+      },
+      "samples": 161,
+      "annotated_seconds": 16.0,
+      "processing_seconds": 0.0006822999566793442,
+      "processing_samples_per_second": 235966.59859625943,
+      "sample_state_accuracy": 1.0,
+      "closed_sample_precision": 1.0,
+      "closed_sample_recall": 1.0,
+      "sustained_closure_events": 1,
+      "pause_events": 1,
+      "closure_event_precision": 1.0,
+      "closure_event_recall": 1.0,
+      "false_pauses": 0,
+      "closure_to_pause": {
+        "count": 1,
+        "median_ms": 2000.0,
+        "p95_ms": 2000.0
+      },
+      "reopening_to_resume": {
+        "count": 1,
+        "median_ms": 500.0,
+        "p95_ms": 500.0
+      },
+      "inference": null,
+      "actions": [
+        {
+          "action": "pause",
+          "timestamp": 7.0
+        },
+        {
+          "action": "play",
+          "timestamp": 9.0
+        }
+      ],
+      "note": "Latency includes configured dwell time; simulated playback acknowledges immediately. Trace throughput measures policy replay, not camera inference or media-service latency."
+    }
+  ]
+}

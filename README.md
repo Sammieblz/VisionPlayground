@@ -1,51 +1,27 @@
-# EyeDetection
-Python code that detects when an eye blinks and performs a play/pause action. This is going to be part of a bigger project.
-This code is a Python script that uses the OpenCV library to detect closed eyes in real-time video frames from your webcam. It then interacts with the PyAutoGUI library to control media playback based on the detection of closed eyes.
+# VisionPlayground
 
-Here's a step-by-step explanation of the code:
+A growing collection of computer vision projects by Samuel: from measurable visual signals to useful applications.
 
-1. **Import Libraries:**
-   - `cv2`: This is the OpenCV library, used for computer vision tasks.
-   - `pyautogui`: This library is used for simulating keyboard and mouse inputs.
-   - `time`: This library provides functions for time-related tasks.
+Each project includes its own setup, demonstration, technical explanation, and evaluation evidence. Models and upstream contributions are credited alongside the engineering built around them.
 
-2. **Load Cascade Classifier:**
-   The code loads a pre-trained Haar Cascade classifier for detecting eyes from the 'haarcascade_eye.xml' file. Haar Cascades are used for object detection, and in this case, they help detect eyes in the video frames.
+## Projects
 
-3. **Load Video Capture:**
-   The code initializes the webcam capture using `cv2.VideoCapture(0)` to capture frames from the default camera (index 0).
+| Project | What it demonstrates | Try it |
+| --- | --- | --- |
+| **01 · [EyePause](Eyedetection/README.md)** | Facial landmarks, bilateral eye aspect ratio, temporal filtering, state-aware Windows media control, and a local desktop application | [Walkthrough](Eyedetection/docs/media/walkthrough.gif) · [Case study](Eyedetection/docs/CASE_STUDY.md) · [Setup](Eyedetection/README.md#run-from-source) |
 
-4. **Variables:**
-   - `counter`: This variable keeps track of the number of consecutive frames with closed eyes.
-   - `threshold`: This is the number of consecutive frames with closed eyes required before pausing the media.
-   
-5. **Start Media Playback:**
-   The script sends a 'play' command using `pyautogui.press('play')` to start the media playback.
+![EyePause desktop demonstration](Eyedetection/docs/media/auto-paused.png)
 
-6. **Main Loop:**
-   The main loop iterates infinitely, capturing frames from the webcam in each iteration.
+## EyePause
 
-7. **Preprocessing:**
-   - The captured frame is converted to grayscale using `cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)` to simplify processing.
-   
-8. **Eye Detection:**
-   - The Haar Cascade classifier is used to detect eyes in the grayscale frame using `eye_cascade.detectMultiScale()`.
-   - Detected eyes are stored as rectangles with their (x, y) coordinates and width and height (w, h) in the `eyes` array.
-   
-9. **Eye Status Classification:**
-   - The code iterates through the detected eyes and draws a blue rectangle around each eye.
-   - For each detected eye, a region of interest (ROI) is extracted from the grayscale frame using the eye's coordinates.
-   - The average pixel intensity (mean) of the ROI is calculated. If it's below a threshold (120 in this case), the eye is classified as closed; otherwise, it's classified as open.
-   
-10. **Counter and Playback Control:**
-    - If a closed eye is detected, the `counter` is incremented, and "Closed Eye" is printed.
-    - If an open eye is detected, the `counter` is reset, and "Open Eye" is printed.
-    - If the `counter` reaches the defined `threshold`, media playback is paused using `pyautogui.press('pause')`, and there's a 1-second pause using `time.sleep(1)` to prevent rapid toggling.
-    
-11. **Display Frame:**
-    The current frame with detected eyes (drawn rectangles) is displayed using `cv2.imshow()`.
+EyePause pauses a selected media session after sustained eye closure and resumes after stable reopening. It runs locally on Windows, offers optional calibration, and includes a camera-free demo.
 
-12. **Exit Condition:**
-    The loop continues until the user presses the 'q' key. Upon pressing 'q', the loop breaks, and the script releases the video capture and closes all OpenCV windows.
+Portable builds are available as downloadable artifacts after the **EyePause Windows** workflow runs in [GitHub Actions](https://github.com/Sammieblz/VisionPlayground/actions). Local builds produce a ZIP under the project's `dist` directory. Builds are not automatically published as releases.
 
-This code essentially detects closed eyes using the Haar Cascade classifier, tracks consecutive frames with closed eyes, and controls media playback using the PyAutoGUI library. Note that the accuracy of eye detection might vary based on lighting conditions, head orientation, and the quality of the camera feed.
+See the project's [verification matrix](Eyedetection/docs/VALIDATION.md) for the distinction between automated checks, model smoke tests, and manual service/player compatibility. Published performance figures identify their dataset and measurement method.
+
+## Repository structure
+
+Projects are self-contained folders with packaged source, tests, documentation, and reproducible tooling. EyePause retains the original `Eyedetection` folder path; the initial scripts are archived within that project for provenance.
+
+Future projects will be listed here as they are built. Shared infrastructure will be extracted when multiple projects need it.
