@@ -9,6 +9,7 @@ Each project includes its own setup, demonstration, technical explanation, and e
 | Project | What it demonstrates | Try it |
 | --- | --- | --- |
 | **01 · [EyePause](Eyedetection/README.md)** | Facial landmarks, bilateral eye aspect ratio, temporal filtering, state-aware Windows media control, and a local desktop application | [Walkthrough](Eyedetection/docs/media/walkthrough.gif) · [Case study](Eyedetection/docs/CASE_STUDY.md) · [Setup](Eyedetection/README.md#run-from-source) |
+| **02 · [CoDriverSim](CoDriverSim/README.md)** | A MetaDrive driving world with an observer-only following-warning overlay using simulator truth; camera AI remains a future milestone | [Windows setup](CoDriverSim/README.md#windows-quick-start) · [Plan](CoDriverSim/docs/PLAN.md) · [Evaluation](CoDriverSim/docs/EVALUATION.md) |
 
 ![EyePause desktop demonstration](Eyedetection/docs/media/auto-paused.png)
 

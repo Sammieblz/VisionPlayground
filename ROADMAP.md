@@ -7,6 +7,7 @@ VisionPlayground grows through useful applications and reusable, independently t
 | Project | Foundation | Real-model work | Application milestone |
 | --- | --- | --- | --- |
 | [EyePause](Eyedetection/README.md) | Existing implementation | Landmark inference implemented; [manual validation](Eyedetection/docs/VALIDATION.md) still matters | Windows desktop/tray application and portable build implemented |
+| [CoDriverSim](CoDriverSim/README.md) | MetaDrive launcher, simulator-truth following warnings, typed observations and JSON demo | Camera/model adapters and Comma runtime compatibility remain unimplemented | Verify Windows rendering, then add controlled hazards, event recording and companion |
 | [SceneFlow](SceneFlow/docs/PLAN.md) | Directed segment crossings from supplied tracks | Recorded-video detector/tracker adapters and independent crossing labels | Zones, dwell-time analytics, live sources, exports, UI |
 | [DocLens](DocLens/docs/PLAN.md) | Receipt fields from supplied labeled OCR lines | OCR, preprocessing, line grouping, broader labeled layouts | Review/correction workflow and document exports |
 | [InspectLab](InspectLab/docs/PLAN.md) | Thresholded maps and four-connected regions | Normal-image baseline, held-out defect labels, threshold calibration | Image inspection and reviewed outcomes |

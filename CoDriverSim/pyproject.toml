@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=75,<85"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionplayground-codriversim"
+version = "0.1.0.dev0"
+description = "Observer-only co-driver experiments in a MetaDrive world."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+authors = [{name = "Samuel"}]
+dependencies = []
+
+[project.optional-dependencies]
+sim = ["metadrive-simulator @ git+https://github.com/metadriverse/metadrive.git@fe54b03327b14bcfc17a9a04b60c8abbee4d7ab1"]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "setuptools>=75,<85"]
+
+[project.scripts]
+codriversim = "codriversim.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+codriversim = ["examples/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["codriversim"]
