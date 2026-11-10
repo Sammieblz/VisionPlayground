@@ -76,7 +76,7 @@ namespace CoDriver
                 Debug.LogWarning(
                     "Modeled cockpit missing; run the pinned asset preparation before packaging"
                 );
-            var cluster = new Vector3(-.35f, 1.06f, 1.0f);
+            var cluster = new Vector3(-.35f, .95f, 1.08f);
             Art.Box(
                 "Dashboard instrument housing",
                 transform,
@@ -135,7 +135,7 @@ namespace CoDriver
                 transform,
                 vehicle.VisualDefinition
                     ? vehicle.VisualDefinition.deviceCentre
-                    : new Vector3(-.1f, 1.13f, .98f),
+                    : new Vector3(.15f, 1.13f, .98f),
                 new Vector3(.30f, .175f, .025f),
                 Art.Rubber,
                 false

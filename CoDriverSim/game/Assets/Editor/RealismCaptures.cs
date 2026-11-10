@@ -9,6 +9,42 @@ namespace CoDriver.Editor
     // Actual world/cabin rendering, without starting external services or claiming a drive test.
     public static class RealismCaptures
     {
+        public static void CaptureVegetation()
+        {
+            RealismImporter.PrepareFoliageTextures();
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
+            Art.Initialize();
+            GraphicsSettings.useScriptableRenderPipelineBatching = false;
+            RenderSettings.ambientMode = AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(.6f, .72f, .85f);
+            RenderSettings.ambientEquatorColor = new Color(.46f, .5f, .54f);
+            RenderSettings.ambientGroundColor = new Color(.25f, .28f, .2f);
+            Realism.Lighting();
+            var sun = new GameObject("Daylight").AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.intensity = 1.35f;
+            sun.transform.rotation = Quaternion.Euler(42, -35, 0);
+            var root = new GameObject("Imported vegetation comparison").transform;
+            Realism.Spawn("Pine", root, Vector3.left * 6);
+            Realism.Spawn("Oak", root, Vector3.right * 6);
+            Art.Box("Ground", root, Vector3.down * .5f, new Vector3(150, 1, 150), Art.Grass, false);
+            var camera = new GameObject("Vegetation inspection camera").AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.Skybox;
+            camera.fieldOfView = 60;
+            var target = new RenderTexture(1280, 720, 24);
+            camera.targetTexture = target;
+            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            Directory.CreateDirectory(folder);
+            foreach (int distance in new[] { 24, 65 })
+            {
+                camera.transform.position = new Vector3(0, 4, -distance);
+                camera.transform.LookAt(Vector3.up * 3.5f);
+                Save(camera, target, Path.Combine(folder, $"vegetation-{distance}m-720.png"));
+            }
+            target.Release();
+            Object.DestroyImmediate(target);
+        }
+
         public static void InspectFootways()
         {
             var map = MapDefinition.Load("davis-downtown");

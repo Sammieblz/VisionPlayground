@@ -27,10 +27,12 @@ permission is established. CC0/CC-BY assets retain their individual provenance.
 Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
 revised Davis streets are integrated. The populated contact/traffic regressions
 and renewed physical turn review pass with the documented route exclusions.
-The pooled-camera candidate meets the sustained rendering/inference targets, but
-its long run exposed traffic and railway failures. Current work is correcting
-those failures, qualifying the resulting application and preparing the eligible
-public package. Visual acceptance and the final controller/Comma check remain open. Measurements below
+An earlier pooled-camera candidate met the sustained rendering/inference targets,
+but its long run exposed traffic and railway failures. The subsequent run had no
+recorded player contacts, but exposed a pedestrian crossing blockage and camera
+delivery below target. Current work is correcting those failures, qualifying the
+resulting application and preparing the eligible public package. Visual acceptance
+and the final controller/Comma check remain open. Measurements below
 identify their exact candidates; an earlier candidate's results are not a blanket
 pass for later changes.
 
@@ -410,3 +412,69 @@ cluster used by the local cabin, in a dashboard housing with neutral matte
 upholstery. The qualification driver also now uses the selected profile's
 wheelbase, replacing its Honda-only constant. Neither change modifies Comma's
 upstream models or control logic. Both profiles are being rebuilt before delivery.
+
+### Packaged cockpit review and crossing blockage
+
+The next packages, `Realism-local-20261110-114821` and
+`Realism-public-20261110-115250`, share code identity
+`b706b03d88ebaf1828d796a38ac1896f6405f68a021b33496b07a70557ca852d`.
+Both passed package integrity and isolated CLI checks. Public launch session
+`6264820ded1a421998b68481ecb96bef` completed 180 seconds with no recorded player
+contacts or sampled vehicle/rail overlaps. Startup-inclusive rendering was
+26.69 FPS, camera delivery 19.01 Hz and detection 6.30 Hz. Its cockpit capture
+exposed overlap between the new instrument housing and the Comma device. Their
+public-car anchors are being adjusted; the Mercedes uses independent anchors.
+
+The attempted sustained GLS run, `c2c58f51f5834d61a09b5ae7a2c1c44b`, was ended
+early after a long crossing blockage appeared. It recorded 879.78 seconds of
+advancing simulation, 30.17 FPS including startup, p95/p99 frame times
+59.91/83.70 ms, camera delivery **18.92 Hz**, detection 6.25 Hz and warning
+latency p95 464.07 ms across 415 warning samples. It had zero player contacts
+and no sampled vehicle/rail overlap, but **failed qualification**: car 9 waited
+201.55 seconds, car 21 behind it 197.40 seconds, and the bus behind that queue
+129.20 seconds. Comma services were enabled; the labelled qualification driver
+was driving. This is neither a 30-minute pass nor Comma driving evidence.
+
+Person 49 stopped in the crosswalk at (-79.7173, 0, -95.3962), in front of car 9.
+The exact map has a complete navigation path to the far sidewalk, but the direct
+collision sweep hits that car's nose. An isolated physical reproduction cleared
+in 15.62 seconds with the previous code, so the static pose alone does not prove
+the cause of the long-run stall. A follow-up adds same-side detours, crossing
+progress recovery, completion based on physical arrival, and stopped-crossing
+navigation diagnostics. Focused fault-injection and populated runs must establish
+whether those changes resolve the actual failure.
+
+`scripts/archive-game.py` now creates a public ZIP and SHA-256 sidecar only from
+a redistributable package's verified manifest. It excludes runtime recordings,
+logs and unlisted files, rejects changed bytes and local-only art, and never
+overwrites an existing download. Eight focused archive tests passed, followed by
+the complete Python/CLI matrix on Windows/Linux and Python 3.11/3.12. This does
+not waive the outstanding game qualification. `scripts/visual-review.py --run
+PACKAGE SESSION LABEL` adds original packaged screenshots, measured results and
+build identities to the local visual review page.
+
+The crossing follow-up passed **4/4 focused PlayMode checks**, including a lost-
+navigation fault at the recorded Davis car nose. The pedestrian physically reached
+the far sidewalk in 9.34 seconds without penetrating the car, snapping position,
+or moving the held vehicle more than 0.15 m. The other cases exercise a stopped
+car detour, an occupied bus crossing, and impact interruption. Evidence:
+`outputs/unity/realism-crossing-recovery.xml`. A fresh populated run and packaged
+long run remain necessary; this fixture alone does not prove the long-run cause.
+
+The pine's pale edges were traced to white RGB in transparent texture pixels.
+Foliage import now pads visible colors into the transparent area and preserves
+alpha coverage in mipmaps, including already imported cached textures. Actual
+24 m and 65 m Unity captures are retained before and after the change under
+`outputs/qualification/realism/visual-before-material-pass/` and `visual/`.
+No source texture was repainted or screenshot enhanced. Public cockpit anchors
+and the activity-tour label also changed and still require packaged review.
+
+The subsequent populated follow-up passed **6/6 PlayMode cases** in 1,135 seconds:
+animal crossings in both directions, ordinary traffic in both towns, Davis bus
+passenger travel, a complete parking occupant/vehicle cycle, and all ten ambulance
+dispatch/return seeds (21–30) with temporary blocked access. The bus covered
+2,511 m, visited three stops and completed boarding/alighting. Parking physically
+departed, searched and returned. Evidence: `outputs/unity/realism-crossing-populated.xml`
+and `outputs/qualification/realism/ambulance-crossing-qualified.json`. These are
+accelerated behavior tests, not the real-time rendering/inference qualification.
+New local and public packages are being built from this follow-up.

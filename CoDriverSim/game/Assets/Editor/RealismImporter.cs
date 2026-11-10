@@ -49,6 +49,19 @@ namespace CoDriver.Editor
                 importer.sRGBTexture = false;
             if (name.Contains("roughness"))
                 importer.isReadable = true;
+            if (
+                (assetPath.Contains("/pine_tree/") || assetPath.Contains("/oak_tree/"))
+                && name.Contains("branch")
+                && name.Contains("diffuse")
+            )
+            {
+                // These licensed leaf cards contain white RGB in transparent pixels.
+                // Pad leaf colors before filtering so distant branches do not look snowy.
+                // Unity TextureImporter.alphaIsTransparency / mipMapsPreserveCoverage.
+                importer.alphaIsTransparency = true;
+                importer.mipMapsPreserveCoverage = true;
+                importer.alphaTestReferenceValue = .45f;
+            }
             if (name == "daylight")
             {
                 importer.textureShape = TextureImporterShape.TextureCube;
@@ -56,6 +69,34 @@ namespace CoDriver.Editor
             }
             importer.maxTextureSize = 2048;
             importer.mipmapEnabled = true;
+        }
+
+        public static void PrepareFoliageTextures()
+        {
+            foreach (var tree in new[] { "pine_tree", "oak_tree" })
+            {
+                string folder = Root + "Source/" + tree + "/materials/textures";
+                if (!Directory.Exists(folder))
+                    continue;
+                foreach (var file in Directory.GetFiles(folder, "*branch*diffuse.png"))
+                {
+                    var importer =
+                        AssetImporter.GetAtPath(file.Replace('\\', '/')) as TextureImporter;
+                    if (
+                        !importer
+                        || (
+                            importer.alphaIsTransparency
+                            && importer.mipMapsPreserveCoverage
+                            && Mathf.Abs(importer.alphaTestReferenceValue - .45f) < .001f
+                        )
+                    )
+                        continue;
+                    importer.alphaIsTransparency = true;
+                    importer.mipMapsPreserveCoverage = true;
+                    importer.alphaTestReferenceValue = .45f;
+                    importer.SaveAndReimport();
+                }
+            }
         }
 
         public static Bounds Bounds(GameObject model)
@@ -116,6 +157,7 @@ namespace CoDriver.Editor
         {
             Directory.CreateDirectory(Prepared);
             AssetDatabase.Refresh();
+            PrepareFoliageTextures();
             PrepareSurfaces();
             Model("Sedan", "prius_hybrid/meshes/Hybrid.obj", new Vector3(-90, 0, 0), 2, 4.4f);
             Model("PlayerSedan", "prius_hybrid/meshes/Hybrid.obj", new Vector3(-90, 0, 0), 2, 4.4f);

@@ -1647,7 +1647,9 @@ namespace CoDriver
         Vector3 home,
             destination;
         Vector3 crossingTravel = Vector3.right * 12;
-        Vector3 crossingStart;
+        Vector3 crossingProgressPosition;
+        float crossingProgressAt,
+            nextCrossingReplan;
         float nextAction,
             phase;
         int index,
@@ -1691,6 +1693,10 @@ namespace CoDriver
                         + agent.destination.ToString("F2")
                         + " path="
                         + agent.pathStatus
+                        + " stopped="
+                        + agent.isStopped
+                        + " desired="
+                        + agent.desiredVelocity.ToString("F2")
                     : "offmesh"
             )
             + (visiting ? " door=" + visiting.Approach.ToString("F2") : "");
@@ -1719,6 +1725,34 @@ namespace CoDriver
             State = "Crossing";
             agent.areaMask = NavMesh.AllAreas;
             Go(scriptedGoal);
+            StartCrossingProgress();
+        }
+
+        void StartCrossingProgress()
+        {
+            crossingProgressPosition = transform.position;
+            crossingProgressAt = Time.time;
+            nextCrossingReplan = Time.time + 3;
+        }
+
+        void RecoverCrossingProgress(Vector3 goal)
+        {
+            if ((transform.position - crossingProgressPosition).sqrMagnitude > .15f * .15f)
+            {
+                crossingProgressPosition = transform.position;
+                crossingProgressAt = Time.time;
+            }
+            if (
+                Time.time - crossingProgressAt < 3
+                || Time.time < nextCrossingReplan
+                || agent.pathPending
+            )
+                return;
+            // Re-query navigation after a rejected path or local-avoidance stall.
+            // Locomotion still checks vehicles and applies bounded physical force;
+            // this never changes an actor pose or permits crossing through a car.
+            Go(goal);
+            nextCrossingReplan = Time.time + 3;
         }
 
         public void Initialize(Town t, int id)
@@ -2072,10 +2106,18 @@ namespace CoDriver
             }
             if (scriptedWaiting || scriptedCrossing)
             {
+                if (scriptedCrossing)
+                    RecoverCrossingProgress(scriptedGoal);
                 float velocity = scriptedCrossing ? ActualSpeed : 0;
                 rig?.Animate(velocity, State, index);
                 animalRig?.Animate(velocity, State, index);
-                if (scriptedCrossing && !agent.pathPending && agent.remainingDistance < .4f)
+                if (
+                    scriptedCrossing
+                    && !agent.pathPending
+                    && Vector3
+                        .ProjectOnPlane(transform.position - scriptedGoal, Vector3.up)
+                        .magnitude < .4f
+                )
                 {
                     scriptedCrossing = Crossing = false;
                     agent.areaMask = PedestrianNavigation.WalkingMask;
@@ -2185,21 +2227,19 @@ namespace CoDriver
                 }
                 Crossing = true;
                 State = "Crossing";
-                crossingStart = destination;
                 destination += crossingTravel;
                 agent.areaMask = NavMesh.AllAreas;
                 Go(destination);
+                StartCrossingProgress();
                 nextAction = Time.time + 1;
                 return;
             }
             if (State == "Crossing")
             {
-                float progress = Vector3.Dot(
-                    transform.position - crossingStart,
-                    crossingTravel.normalized
-                );
+                RecoverCrossingProgress(destination);
                 if (
-                    (agent.remainingDistance > .6f && progress < crossingTravel.magnitude - .5f)
+                    Vector3.ProjectOnPlane(transform.position - destination, Vector3.up).magnitude
+                        > .65f
                     || !NavMesh.SamplePosition(
                         transform.position,
                         out _,

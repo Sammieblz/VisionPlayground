@@ -72,6 +72,12 @@ namespace CoDriver
                 clearances = town.Traffic.Select(t => t.Clearance).ToArray(),
                 grounded = town.Traffic.Select(t => t.Grounded).ToArray(),
                 actor_positions = town.Walkers.Select(w => w.transform.position).ToArray(),
+                blocked_walkers = town
+                    .Walkers.Where(w => w.Crossing && w.ActualSpeed < .05f)
+                    .Select(w =>
+                        w.NavigationDetail + " " + w.GetComponent<ActorLocomotion>().Diagnostic
+                    )
+                    .ToArray(),
                 traffic_overlaps = TrafficOverlaps(town),
                 rail_overlaps = RailOverlaps(town),
                 train_position = town.Train.transform.position,
@@ -170,6 +176,7 @@ namespace CoDriver
             public int nearby_people,
                 nearby_moving_vehicles;
             public string[] traffic_overlaps;
+            public string[] blocked_walkers;
             public string[] junction_reservations;
         }
 

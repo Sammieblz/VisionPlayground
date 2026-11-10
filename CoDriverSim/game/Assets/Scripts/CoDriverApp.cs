@@ -31,6 +31,7 @@ namespace CoDriver
         Camera view;
         int viewMode = 1;
         public int ViewMode => viewMode;
+        public bool ActivityCameraActive => activityView || tourSystems;
         public float SeatForward,
             SeatHeight,
             CockpitFieldOfView = 70;
@@ -617,6 +618,9 @@ namespace CoDriver
                     Town.Walkers[17].transform,
                     Town.Walkers[18].transform,
                 };
+                targets = Array.FindAll(targets, t => t && t.gameObject.activeInHierarchy);
+                if (targets.Length == 0)
+                    return;
                 int selection = (int)(Time.time / 20) % targets.Length;
                 var target = targets[selection];
                 view.cullingMask = ~0;

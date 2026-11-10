@@ -242,7 +242,11 @@ namespace CoDriver
             // Walk around its end using bounded locomotion, within the already
             // permitted navigation area. Never move the vehicle or snap the person.
             var local = vehicle.transform.InverseTransformPoint(body.position) - vehicle.center;
+            var goal = vehicle.transform.InverseTransformPoint(agent.destination) - vehicle.center;
             float side = local.x >= 0 ? 1 : -1;
+            // A person already beyond the nose can be heading toward the same
+            // side of the vehicle. Do not send them back across the entire car.
+            float exitSide = goal.x >= 0 ? 1 : -1;
             float best = float.PositiveInfinity;
             for (int end = -1; end <= 1; end += 2)
             {
@@ -257,7 +261,7 @@ namespace CoDriver
                 var second = vehicle.transform.TransformPoint(
                     vehicle.center
                         + new Vector3(
-                            -side * (vehicle.size.x * .5f + .65f),
+                            exitSide * (vehicle.size.x * .5f + .65f),
                             -vehicle.center.y,
                             end * (vehicle.size.z * .5f + .7f)
                         )

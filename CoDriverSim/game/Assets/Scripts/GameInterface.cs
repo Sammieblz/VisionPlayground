@@ -211,7 +211,8 @@ namespace CoDriver
                 205 + Mathf.Cos(northAngle) * 111
             );
             driveStatus.text =
-                (
+                (app.ActivityCameraActive ? "ACTIVITY VIEW · AI uses the vehicle camera\n" : "")
+                + (
                     app.Mode == "qualification_driver" ? "SIMULATION TEST DRIVER"
                     : app.AutomationActive ? "COMMA ACTIVE"
                     : "HUMAN DRIVING"

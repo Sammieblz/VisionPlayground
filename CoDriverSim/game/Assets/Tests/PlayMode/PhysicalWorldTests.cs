@@ -428,6 +428,91 @@ namespace CoDriver.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedDavisCrossingDetoursToSameSideOfStoppedCar()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis pedestrian crossing").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var car = town.Traffic[9];
+            var pedestrian = town.Walkers[49];
+            foreach (var other in town.Traffic)
+                if (other != car)
+                    other.gameObject.SetActive(false);
+            foreach (var other in town.Walkers)
+                if (other != pedestrian)
+                    other.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            car.ScenarioSpeed = 0;
+            PlaceFixture(
+                car,
+                new Vector3(-78.35664f, -.022403f, -97.78930f),
+                new Vector3(-.6362376f, -.01515008f, .7713445f)
+            );
+            yield return new WaitForSeconds(1.5f);
+            var parked = car.transform.position;
+            var agent = pedestrian.GetComponent<NavMeshAgent>();
+            var body = pedestrian.GetComponent<Rigidbody>();
+            var shape = pedestrian.GetComponent<Collider>();
+            var shell = car.GetComponent<BoxCollider>();
+            var at = new Vector3(-79.7172546f, .01f, -95.3961563f);
+            var destination = new Vector3(-73.10962f, .11f, -94.17220f);
+            pedestrian.PrepareCrossing(at, destination);
+            pedestrian.BeginCrossing();
+            // Exercise a lost navigation intent after the crossing has started.
+            // Recovery must be an actual physical walk, not clearing the Crossing flag.
+            agent.ResetPath();
+            agent.isStopped = true;
+            var previous = body.position;
+            float start = Time.time;
+            while (
+                Time.time - start < 20
+                && Vector3.ProjectOnPlane(body.position - destination, Vector3.up).magnitude > .4f
+            )
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.Less(
+                    Vector3.Distance(previous, body.position),
+                    .09f,
+                    "The actor must walk around the obstacle without navigation snapping"
+                );
+                previous = body.position;
+                Assert.IsFalse(
+                    Physics.ComputePenetration(
+                        shape,
+                        body.position,
+                        body.rotation,
+                        shell,
+                        car.transform.position,
+                        car.transform.rotation,
+                        out _,
+                        out _
+                    ),
+                    "The detour cannot pass through the car"
+                );
+            }
+            Debug.Log(
+                "CODRIVER_RECORDED_CROSSING seconds="
+                    + (Time.time - start)
+                    + " "
+                    + pedestrian.NavigationDetail
+                    + " "
+                    + pedestrian.GetComponent<ActorLocomotion>().Diagnostic
+            );
+            Assert.Less(
+                Vector3.ProjectOnPlane(body.position - destination, Vector3.up).magnitude,
+                .4f,
+                "The pedestrian must clear the exact recorded car nose"
+            );
+            Assert.Less(
+                Vector3.Distance(parked, car.transform.position),
+                .15f,
+                "The pedestrian must not push the held vehicle aside"
+            );
+        }
+
+        [UnityTest, Timeout(300000)]
         public IEnumerator CedarBusCompletesCornersWithoutFurnitureDeadlock()
         {
             Art.Initialize();
