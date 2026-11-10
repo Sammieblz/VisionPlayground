@@ -35,6 +35,22 @@ checkout and separately installed WSL runtime. `scripts/package-game.py` prepare
 folder with its own Python interpreter, observer, models and notices. Installed-folder launch,
 Comma engagement, service restart and clean exit have been exercised; full release qualification
 remains incomplete. WSL Comma is a separate installation, configurable in `codriversim-app.json`.
+
+To prepare a public development download, build with eligible assets and keep the
+output directory new. The archive command verifies every included file against
+the package manifest and excludes later recordings, logs and unrelated files:
+
+```powershell
+.\CoDriverSim\scripts\build-game.ps1 -PublicAssets
+.\CoDriverSim\.venv\Scripts\python.exe CoDriverSim/scripts/package-game.py --public --destination C:/CoDriverBuilds/public-preview
+.\CoDriverSim\.venv\Scripts\python.exe CoDriverSim/scripts/verify-game-package.py --public --root C:/CoDriverBuilds/public-preview
+.\CoDriverSim\.venv\Scripts\python.exe CoDriverSim/scripts/archive-game.py --root C:/CoDriverBuilds/public-preview --output C:/CoDriverBuilds/CoDriverSim-preview.zip
+```
+
+The ZIP includes the redistributable cabin, bundled observer and notices. It does
+not bundle the separately installed WSL Comma runtime. A successful package check
+does not establish visual, driving or performance acceptance.
+
 Play starts human driving. Xbox triggers accelerate/brake, left stick steers, Y changes view,
 X requests/cancels Comma, and Menu pauses. Keyboard fallback is W/A/S/D, C for view, X for Comma,
 and Esc for pause. Settings includes remapping, dead zones and service restart controls.
