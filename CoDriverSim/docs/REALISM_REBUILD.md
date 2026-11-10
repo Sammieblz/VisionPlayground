@@ -760,3 +760,19 @@ windows. Repetition, empty-looking glazing and sparse landscaping still limit
 realism. These captures establish the actual rendered change, not whole-game
 visual acceptance. Whole-population behavior and sustained rendering/inference
 qualification remain necessary after this pass.
+
+### Storefront landing qualification
+
+The initial architectural editor rerun passed 128/129 checks. Its storefront
+fixture still invoked the old building signature. After correcting that call,
+a stronger floor check first exposed the fixture's missing mapped sidewalk, then
+an actual unsupported approach at `way/45208404`. The original single diagonal
+threshold could miss the straight-ahead door waiting point.
+
+Landings now follow the door axis before joining the mapped sidewalk, with matching
+world-aligned concrete UVs. The isolated physical check verifies closed-door
+collision, open-door clearance and floor support at every mapped activity entrance;
+`realism-storefront-landing.xml` passes. Earlier failures are retained. The complete
+129-case editor suite and all 23 populated-world cases are being rerun before the
+new local/public packages are produced. All four Python 3.11/3.12 Windows/Linux CI
+jobs passed for `1613b56`; those do not qualify Unity behavior.

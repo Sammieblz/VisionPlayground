@@ -19,6 +19,17 @@ namespace CoDriver.Tests
                 var town = new GameObject("Storefront inspection").AddComponent<Town>();
                 SceneManager.MoveGameObjectToScene(town.gameObject, scene);
                 town.Map = MapDefinition.Load("davis-downtown");
+                // Thresholds join the existing mapped sidewalk; the approach
+                // can already lie on that sidewalk rather than the short slab.
+                DavisWorld.Surface(
+                    "Mapped sidewalks and paths",
+                    town.transform,
+                    town.Map.sidewalkSurface,
+                    Art.Concrete
+                );
+                var physics = scene.GetPhysicsScene();
+                Assert.IsTrue(physics.IsValid());
+                Assert.AreNotEqual(Physics.defaultPhysicsScene, physics);
                 var build = typeof(DavisWorld).GetMethod(
                     "Building",
                     BindingFlags.Static | BindingFlags.NonPublic
@@ -32,16 +43,17 @@ namespace CoDriver.Tests
                     build.Invoke(null, new object[] { town, building });
                     inspected++;
                     var door = town.Doors.Last();
+                    Physics.SyncTransforms();
+                    var doorwayProbe = entry.Centre + entry.Outward * 1.5f + Vector3.up;
+                    Assert.IsTrue(
+                        physics.Raycast(doorwayProbe, -entry.Outward, out var closed, 3.5f),
+                        building.sourceId + " requires a collidable closed door"
+                    );
+                    Assert.IsTrue(closed.collider.transform.IsChildOf(door.transform));
                     door.transform.localRotation = Quaternion.Euler(0, 75, 0);
                     Physics.SyncTransforms();
-                    var physics = scene.GetPhysicsScene();
                     Assert.IsFalse(
-                        physics.Raycast(
-                            entry.Centre + entry.Outward * 1.5f + Vector3.up,
-                            -entry.Outward,
-                            out var hit,
-                            3.5f
-                        ),
+                        physics.Raycast(doorwayProbe, -entry.Outward, out var hit, 3.5f),
                         building.sourceId + " blocked by " + hit.collider
                     );
                     Assert.LessOrEqual(entry.WalkDistance, 8.75f);

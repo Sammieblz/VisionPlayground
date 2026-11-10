@@ -193,25 +193,52 @@ namespace CoDriver
                     false
                 );
             var inside = Centre - Outward * 3;
-            var path = SidewalkPoint - inside;
-            path.y = 0;
-            var floor = Art.Box(
-                "Connected shop threshold",
-                town.transform,
-                (inside + SidewalkPoint) * .5f + Vector3.up * .01f,
-                new Vector3(1.8f, .12f, path.magnitude + 1),
-                Art.Concrete
-            );
-            floor.transform.rotation = Quaternion.LookRotation(path);
-            town.WalkSurfaces.Add(
-                new NavMeshBuildSource
+            // Keep the doorway landing aligned with the door, then join the
+            // mapped sidewalk. A single diagonal slab can miss ActivityDoor's
+            // straight-ahead approach when the nearest sidewalk lies to one side.
+            var approach = Centre + Outward * 2.06f;
+            void AccessSegment(Vector3 from, Vector3 to)
+            {
+                var path = to - from;
+                path.y = 0;
+                if (path.sqrMagnitude < .01f)
+                    return;
+                var centre = (from + to) * .5f;
+                centre.y = Mathf.Max(Centre.y, SidewalkPoint.y) - .04f;
+                var floor = Art.Box(
+                    "Connected shop threshold",
+                    town.transform,
+                    centre,
+                    new Vector3(1.8f, .12f, path.magnitude + .4f),
+                    Art.Concrete
+                );
+                floor.transform.rotation = Quaternion.LookRotation(path);
+                if (Art.Concrete.mainTexture)
                 {
-                    shape = NavMeshBuildSourceShape.Box,
-                    transform = floor.transform.localToWorldMatrix,
-                    size = Vector3.one,
-                    area = 0,
+                    // Art.Box owns a texture-scaled copy. World-aligned UVs keep
+                    // the two overlapping landing pieces visually continuous.
+                    var mesh = floor.GetComponent<MeshFilter>().sharedMesh;
+                    mesh.uv = mesh
+                        .vertices.Select(v =>
+                        {
+                            var world = floor.transform.TransformPoint(v);
+                            return new Vector2(world.x, world.z) * .2f;
+                        })
+                        .ToArray();
+                    RuntimeResources.Register(floor, mesh);
                 }
-            );
+                town.WalkSurfaces.Add(
+                    new NavMeshBuildSource
+                    {
+                        shape = NavMeshBuildSourceShape.Box,
+                        transform = floor.transform.localToWorldMatrix,
+                        size = Vector3.one,
+                        area = 0,
+                    }
+                );
+            }
+            AccessSegment(inside, approach);
+            AccessSegment(approach, SidewalkPoint);
             // A shallow vestibule gives the physical visitor somewhere to enter.
             Art.Box(
                 "Shop interior back",
