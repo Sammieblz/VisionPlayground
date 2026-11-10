@@ -691,3 +691,33 @@ transition proof. The probe now requires consecutive fresh samples after opening
 Diagnostics and immediately before injection. A clean 67.22-second post-recovery
 window received 19.97 camera frames/s and 6.11 detections/s; that stationary short
 window does not replace sustained qualification of the bounded queue.
+
+
+### Physical sidewalk journeys
+
+Review of the sustained session found several extra citizens travelling only
+10?50 metres in 30 minutes. Wandering used world-X offsets even on angled Davis
+streets, and nearest-surface spawning could choose disconnected corner patches.
+A new physical test reproduced the inability to obtain a walking route. Connected
+spawn selection and complete sidewalk routes restored movement; subsequent tests
+exposed endpoint oscillation and a path brushing building `way/45208365`.
+
+Davis navigation now rasterizes the same building wall mesh used by PhysX, including
+its door openings. Final-segment locomotion brakes using physical distance, retaining
+bounded force, vehicle checks and pedestrian clearance. Visits select reachable,
+available entrances and use a cooldown instead of crowding three shared queue points.
+All eight previously stranded test actors now physically complete 9?25 metre journeys
+in the populated world; all mapped shop access paths remain complete. Evidence:
+`realism-sidewalk-walls.xml` (2/2), with earlier failed route/contact checks retained.
+The wider crossing/traffic/transit/parking/ten-seed emergency suite is being rerun.
+
+The earlier moving qualification route had at most 11 people within 200 m, while
+a static central cluster contained approximately 35?36. The harness starts away
+from the normal player spawn. Those counts do not validate the two-minute downtown
+hotspot activity target; the new mobile population needs fresh packaged observation.
+
+Construction packages `Realism-local-20261110-161424` and
+`Realism-public-20261110-161806` share code
+`83a76d19de1e097089520a348f8d59d7ecc9fc364739c657c47b935a196c0d55`;
+both passed integrity and isolated CLI checks. All four Python CI jobs passed for
+`fe3d506`. These packages predate the sidewalk changes above.

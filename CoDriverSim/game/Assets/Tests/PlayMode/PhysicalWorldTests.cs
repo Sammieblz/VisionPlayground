@@ -666,6 +666,83 @@ namespace CoDriver.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator DavisPreviouslyIdleCitizensCompleteSidewalkJourneys()
+        {
+            Art.Initialize();
+            var town = Own("Davis sidewalk journey regression").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            yield return new WaitForSeconds(2);
+            int[] indices = { 21, 22, 24, 27, 29, 30, 32, 35 };
+            var walkers = indices.Select(i => town.Walkers[i]).ToArray();
+            var starts = walkers.Select(w => w.transform.position).ToArray();
+            var goals = new Vector3[walkers.Length];
+            for (int i = 0; i < walkers.Length; i++)
+            {
+                // Hold only the high-level activity timer. Navigation and dynamic
+                // locomotion remain enabled in the complete populated world.
+                walkers[i].enabled = false;
+                bool routeReady = walkers[i].WalkAbout();
+                Debug.Log(
+                    "CODRIVER_SIDEWALK_START " + routeReady + " " + walkers[i].NavigationDetail
+                );
+                if (!routeReady)
+                    File.WriteAllText(
+                        Path.GetFullPath("../outputs/qualification/realism/sidewalk-navmesh.json"),
+                        JsonUtility.ToJson(NavMesh.CalculateTriangulation())
+                    );
+                Assert.IsTrue(routeReady, walkers[i].NavigationDetail);
+                var agent = walkers[i].GetComponent<NavMeshAgent>();
+                Assert.AreEqual(PedestrianNavigation.WalkingMask, agent.areaMask);
+                goals[i] = agent.destination;
+            }
+            float deadline = Time.time + 80;
+            var arrived = new bool[walkers.Length];
+            while (Time.time < deadline && arrived.Any(a => !a))
+            {
+                yield return new WaitForSeconds(.5f);
+                for (int i = 0; i < walkers.Length; i++)
+                    arrived[i] |=
+                        Vector3
+                            .ProjectOnPlane(walkers[i].transform.position - goals[i], Vector3.up)
+                            .magnitude < .8f;
+            }
+            for (int i = 0; i < walkers.Length; i++)
+            {
+                Debug.Log(
+                    $"CODRIVER_SIDEWALK_JOURNEY id={indices[i]} arrived={arrived[i]} travel={Vector3.Distance(starts[i], walkers[i].transform.position):F2} {walkers[i].NavigationDetail}"
+                );
+                if (!arrived[i])
+                    Debug.Log(
+                        "CODRIVER_SIDEWALK_BLOCKED "
+                            + indices[i]
+                            + " "
+                            + walkers[i].GetComponent<ActorLocomotion>().Diagnostic
+                            + " nearby="
+                            + string.Join(
+                                ";",
+                                Physics
+                                    .OverlapSphere(
+                                        walkers[i].transform.position + Vector3.up * .8f,
+                                        .85f
+                                    )
+                                    .Where(c => c.gameObject != walkers[i].gameObject)
+                                    .Select(c => c.name + " " + c.bounds)
+                            )
+                    );
+            }
+            Assert.IsTrue(
+                arrived.All(a => a),
+                string.Join(
+                    ";",
+                    walkers.Where((w, i) => !arrived[i]).Select(w => w.NavigationDetail)
+                )
+            );
+            for (int i = 0; i < walkers.Length; i++)
+                Assert.Greater(Vector3.Distance(starts[i], walkers[i].transform.position), 3);
+        }
+
+        [UnityTest, Timeout(300000)]
         public IEnumerator CedarBusCompletesCornersWithoutFurnitureDeadlock()
         {
             Art.Initialize();

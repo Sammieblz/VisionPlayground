@@ -535,6 +535,18 @@ namespace CoDriver
             root.GetComponent<MeshFilter>().sharedMesh.uv = uv.ToArray();
             root.GetComponent<MeshFilter>().sharedMesh.RecalculateTangents();
             var shell = root.GetComponent<MeshFilter>().sharedMesh;
+            // Rasterize the same walls used by PhysX into navigation. Sidewalk
+            // surfaces alone can otherwise propose a path through a facade edge.
+            // Door openings remain in this mesh, so shop interiors stay reachable.
+            town.WalkSurfaces.Add(
+                new NavMeshBuildSource
+                {
+                    shape = NavMeshBuildSourceShape.Mesh,
+                    sourceObject = shell,
+                    transform = root.transform.localToWorldMatrix,
+                    area = 1, // Unity's Not Walkable area.
+                }
+            );
             shell.subMeshCount = 2;
             shell.SetTriangles(b.roof.triangles, 0);
             shell.SetTriangles(triangles.Skip(b.roof.triangles.Length).ToArray(), 1);

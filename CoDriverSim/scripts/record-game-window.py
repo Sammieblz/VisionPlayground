@@ -162,9 +162,14 @@ def record(args, output, user32, window, owner, installation, identity, session,
     samples = []
     distinct_frames = set()
     frames = 0
+    encoded_source_frames = 0
+    next_capture = 0.0
     failure = None
     try:
         while time.monotonic() - start < args.seconds:
+            wait = next_capture - (time.monotonic() - start)
+            if wait > 0:
+                time.sleep(wait)
             user32.GetWindowThreadProcessId(ctypes.c_void_p(window), ctypes.byref(owner))
             if not user32.IsWindow(ctypes.c_void_p(window)) or owner.value != args.pid:
                 break
@@ -175,15 +180,17 @@ def record(args, output, user32, window, owner, installation, identity, session,
             if image.shape != first.shape:
                 raise RuntimeError("Window size changed during capture")
             now = time.monotonic() - start
+            next_capture = max(next_capture + 1 / args.fps, now)
             distinct_frames.add(hashlib.sha256(image.tobytes()).hexdigest())
             frame = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             # Preserve wall-clock playback duration if screen capture falls behind.
             target = int(now * args.fps) + 1
+            if frames < target:
+                encoded_source_frames += 1
             while frames < target:
                 writer.write(frame)
                 frames += 1
             samples.append(now)
-            time.sleep(max(0, frames / args.fps - (time.monotonic() - start)))
     except Exception as exc:
         failure = str(exc)
         raise
@@ -202,7 +209,8 @@ def record(args, output, user32, window, owner, installation, identity, session,
             capture_method="verified_foreground_client_pixels",
             capture_backend=args.backend,
             effective_capture_hz=len(samples) / (time.monotonic() - start),
-            duplicated_encoded_frames=frames - len(samples),
+            duplicated_encoded_frames=frames - encoded_source_frames,
+            sampled_without_encoding=len(samples) - encoded_source_frames,
             distinct_captured_frames=len(distinct_frames),
             seconds=time.monotonic() - start,
             requested_seconds=args.seconds,

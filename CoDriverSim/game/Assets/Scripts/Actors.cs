@@ -1670,7 +1670,8 @@ namespace CoDriver
         Vector3 transitGoal;
         bool transitCounted;
         ActivityDoor visiting;
-        float visitStarted;
+        float visitStarted,
+            nextVisit;
         public bool VisitingBuilding => visiting != null;
         ParkingOccupant parkingOccupant;
         ActorLocomotion locomotion;
@@ -1979,14 +1980,14 @@ namespace CoDriver
             if (id >= 20)
             {
                 Physics.SyncTransforms();
-                for (int attempt = 0; attempt < 40; attempt++)
+                for (int attempt = 0; attempt < 120; attempt++)
                 {
                     float angle = attempt * 2.4f;
                     var candidate =
                         home
                         + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle))
                             * Mathf.Sqrt(attempt)
-                            * 1.3f;
+                            * 2.6f;
                     if (
                         NavMesh.SamplePosition(
                             candidate,
@@ -1994,6 +1995,7 @@ namespace CoDriver
                             2,
                             PedestrianNavigation.WalkingMask
                         )
+                        && PedestrianNavigation.TryWalkRoute(clear.position, rng, out _, 12)
                         && !Physics.CheckCapsule(
                             clear.position + Vector3.up * .4f,
                             clear.position + Vector3.up * 1.5f,
@@ -2013,9 +2015,9 @@ namespace CoDriver
             rb.position = transform.position;
             locomotion = gameObject.AddComponent<ActorLocomotion>();
             locomotion.Initialize(Species, person ? transform.GetChild(0) : null);
-            destination = home + Vector3.right * 25;
+            destination = home;
             nextAction = Time.time + 3 + (id % 16) * .8f;
-            Go(destination);
+            WalkAbout();
             nextFlight = Time.time + 8 + id;
             if (id < 2 || id == 12 || id == 13)
             {
@@ -2053,6 +2055,24 @@ namespace CoDriver
                 agent.SetPath(route);
                 return true;
             }
+            return false;
+        }
+
+        public bool WalkAbout()
+        {
+            if (!agent || !agent.enabled || !agent.isOnNavMesh)
+                return false;
+            agent.areaMask = PedestrianNavigation.WalkingMask;
+            Crossing = false;
+            if (PedestrianNavigation.TryWalkRoute(agent.nextPosition, rng, out var route))
+            {
+                State = IsAnimal ? "Exploring" : "Walking";
+                agent.isStopped = false;
+                agent.SetPath(route);
+                return true;
+            }
+            State = IsAnimal ? "Resting" : "Looking around";
+            agent.isStopped = true;
             return false;
         }
 
@@ -2316,8 +2336,7 @@ namespace CoDriver
             }
             else
             {
-                State = IsAnimal ? "Exploring" : "Walking";
-                Go(home + Vector3.right * (float)(rng.NextDouble() * 40 - 20));
+                WalkAbout();
             }
             nextAction = Time.time + 4 + (float)rng.NextDouble() * 7;
         }
@@ -2332,30 +2351,37 @@ namespace CoDriver
                 || State.Contains("transit")
             )
                 return;
-            visiting = town.NearestDoor(transform.position);
-            if (!visiting)
-                return;
-            visitStarted = Time.time;
-            State = "Visiting building";
-            if (visiting.Reserve(this))
+            if (Time.time < nextVisit)
             {
-                if (!Go(visiting.Approach))
+                WalkAbout();
+                nextAction = Time.time + 6;
+                return;
+            }
+            // Choose a reachable, available entrance before taking its reservation.
+            // A busy shop is a reason to continue the journey, not to crowd three
+            // shared queue points for fifty seconds and repeat indefinitely.
+            foreach (
+                var door in town.Doors.OrderBy(d => (d.Approach - transform.position).sqrMagnitude)
+            )
+            {
+                if (
+                    (door.Approach - transform.position).sqrMagnitude > 10000
+                    || !door.AvailableFor(this)
+                    || !Go(door.Approach)
+                )
+                    continue;
+                if (door.Reserve(this))
                 {
-                    visiting.Release(this);
-                    visiting = null;
-                    RequestCrossing();
+                    visiting = door;
+                    visitStarted = Time.time;
+                    State = "Visiting building";
+                    nextVisit = Time.time + 60 + (float)rng.NextDouble() * 30;
+                    return;
                 }
             }
-            else
-            {
-                State = "Waiting for entrance";
-                var queue =
-                    visiting.Approach + visiting.transform.parent.right * (1.1f + index % 3 * .7f);
-                if (NavMesh.SamplePosition(queue, out var spot, 1.5f, NavMesh.AllAreas))
-                    Go(spot.position);
-                else
-                    agent.isStopped = true;
-            }
+            nextVisit = Time.time + 25 + (float)rng.NextDouble() * 20;
+            WalkAbout();
+            nextAction = Time.time + 6;
         }
 
         bool BuildingActivity()
@@ -2375,7 +2401,7 @@ namespace CoDriver
                 visiting.Release(this);
                 visiting = null;
                 State = "Walking";
-                Go(home);
+                WalkAbout();
                 nextAction = Time.time + 10;
                 return true;
             }
@@ -2442,7 +2468,7 @@ namespace CoDriver
                     visiting.Release(this);
                     visiting = null;
                     State = "Walking";
-                    Go(home);
+                    WalkAbout();
                     nextAction = Time.time + 6;
                 }
                 return true;

@@ -12,6 +12,38 @@ namespace CoDriver
         public const int CrossingArea = 3;
         public const int WalkingMask = NavMesh.AllAreas & ~(1 << CrossingArea);
 
+        public static bool TryWalkRoute(
+            Vector3 position,
+            System.Random random,
+            out NavMeshPath route,
+            float minimumTravel = 4
+        )
+        {
+            route = new NavMeshPath();
+            float angle = (float)random.NextDouble() * Mathf.PI * 2;
+            for (int attempt = 0; attempt < 32; attempt++)
+            {
+                float radius = 8 + (float)random.NextDouble() * 20;
+                float heading = angle + attempt * 2.399963f;
+                var proposal =
+                    position + new Vector3(Mathf.Cos(heading), 0, Mathf.Sin(heading)) * radius;
+                if (
+                    !NavMesh.SamplePosition(proposal, out var target, 3, WalkingMask)
+                    || Vector3.Distance(position, target.position) < minimumTravel
+                    || !NavMesh.CalculatePath(position, target.position, WalkingMask, route)
+                    || route.status != NavMeshPathStatus.PathComplete
+                )
+                    continue;
+                float length = 0;
+                var corners = route.corners;
+                for (int i = 1; i < corners.Length; i++)
+                    length += Vector3.Distance(corners[i - 1], corners[i]);
+                if (length >= minimumTravel && length <= 40)
+                    return true;
+            }
+            return false;
+        }
+
         public static bool TryCrossing(
             Town town,
             Vector3 position,

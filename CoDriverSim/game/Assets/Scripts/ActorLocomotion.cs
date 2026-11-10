@@ -123,7 +123,43 @@ namespace CoDriver
             if (flying)
                 desired = Vector3.ClampMagnitude((flightTarget - body.position) * 3, 5);
             else if (agent && agent.enabled && agent.isOnNavMesh && !agent.isStopped)
+            {
                 desired = agent.desiredVelocity;
+                Vector3 toGoal = Vector3.ProjectOnPlane(
+                    agent.destination - body.position,
+                    Vector3.up
+                );
+                if (
+                    agent.hasPath
+                    && !agent.pathPending
+                    && agent.pathStatus == NavMeshPathStatus.PathComplete
+                    && toGoal.sqrMagnitude < 4
+                    && !NavMesh.Raycast(
+                        agent.nextPosition,
+                        agent.destination,
+                        out _,
+                        agent.areaMask
+                    )
+                )
+                {
+                    // NavMesh's simulated velocity can oscillate at the destination
+                    // while a separate force-driven body catches up. Brake against
+                    // the physical distance on the unobstructed final segment.
+                    float speed = Mathf.Min(agent.speed, Mathf.Max(0, toGoal.magnitude - .15f) * 2);
+                    bool personAhead =
+                        speed > .05f
+                        && physics.SphereCast(
+                            body.position + Vector3.up * .8f,
+                            .25f,
+                            toGoal.normalized,
+                            out _,
+                            Mathf.Min(toGoal.magnitude, .7f),
+                            1 << TrafficClearance.WalkerLayer,
+                            QueryTriggerInteraction.Ignore
+                        );
+                    desired = personAhead ? Vector3.zero : toGoal.normalized * speed;
+                }
+            }
             // A physical contact or rounded corner can leave the body beyond the
             // navigation boundary. The agent's internal position is clamped there;
             // copying its desired velocity alone can strand the solid body in the

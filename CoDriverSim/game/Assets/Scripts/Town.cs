@@ -1426,9 +1426,11 @@ namespace CoDriver
         float until;
         Walker visitor;
 
+        public bool AvailableFor(Walker actor) => !visitor || visitor == actor;
+
         public bool Reserve(Walker actor)
         {
-            if (visitor && visitor != actor)
+            if (!AvailableFor(actor))
                 return false;
             visitor = actor;
             return true;
