@@ -206,6 +206,12 @@ def main():
     (target / "codriversim-app.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
     shutil.copy2(root / "docs/UNITY_GAME.md", target / "DEVELOPMENT-STATUS.md")
     shutil.copy2(root / "docs/REALISM_REBUILD.md", target / "REALISM-STATUS.md")
+    # Keep the linked setup/evaluation records usable outside the checkout.
+    # The Comma runtime is separate; a download must include its setup record.
+    documentation = target / "docs"
+    documentation.mkdir()
+    for document in root.joinpath("docs").glob("*.md"):
+        shutil.copy2(document, documentation / document.name)
     (target / "START-HERE.txt").write_text(
         "CoDriverSim development build - release qualification incomplete\n\n"
         "Run CoDriverSim.exe. The bundled Python runtime starts automatically.\n"
@@ -220,7 +226,8 @@ def main():
         "Set wsl_distribution and openpilot_directory in codriversim-app.json if needed.\n"
         "An empty openpilot_directory uses ~/VisionPlayground-experiments/openpilot-onnx-v0.9.7.\n"
         "Human control is the default. Camera warnings cannot control a real car.\n"
-        "See REALISM-STATUS.md and DEVELOPMENT-STATUS.md for measurements and remaining work.\n"
+        "See docs/REALISM_REBUILD.md and docs/UNITY_GAME.md for measurements and remaining work.\n"
+        "The pinned WSL Comma setup record is in docs/COMMA_SIM.md; that runtime is not bundled.\n"
         "Source, setup and third-party notices: https://github.com/Sammieblz/VisionPlayground\n",
         encoding="utf-8",
     )
