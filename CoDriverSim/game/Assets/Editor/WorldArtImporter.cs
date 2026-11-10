@@ -210,6 +210,18 @@ namespace CoDriver.Editor
                                 Path.GetInvalidFileNameChars().Contains(c) ? '_' : c
                             )
                         );
+                        if (string.IsNullOrWhiteSpace(file))
+                        {
+                            // glTF permits unnamed materials. Preserve a stable
+                            // identity instead of trying to create an invalid .mat.
+                            file = AssetDatabase.TryGetGUIDAndLocalFileIdentifier(
+                                original,
+                                out string sourceGuid,
+                                out long localId
+                            )
+                                ? "Material-" + sourceGuid + "-" + localId
+                                : "Material-" + converted.Count;
+                        }
                         WorldMaterialMaps.Copy(original, material, directory, file);
                         string path = directory + "/" + file + ".mat";
                         var previous = AssetDatabase.LoadAssetAtPath<Material>(path);

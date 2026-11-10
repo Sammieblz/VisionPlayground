@@ -115,6 +115,10 @@ mirrors and the co-driver device are application additions. Khronos trademarks a
 CC BY; this adaptation omits the trademark-bearing meshes. Full attribution and license are under
 `src/codriversim/licenses/CarConcept-*`.
 
+The public fallback additionally uses converted URP materials with neutral,
+matte upholstery and reduced normal-map strength, plus an authored dashboard
+instrument housing and a live Canvas cluster. Licensed source geometry is retained.
+
 The Comma-style Canvas layout and steering-wheel image are adapted from the installed official
 openpilot v0.9.7 revision above, MIT licensed by comma.ai. The fonts are unmodified Inter Regular, Bold
 and Semibold by Rasmus Andersson and contributors, under the SIL Open Font License 1.1.
