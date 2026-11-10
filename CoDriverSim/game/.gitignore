@@ -9,6 +9,7 @@
 /Assets/Resources/BuildIdentity.json*
 /Assets/Resources/PerformanceTestRunInfo.json*
 /Assets/Resources/PerformanceTestRunSettings.json*
+/Assets/InitTestScene*.unity*
 *.csproj
 *.sln
 *.slnx

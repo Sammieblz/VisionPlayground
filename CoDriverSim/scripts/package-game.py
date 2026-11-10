@@ -127,6 +127,7 @@ def main():
         shutil.copy2(root / "scripts" / name, target / "scripts" / name)
     notices = target / "Notices"
     notices.mkdir()
+    shutil.copy2(root / "LICENSE", target / "LICENSE.txt")
     shutil.copy2(root / "THIRD_PARTY_NOTICES.md", notices)
     shutil.copytree(root / "src/codriversim/licenses", notices / "licenses")
     (notices / "BUNDLED-PATHS.txt").write_text(

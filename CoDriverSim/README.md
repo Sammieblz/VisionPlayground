@@ -3,6 +3,9 @@
 An AI co-driver experiment with a Windows Unity driving application and retained MetaDrive demos.
 Status: **development build; first-release qualification is incomplete**.
 
+Original CoDriverSim code is [MIT licensed](LICENSE). Third-party code, art and
+map data retain their [individual licenses and attribution](THIRD_PARTY_NOTICES.md).
+
 The Unity application uses an independent forward camera, NanoDet ONNX detection, conservative
 image-based sign/light reading, tracking, and read-only openpilot model outputs. The portable
 dashcam observes, warns and records. A separate, simulation-only adapter can give stock Comma
