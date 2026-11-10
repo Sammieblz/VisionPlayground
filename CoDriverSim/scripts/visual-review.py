@@ -109,6 +109,7 @@ def main():
         ("Bridge extension", "bridge-720.png", "bridge-720.png"),
         ("Storefront", "storefront-720.png", "storefront-720.png"),
         ("Modeled low-rise", "lowrise-720.png", "lowrise-720.png"),
+        ("Articulated construction machine", "construction-00-720.png", "construction-00-720.png"),
         ("Railway", "railway-720.png", "railway-720.png"),
         ("Clothed civilian A", "civilian-720.png", "citizen_a-720.png"),
         ("Clothed civilian B", "civilian-720.png", "citizen_b-720.png"),
@@ -160,8 +161,13 @@ def main():
         )
     for title, before, after in panels:
         images = []
+        before_folder = (
+            "visual-before-architecture-pass"
+            if title in {"Storefront", "Modeled low-rise"}
+            else "visual-before-material-pass"
+        )
         for label, relative in (
-            ("Earlier capture", Path("visual-before-material-pass") / before),
+            ("Earlier capture", Path(before_folder) / before),
             ("Scene asset inspection", Path("visual") / after),
         ):
             path = folder / relative

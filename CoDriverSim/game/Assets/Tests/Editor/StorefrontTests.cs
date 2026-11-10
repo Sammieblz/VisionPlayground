@@ -47,7 +47,12 @@ namespace CoDriver.Tests
                     Assert.LessOrEqual(entry.WalkDistance, 8.75f);
                     Assert.GreaterOrEqual(entry.Width, 2.4f);
                     Assert.IsTrue(
-                        physics.Raycast(door.Approach + Vector3.up, Vector3.down, out var floor, 2),
+                        physics.Raycast(
+                            entry.Centre + entry.Outward * 2 + Vector3.up,
+                            Vector3.down,
+                            out var floor,
+                            2
+                        ),
                         building.sourceId + " requires a physical floor at its approach"
                     );
                     Assert.Greater(floor.normal.y, .7f);
