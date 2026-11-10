@@ -182,9 +182,17 @@ namespace CoDriver.Editor
 
         public static void Capture()
         {
-            ActorImporter.Prepare();
-            WorldArtImporter.Prepare();
-            RealismImporter.Prepare();
+            if (
+                System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-architecture-only")
+                >= 0
+            )
+                RealismImporter.PrepareSurfaces();
+            else
+            {
+                ActorImporter.Prepare();
+                WorldArtImporter.Prepare();
+                RealismImporter.Prepare();
+            }
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
             Art.Initialize();
             GraphicsSettings.useScriptableRenderPipelineBatching = false;

@@ -742,3 +742,21 @@ moving the handbraked vehicle more than 0.15 m, the cat completes its recorded
 crossing around the pole, and eight sidewalk journeys still physically complete.
 The populated traffic, shop access and activity checks require a fresh rerun.
 Python CI for `ab39485` passed all four Windows/Linux, Python 3.11/3.12 jobs.
+
+### Architectural finishes and street-facing shop fronts
+
+The next visual pass adds three hash-pinned CC0 material sets (12 source maps at
+2K), a stable six-finish facade palette, painted modeled joinery, street-facing
+retail glazing with frames and awnings, and parapets/bitumen for flat roofs.
+Pitched roofs retain their tile finish. Near and distant wall materials use the
+same stable map identity. The licensed Poly Haven architectural profiles remain;
+these are adapted appearances, not claims about the surveyed Davis buildings.
+
+Matched 720p/1080p Unity captures are under `visual/`; the previous captures are
+preserved under `visual-before-architecture-pass/`, and the first finish attempt
+under `visual-architecture-first-pass/`. The lighter stucco follow-up improves
+wall/trim separation, and the commercial ground floors now differ from upstairs
+windows. Repetition, empty-looking glazing and sparse landscaping still limit
+realism. These captures establish the actual rendered change, not whole-game
+visual acceptance. Whole-population behavior and sustained rendering/inference
+qualification remain necessary after this pass.

@@ -282,6 +282,154 @@
         "Poly Haven"
       ],
       "sha256": "4dd72e594056fae1653118bdc86638381c65605edcbdf37e6a27c762782d55fe"
+    },
+    {
+      "name": "PaintedStucco",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_diff_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/PaintedStucco.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/beige_wall_001",
+      "authors": [
+        "Dimitrios Savva",
+        "Rico Cilliers"
+      ],
+      "sha256": "222d4d2e7d5c425c97e5a66790852388cec7706714d773f769fba6bfe08cea4e",
+      "surface_metres": 3
+    },
+    {
+      "name": "PaintedStuccoNormal",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_nor_gl_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/PaintedStuccoNormal.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/beige_wall_001",
+      "authors": [
+        "Dimitrios Savva",
+        "Rico Cilliers"
+      ],
+      "sha256": "7f5cbecd6766f44034f3b78b4addb1559e12bdd5a77501bd418a736609e7cedc",
+      "surface_metres": 3
+    },
+    {
+      "name": "PaintedStuccoRoughness",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_rough_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/PaintedStuccoRoughness.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/beige_wall_001",
+      "authors": [
+        "Dimitrios Savva",
+        "Rico Cilliers"
+      ],
+      "sha256": "a76e2307d8ec47d1be1d4710851fc4545db7aecfa176333738a6756358b64767",
+      "surface_metres": 3
+    },
+    {
+      "name": "PaintedStuccoOcclusion",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_ao_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/PaintedStuccoOcclusion.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/beige_wall_001",
+      "authors": [
+        "Dimitrios Savva",
+        "Rico Cilliers"
+      ],
+      "sha256": "371d80c90b63a478093581d4f61ab9b439f233ae6fe970cb62a71d95d64e2ccf",
+      "surface_metres": 3
+    },
+    {
+      "name": "FlatRoof",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bitumen/bitumen_diff_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/FlatRoof.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/bitumen",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "sha256": "709bf2bd8753197f90c0ea1fc3a735c1e06ffd7cb4aabdb9bd9401f9df607e31",
+      "surface_metres": 20
+    },
+    {
+      "name": "FlatRoofNormal",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bitumen/bitumen_nor_gl_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/FlatRoofNormal.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/bitumen",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "sha256": "9b7c1c1f5d1b99eadc652b4b1553305cff3285f4621aab23de3dff7357b7ecb6",
+      "surface_metres": 20
+    },
+    {
+      "name": "FlatRoofRoughness",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bitumen/bitumen_rough_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/FlatRoofRoughness.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/bitumen",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "sha256": "0e1ad6b7542b826ae084d373eec033db9578368d3769ce51101e275230516e78",
+      "surface_metres": 20
+    },
+    {
+      "name": "FlatRoofOcclusion",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bitumen/bitumen_ao_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/FlatRoofOcclusion.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/bitumen",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "sha256": "ccd0e7517b4d7966badbb666a788ec7fbdb92bde4b2df37a4c98187b63a3452f",
+      "surface_metres": 20
+    },
+    {
+      "name": "WhiteStucco",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_stucco/white_stucco_diff_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/WhiteStucco.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/white_stucco",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "sha256": "a1cf9063e72d82306c5f3330cfaa56ed75ee365dc6a6eb875cde125395dbe4ea",
+      "surface_metres": 2
+    },
+    {
+      "name": "WhiteStuccoNormal",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_stucco/white_stucco_nor_gl_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/WhiteStuccoNormal.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/white_stucco",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "sha256": "d11eae11d09af20a1bd4e1262b1d35ad4259451a19651307a7fa8f6c0cadfc59",
+      "surface_metres": 2
+    },
+    {
+      "name": "WhiteStuccoRoughness",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_stucco/white_stucco_rough_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/WhiteStuccoRoughness.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/white_stucco",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "sha256": "6c2aea6bd796d46c926066e48378563366661fffa255df2e82913eae68c1e2f8",
+      "surface_metres": 2
+    },
+    {
+      "name": "WhiteStuccoOcclusion",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/white_stucco/white_stucco_ao_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/WhiteStuccoOcclusion.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/white_stucco",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "sha256": "7c77345981cf41abd02b6793db3088aec529fca2807871b09df9786c34c5e697",
+      "surface_metres": 2
     }
   ]
 }

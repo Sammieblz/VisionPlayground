@@ -8,25 +8,6 @@ namespace CoDriver
 {
     public static class DavisWorld
     {
-        static readonly Dictionary<int, Material> facades = new Dictionary<int, Material>();
-
-        static Material Facade(int variation, bool residential)
-        {
-            int key = variation % 5 + (residential ? 5 : 0);
-            if (facades.TryGetValue(key, out var material))
-                return material;
-            material = new Material(residential ? Art.Concrete : Art.Brick);
-            material.name = "Davis textured facade " + key;
-            material.color = Color.Lerp(
-                new Color(.65f, .56f, .46f),
-                new Color(.95f, .93f, .88f),
-                variation % 5 / 4f
-            );
-            material.enableInstancing = true;
-            facades[key] = material;
-            return material;
-        }
-
         public static Mesh Mesh(MapMesh data)
         {
             var mesh = new Mesh { indexFormat = IndexFormat.UInt32 };
@@ -169,9 +150,8 @@ namespace CoDriver
                     stripe.transform.rotation = Quaternion.LookRotation(direction);
                 }
             }
-            int index = 0;
             foreach (var building in map.buildings)
-                Building(town, building, index++);
+                Building(town, building);
             foreach (var landmark in map.landmarks)
             {
                 if (!map.Contains(landmark.position, 3))
@@ -459,15 +439,10 @@ namespace CoDriver
             );
         }
 
-        static void Building(Town town, MapBuilding b, int variation)
+        static void Building(Town town, MapBuilding b)
         {
             Transform parent = town.transform;
             var entrance = MappedStorefront.Find(town.Map, b);
-            bool residential =
-                b.usage == "house"
-                || b.usage == "houses"
-                || b.usage == "residential"
-                || b.usage == "detached";
             var vertices = new List<Vector3>(b.roof.vertices);
             var triangles = new List<int>(b.roof.triangles);
             var uv = b.roof.vertices.Select(p => new Vector2(p.x, p.z) * .2f).ToList();
@@ -529,7 +504,7 @@ namespace CoDriver
                 "Building " + b.sourceId + " " + b.name,
                 parent,
                 new MapMesh { vertices = vertices.ToArray(), triangles = triangles.ToArray() },
-                Facade(variation, residential)
+                FacadeArchitecture.Wall(FacadeArchitecture.Style(b))
             );
             root.layer = 0;
             root.GetComponent<MeshFilter>().sharedMesh.uv = uv.ToArray();
@@ -552,8 +527,8 @@ namespace CoDriver
             shell.SetTriangles(triangles.Skip(b.roof.triangles.Length).ToArray(), 1);
             root.GetComponent<MeshRenderer>().sharedMaterials = new[]
             {
-                Art.Roof,
-                Facade(variation, residential),
+                FacadeArchitecture.Roof(b),
+                FacadeArchitecture.Wall(FacadeArchitecture.Style(b)),
             };
             entrance?.Build(town);
             if (entrance == null && MappedBuildingArt.TryAdd(root.transform, b))
@@ -561,7 +536,7 @@ namespace CoDriver
                 root.GetComponent<MeshRenderer>().enabled = false;
                 return;
             }
-            if (FacadeArchitecture.Add(root.transform, b, entrance))
+            if (FacadeArchitecture.Add(root.transform, b, entrance, town.Map))
                 return;
             // Recessed window groups follow each actual facade, preserving footprint.
             vertices.Clear();

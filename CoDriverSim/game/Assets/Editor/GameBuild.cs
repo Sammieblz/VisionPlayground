@@ -69,6 +69,13 @@ namespace CoDriver.Editor
                     "Prepared construction/civilian art is missing. Run scripts/setup-world-art.ps1 before packaging."
                 );
             RealismImporter.Prepare();
+            foreach (string surface in new[] { "PaintedStucco", "WhiteStucco", "FlatRoof" })
+                if (!Resources.Load<Texture2D>("Materials/" + surface))
+                    throw new System.InvalidOperationException(
+                        "Missing architectural texture "
+                            + surface
+                            + ". Run scripts/fetch-game-assets.py before packaging."
+                    );
             CockpitImporter.Prepare();
             Directory.CreateDirectory("Assets/Resources");
             string source = string.Join(

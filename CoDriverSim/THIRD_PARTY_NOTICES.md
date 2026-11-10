@@ -189,6 +189,18 @@ retains its own EPL-2.0/GPL-2.0-or-later notices in the external tool cache.
   https://polyhaven.com/a/white_plaster_02 ; https://polyhaven.com/license .
   Four 2K maps are pinned in `game/surface-rail-manifest.json`; applied to the
   varied facade assemblies at a consistent texture scale.
+- **Beige Wall 001 — Dimitrios Savva and Rico Cilliers, Poly Haven**, CC0-1.0:
+  https://polyhaven.com/a/beige_wall_001 ; https://polyhaven.com/license .
+  Four pinned 2K maps provide painted stucco for the adapted architectural palette;
+  the photographed surface spans approximately three metres.
+- **Bitumen — Rob Tuytel, Poly Haven**, CC0-1.0:
+  https://polyhaven.com/a/bitumen ; https://polyhaven.com/license .
+  Four pinned 2K maps provide the flat roof finish, with the source's twenty-metre
+  surface scale. Both sets are listed in `game/surface-rail-manifest.json`.
+- **White Stucco — Amal Kumar, Poly Haven**, CC0-1.0:
+  https://polyhaven.com/a/white_stucco ; https://polyhaven.com/license .
+  Four pinned 2K maps provide the lighter wall finishes, with approximately
+  two metres per texture repeat. The source API metadata is retained locally.
 - The licensed Quaternius UAL animation subset also supplies the pedestrian
   impact clips. `Ground_Recovery` is a reversed, non-looping adaptation of
   `Death01`; the simulation adds interruption, timing and locomotion recovery.

@@ -521,7 +521,7 @@ namespace CoDriver.Editor
             UnityEngine.Object.DestroyImmediate(result);
         }
 
-        static void PrepareSurfaces()
+        public static void PrepareSurfaces()
         {
             var skyImporter = (TextureImporter)AssetImporter.GetAtPath(Root + "Daylight.hdr");
             if (skyImporter && skyImporter.textureShape != TextureImporterShape.TextureCube)
@@ -540,6 +540,9 @@ namespace CoDriver.Editor
                     "Roof",
                     "Ballast",
                     "Plaster",
+                    "PaintedStucco",
+                    "WhiteStucco",
+                    "FlatRoof",
                 }
             )
             {
@@ -613,10 +616,17 @@ namespace CoDriver.Editor
                 }
                 if (name == "Ballast")
                     material.mainTextureScale = Vector2.one * (5f / 2.3f);
-                if (name == "Plaster")
+                if (name == "Plaster" || name == "PaintedStucco" || name == "WhiteStucco")
                 {
                     material.SetFloat("_Smoothness", .08f);
                     material.SetFloat("_BumpScale", .3f);
+                }
+                if (name == "FlatRoof")
+                {
+                    // World roof UVs repeat every five metres; this source is 20 m wide.
+                    material.mainTextureScale = Vector2.one * .25f;
+                    material.SetFloat("_BumpScale", .2f);
+                    material.SetFloat("_Smoothness", .08f);
                 }
                 Save(material, Prepared + name + ".mat");
             }
