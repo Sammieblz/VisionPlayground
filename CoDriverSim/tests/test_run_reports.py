@@ -52,3 +52,23 @@ def test_separate_engagements_are_not_reported_as_one_continuous_drive():
     assert [e["confirmed_span_seconds"] for e in episodes] == [1, 2]
     assert [e["sampled_travel_metres"] for e in episodes] == [1, 2]
     assert [e["end_reason"] for e in episodes] == ["Comma connection stale", "Human takeover"]
+
+
+def test_cached_ready_flag_cannot_hide_a_lost_model_stream_in_legacy_recordings():
+    rows = [dict(comma_healthy=True, model_frame_age=age) for age in (0.2, 0.3, 15, 300)]
+    result = report.service_freshness(rows)
+    assert result["healthy_command_fraction"] == 0.5
+    assert result["model_fresh_fraction"] == 0.5
+    assert result["observer_fresh_fraction"] is None
+
+
+def test_command_observer_and_model_freshness_are_independent():
+    rows = [
+        dict(comma_healthy=True, comma_command_age=0.1, model_frame_age=0.2, observer_fresh=True),
+        dict(comma_healthy=True, comma_command_age=10, model_frame_age=0.2, observer_fresh=False),
+        dict(comma_healthy=True, comma_command_age=0.1, model_frame_age=10, observer_fresh=False),
+    ]
+    result = report.service_freshness(rows)
+    assert result["healthy_command_fraction"] == 2 / 3
+    assert result["model_fresh_fraction"] == 2 / 3
+    assert result["observer_fresh_fraction"] == 1 / 3

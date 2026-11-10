@@ -63,7 +63,12 @@ def packaged_run(folder, package, session, title, records):
             else "Unavailable: no warning samples",
         ),
         ("Player contacts", str(performance["collision_count"])),
-        ("Comma healthy samples", f"{report['comma_healthy_sample_fraction']:.1%}"),
+        (
+            "Fresh Comma healthy samples",
+            f"{report['comma_healthy_sample_fraction']:.1%}"
+            if report["comma_healthy_sample_fraction"] is not None
+            else "Unavailable",
+        ),
         ("Driver mode", performance["driver_mode"]),
     ]
     table = "".join(
@@ -71,6 +76,7 @@ def packaged_run(folder, package, session, title, records):
         for name, value in metrics
     )
     failed = ", ".join(name for name, passed in report["checks"].items() if passed is False)
+    unavailable = ", ".join(name for name, passed in report["checks"].items() if passed is None)
     review_uri = f"packaged/{session}/{report_path.name}"
     return (
         f"<section><h2>{html.escape(title)}</h2>"
@@ -78,6 +84,9 @@ def packaged_run(folder, package, session, title, records):
         "Recorded evidence for this build only; release qualification remains separate.</p>"
         f'<div class="pair">{"".join(figures)}</div><table>{table}</table>'
         f"<p>Unmet run checks: {html.escape(failed or 'None in this sampled run')}.</p>"
+        f"<p>Unavailable checks: {html.escape(unavailable or 'None')}. "
+        "Legacy service-reported rates may cover only the period before a disconnect; "
+        "whole-session rate coverage is checked separately.</p>"
         f'<p><a href="{review_uri}">Full run report and limitations</a> · '
         f'<a href="packaged/{session}/BuildIdentity.json">Build identity</a></p></section>'
     )
@@ -88,6 +97,7 @@ def main():
     parser.add_argument(
         "--run", action="append", nargs=3, default=[], metavar=("PACKAGE", "SESSION", "LABEL")
     )
+    parser.add_argument("--video", action="append", nargs=2, default=[], metavar=("FILE", "LABEL"))
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     folder = root / "outputs/qualification/realism"
@@ -111,6 +121,40 @@ def main():
         packaged_run(folder, package, session, label, records)
         for package, session, label in args.run
     ]
+    for filename, label in args.video:
+        original = Path(filename).resolve(strict=True)
+        metadata = original.with_suffix(".json")
+        capture = json.loads(metadata.read_text(encoding="utf-8"))
+        destination = folder / "videos" / original.name
+        destination.parent.mkdir(exist_ok=True)
+        for source, target in (
+            (original, destination),
+            (metadata, destination.with_suffix(".json")),
+        ):
+            if source.resolve() != target.resolve():
+                shutil.copy2(source, target)
+            with source.open("rb") as stream:
+                digest = hashlib.file_digest(stream, "sha256").hexdigest()
+            records.append(
+                {
+                    "file": target.relative_to(folder).as_posix(),
+                    "source": str(source),
+                    "sha256": digest,
+                }
+            )
+        uri = html.escape(destination.relative_to(folder).as_posix(), quote=True)
+        metadata_uri = html.escape(
+            destination.with_suffix(".json").relative_to(folder).as_posix(), quote=True
+        )
+        sections.append(
+            f"<section><h2>{html.escape(label)}</h2>"
+            f'<video controls preload="metadata" style="width:100%" src="{uri}"></video>'
+            f"<p>{capture['seconds']:.1f} seconds of the owned game window, "
+            f"encoded at {capture['encoded_fps']} FPS. "
+            "Capture overhead excludes this session from performance qualification. "
+            f'<a href="{metadata_uri}">'
+            "Capture metadata</a>.</p></section>"
+        )
     for title, before, after in panels:
         images = []
         for label, relative in (
@@ -128,10 +172,22 @@ def main():
                 }
             )
             uri = html.escape(relative.as_posix(), quote=True)
+            large = relative.with_name(relative.name.replace("720.png", "1080.png"))
+            resolution_link = ""
+            if large != relative and (folder / large).is_file():
+                records.append(
+                    {
+                        "file": large.as_posix(),
+                        "sha256": hashlib.sha256((folder / large).read_bytes()).hexdigest(),
+                    }
+                )
+                resolution_link = (
+                    f' · <a href="{html.escape(large.as_posix(), quote=True)}">1080p capture</a>'
+                )
             images.append(
                 f'<figure><a href="{uri}"><img loading="lazy" src="{uri}" '
                 f'alt="{html.escape(title)} — {label}"></a><figcaption>{label}'
-                "</figcaption></figure>"
+                f"{resolution_link}</figcaption></figure>"
             )
         sections.append(
             f'<section><h2>{html.escape(title)}</h2><div class="pair">'

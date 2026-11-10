@@ -149,6 +149,10 @@ def serve(model: Path, ready: Path, output: Path, token: str):
             encoding="utf-8",
         )
         temporary.replace(ready)
+        order = FrameOrder()
+        reason = "Connection finished"
+        failure_type = None
+        last_header = None
         try:
             connection, _ = listener.accept()
             with connection:
@@ -156,9 +160,12 @@ def serve(model: Path, ready: Path, output: Path, token: str):
                 connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                 connection.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 8 * 1024 * 1024)
                 connection.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1024 * 1024)
-                order = FrameOrder()
                 while True:
                     header, image = packet(connection)
+                    last_header = {
+                        key: repr(header.get(key))[:160]
+                        for key in ("session_id", "frame_id", "timestamp")
+                    }
                     if not secrets.compare_digest(str(header.pop("token", "")), token):
                         raise ValueError("Invalid session capability")
                     frame = CameraFrame.parse(header, image)
@@ -207,10 +214,37 @@ def serve(model: Path, ready: Path, output: Path, token: str):
                             )
                         capture_request.unlink(missing_ok=True)
         except (EOFError, OSError, ValueError) as exc:
+            reason, failure_type = str(exc), type(exc).__name__
             print(f"Observer stopped: {exc}", flush=True)
+        except Exception as exc:
+            reason, failure_type = str(exc), type(exc).__name__
+            raise
         finally:
-            service.close()
-            ready.unlink(missing_ok=True)
+            # Retain the cause before recorder shutdown. The readiness file is
+            # transient, and GUI children otherwise lose their terminal output.
+            try:
+                ready.with_suffix(".exit.json").write_text(
+                    json.dumps(
+                        {
+                            "reason": reason,
+                            "error_type": failure_type,
+                            "accepted_session": order.session,
+                            "accepted_frame_id": order.frame_id,
+                            "accepted_timestamp": order.timestamp,
+                            "last_header": last_header,
+                            "received_frames": service.frames,
+                            "processed_frames": service.processed,
+                        },
+                        allow_nan=False,
+                        indent=2,
+                    ),
+                    encoding="utf-8",
+                )
+            except OSError as exc:
+                print(f"Observer exit evidence unavailable: {exc}", flush=True)
+            finally:
+                service.close()
+                ready.unlink(missing_ok=True)
 
 
 def main():

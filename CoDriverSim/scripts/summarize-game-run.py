@@ -62,6 +62,44 @@ def automation_episodes(driving):
     return episodes
 
 
+def service_freshness(driving):
+    """Cached readiness is insufficient; older recordings still expose model age."""
+
+    def within(value, limit):
+        return isinstance(value, (int, float)) and math.isfinite(value) and 0 <= value < limit
+
+    model_coverage = all("model_frame_age" in r for r in driving)
+    command_coverage = all("comma_command_age" in r for r in driving)
+    observer_coverage = all("observer_fresh" in r for r in driving)
+    healthy = sum(
+        bool(r["comma_healthy"])
+        and (
+            within(r["comma_command_age"], 0.250001)
+            if command_coverage
+            else within(r.get("model_frame_age"), 1)
+        )
+        for r in driving
+    ) / len(driving)
+    return {
+        "healthy_command_fraction": healthy if command_coverage or model_coverage else None,
+        "command_age_coverage": command_coverage,
+        "model_fresh_fraction": (
+            sum(within(r["model_frame_age"], 1) for r in driving) / len(driving)
+            if model_coverage
+            else None
+        ),
+        "observer_fresh_fraction": (
+            sum(bool(r["observer_fresh"]) for r in driving) / len(driving)
+            if observer_coverage
+            else None
+        ),
+        "note": (
+            "Legacy command health requires fresh model output; "
+            "this does not supply missing observer-age measurements."
+        ),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
@@ -91,7 +129,13 @@ def main():
         for r in world
         if r.get("rail_overlaps")
     ]
-    healthy = sum(r["comma_healthy"] for r in driving) / len(driving)
+    freshness = service_freshness(driving)
+    healthy = freshness["healthy_command_fraction"]
+    maps = sorted({r.get("map", "unrecorded") for r in driving})
+    had_qualification = performance.get("driver_mode") == "qualification_driver" or any(
+        r["control"] == "Scripted physics/performance test driver" for r in driving
+    )
+    whole_session_rates = performance.get("throughput_scope") == "whole_session"
     player_anchor = driving[0]["position"]
     player_last_motion = driving[0]["timestamp"]
     player_stationary = 0
@@ -119,15 +163,31 @@ def main():
         "resolution_1280x720": performance.get("width") == 1280
         and performance.get("height") == 720,
         "qualification_driver_uninterrupted": (
-            not performance.get("qualification_interrupted", True)
-            if performance.get("driver_mode") == "qualification_driver"
-            else None
+            not performance.get("qualification_interrupted", True) if had_qualification else None
         ),
         "duration_at_least_30_minutes": simulation_seconds >= 1800,
         "mean_fps_at_least_30": performance["mean_fps"] >= 30,
-        "camera_delivery_near_20_hz": performance["camera_hz"] >= 19.5,
-        "general_detection_at_least_5_hz": performance["detection_hz"] >= 5,
-        "comma_healthy_in_at_least_95_percent_of_samples": healthy >= 0.95,
+        "single_map_throughout_run": len(maps) == 1 and maps != ["unrecorded"],
+        "whole_session_throughput_coverage": whole_session_rates,
+        "camera_delivery_near_20_hz": performance["camera_hz"] >= 19.5
+        if whole_session_rates
+        else None,
+        "general_detection_at_least_5_hz": performance["detection_hz"] >= 5
+        if whole_session_rates
+        else None,
+        "comma_healthy_in_at_least_95_percent_of_samples": healthy >= 0.95
+        if healthy is not None
+        else None,
+        "model_fresh_in_at_least_95_percent_of_samples": (
+            freshness["model_fresh_fraction"] >= 0.95
+            if freshness["model_fresh_fraction"] is not None
+            else None
+        ),
+        "observer_fresh_in_at_least_95_percent_of_samples": (
+            freshness["observer_fresh_fraction"] >= 0.95
+            if freshness["observer_fresh_fraction"] is not None
+            else None
+        ),
         "player_contact_free": performance["collision_count"] == 0,
         "player_not_stationary_for_two_minutes": player_stationary < 120,
         "no_logged_traffic_overlaps": not overlaps,
@@ -157,6 +217,8 @@ def main():
         "observed_simulation_seconds": simulation_seconds,
         "reviewer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "comma_healthy_sample_fraction": healthy,
+        "service_freshness": freshness,
+        "maps_observed": maps,
         "automation_episodes": automation_episodes(driving),
         "player_longest_stationary_seconds": player_stationary,
         "model_geometry": {
@@ -223,6 +285,8 @@ def main():
             "Camera target is 20 Hz; 19.5 Hz is the explicitly recorded near-target tolerance",
             "Simulation-only qualification driver is not human or Comma driving performance",
             "File hashes describe files at review time, not proof of the original running build",
+            "Legacy service-reported throughput can freeze at disconnect; "
+            "missing whole-session coverage cannot pass the rate gates",
         ],
     }
     destination = qualification / f"run-review-{args.session}.json"

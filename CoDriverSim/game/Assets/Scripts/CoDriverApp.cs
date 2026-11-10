@@ -23,6 +23,21 @@ namespace CoDriver
             Mode = "human_ai";
         public CommaCommand Command;
         public double CommandAt;
+        public bool CommandFresh =>
+            ServiceMeasurements.CommandFresh(
+                Command,
+                Session,
+                Time.realtimeSinceStartupAsDouble - CommandAt
+            );
+        public bool ObserverFresh =>
+            ServiceMeasurements.ObserverFresh(
+                Observation,
+                Session,
+                Time.realtimeSinceStartupAsDouble
+            );
+        public int ObserverGeneration => services?.Generation ?? 0;
+        public string ObserverTransportStatus => services?.Link?.Status ?? ServiceStatus;
+        readonly ServiceMeasurements serviceMeasurements = new ServiceMeasurements();
         public Action<bool> CommaRequest;
         ServiceSupervisor services;
         CommaBridge comma;
@@ -210,6 +225,7 @@ namespace CoDriver
             }
             Time.timeScale = Paused ? 0 : 1;
             previousTime = Time.realtimeSinceStartupAsDouble;
+            serviceMeasurements.Start(previousTime);
         }
 
         void Start()
@@ -381,10 +397,8 @@ namespace CoDriver
             }
             Sensors.Observer = services.Link;
             var observation = services.Link?.Result;
-            bool observationFresh =
-                observation != null
-                && observation.session_id == Session
-                && Time.realtimeSinceStartupAsDouble - observation.timestamp < 1;
+            serviceMeasurements.Observe(observation, services.Generation);
+            bool observationFresh = ObserverFresh;
             companion.Observe(observation, observationFresh, Mode == "human_muted" || Paused);
             if (observationFresh && observation.frame_id != lastObservation)
             {
@@ -1358,10 +1372,14 @@ namespace CoDriver
                 observer_updates = observations.Length,
                 driving_seconds = drivingSeconds,
                 paused_seconds = pausedSeconds,
-                camera_received = services.Link?.Result?.received_frames ?? 0,
-                detector_processed = services.Link?.Result?.processed_frames ?? 0,
-                camera_hz = services.Link?.Result?.camera_hz ?? 0,
-                detection_hz = services.Link?.Result?.detection_hz ?? 0,
+                camera_received = (int)serviceMeasurements.Received,
+                detector_processed = (int)serviceMeasurements.Processed,
+                camera_hz = serviceMeasurements.CameraHz(Time.realtimeSinceStartupAsDouble),
+                detection_hz = serviceMeasurements.DetectionHz(Time.realtimeSinceStartupAsDouble),
+                throughput_scope = "whole_session",
+                sensor_measurement_seconds =
+                    Time.realtimeSinceStartupAsDouble - serviceMeasurements.StartedAt,
+                observer_generations = services.Generation,
                 moving_seconds = movingSeconds,
                 driver_mode = Mode,
                 collision_count = Vehicle.Collisions,
@@ -1486,6 +1504,9 @@ namespace CoDriver
                 paused_seconds,
                 camera_hz,
                 detection_hz;
+            public string throughput_scope;
+            public double sensor_measurement_seconds;
+            public int observer_generations;
         }
     }
 }

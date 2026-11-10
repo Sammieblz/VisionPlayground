@@ -547,3 +547,44 @@ in progress; neither the rendered-pixel clipping test nor a short screenshot
 check substitutes for that result. Public packaging also now includes the
 previously omitted MakeHuman core-asset provenance manifest and a controls guide;
 these packaging-only changes do not alter the measured game binaries.
+
+### Interrupted sustained run and stale service measurements
+
+The local session `120e9204f91c4377818089da7d9cd9ea` is **not qualified**.
+The model stream stopped updating near application time 1,074 seconds, before
+the later manual controller testing and map changes. The observer process exited;
+Comma subsequently stopped when camera delivery ceased. The original observer
+launcher discarded stdout, so the precise exit cause is unavailable. The prior
+`f675d024366a4a429cd407bf21ebdcd5` and `c2c58f51f5834d61a09b5ae7a2c1c44b`
+recordings retain fresh model output at their ends; this failure does not establish
+that their services stopped in the same way.
+
+This exposed a reporting defect: diagnostics retained the last command's healthy
+flag, and the performance report reused the observer's last reported rates.
+The actual control arbiter still rejects commands older than 250 ms. The new
+reviewer checks recorded model/command freshness and map continuity; missing
+whole-session throughput evidence cannot pass its rate gates. The original report
+is preserved as `run-review-120e9204f91c4377818089da7d9cd9ea-before-freshness-fix.json`
+under `outputs/qualification/realism/`. Its corrected review measures fresh model
+output in only **54.7%** of samples. The aggregate 41.88 FPS includes the period
+after inference stopped and later manual driving; it is not the required combined
+workload result. Manual testing visited both maps, and the advancing world-time
+interval was 1,775.04 seconds.
+
+The bus also waited **149.85 seconds** at the E Street turn, across signal waits
+and occupied turn clearance. It physically resumed two seconds after the recorded
+stationary interval; it was not permanently stuck. The original two-minute review
+threshold remains failed. The queue history is retained in `bus-long-wait-review.json`.
+No ordinary vehicle reached that threshold, and no traffic/rail overlap was found
+in the sampled world rows. These observations do not waive the failed gates.
+
+The source follow-up measures received/detected frames across the full session,
+including service downtime and restarts; expires diagnostic readiness by command
+age; records observer stdout/stderr, transport errors and an exit-reason JSON;
+and discards obsolete GPU readback completions before the strict ordered camera
+connection. Out-of-order completion is a defended failure case, not the proven
+cause of this shutdown. **100 Python tests pass**, including persistent transport
+exit evidence and stale-health reporting. The focused Unity measurement, buffer
+and control suite passes **26/26** (`realism-service-measurements.xml`). The user
+has finished testing the untimed game; rebuilt local/public applications and
+renewed sustained/recovery checks are next. No root-cause or release pass is claimed.

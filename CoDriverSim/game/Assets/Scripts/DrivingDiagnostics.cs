@@ -70,12 +70,26 @@ namespace CoDriver
                 raw_throttle = app.Input.Gas.ReadValue<float>(),
                 raw_brake = app.Input.Brake.ReadValue<float>(),
                 comma_requested = app.Arbiter.Requested,
-                comma_active = app.Command?.active ?? false,
-                comma_healthy = app.Command?.healthy ?? false,
-                comma_engageable = app.Command?.engageable ?? false,
+                comma_active = app.CommandFresh && (app.Command?.active ?? false),
+                comma_healthy = app.CommandFresh && (app.Command?.healthy ?? false),
+                comma_engageable = app.CommandFresh && (app.Command?.engageable ?? false),
+                comma_command_age =
+                    app.Command == null ? -1 : Time.realtimeSinceStartupAsDouble - app.CommandAt,
+                observer_fresh = app.ObserverFresh,
+                observer_age =
+                    app.Observation == null
+                        ? -1
+                        : Time.realtimeSinceStartupAsDouble - app.Observation.timestamp,
+                observer_generation = app.ObserverGeneration,
+                observer_transport = app.ObserverTransportStatus,
+                observer_received_frames = app.Observation?.received_frames ?? 0,
+                observer_processed_frames = app.Observation?.processed_frames ?? 0,
+                camera_reordered_drops = app.Sensors.ReorderedDropped,
                 map = app.Town.Map.id,
                 comma_acceleration = app.Command?.acceleration_mps2 ?? 0,
-                comma_status = app.Command?.status ?? "unavailable",
+                comma_status = app.CommandFresh
+                    ? app.Command.status
+                    : "Stale/unavailable: " + app.CommaStatus,
                 automation_accepted = app.AutomationActive,
                 model_frame_age =
                     app.CommaUi?.road == null
@@ -162,6 +176,14 @@ namespace CoDriver
                 model_frame_cached;
             public int model_geometry_vertices;
             public double model_frame_age;
+            public double comma_command_age,
+                observer_age;
+            public bool observer_fresh;
+            public int observer_generation,
+                observer_received_frames,
+                observer_processed_frames,
+                camera_reordered_drops;
+            public string observer_transport;
         }
     }
 }

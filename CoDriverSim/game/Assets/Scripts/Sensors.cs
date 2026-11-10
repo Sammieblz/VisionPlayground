@@ -150,6 +150,7 @@ namespace CoDriver
         public double ReceivedAt;
         public int Port;
         public Action<byte[], CameraHeader> Encoded;
+        public Action<string> Failure;
         readonly object sync = new object();
         CameraFrameBuffer pendingImage;
         string pendingHeader;
@@ -239,7 +240,10 @@ namespace CoDriver
             catch (Exception e)
             {
                 if (!stop)
+                {
                     Status = "Disconnected: " + e.Message;
+                    Failure?.Invoke(e.ToString());
+                }
             }
             finally
             {
@@ -306,6 +310,8 @@ namespace CoDriver
         }
 
         int inFlight;
+        readonly FrameDeliveryOrder deliveryOrder = new FrameDeliveryOrder();
+        public int ReorderedDropped => deliveryOrder.Dropped;
         float next,
             previousSpeed;
         long frame;
@@ -456,6 +462,8 @@ namespace CoDriver
                     var observer = Observer;
                     if (observer != null)
                     {
+                        if (!deliveryOrder.TryAdvance(header.frame_id, header.timestamp))
+                            return;
                         var pixels = request.GetData<byte>();
                         CameraFrameBuffer raw = new CameraFrameBuffer(pixels.Length);
                         try
@@ -506,6 +514,10 @@ namespace CoDriver
             Root,
             Token = Guid.NewGuid().ToString("N"),
             ReadyFile;
+        public int Generation { get; private set; }
+        public string DiagnosticLog { get; private set; }
+        string lastOutput = "";
+        readonly object logLock = new object();
         Process process;
         float started;
         bool disposed;
@@ -545,6 +557,15 @@ namespace CoDriver
             }
             ReadyFile = Path.Combine(Root, "outputs", "services", "observer-" + Token + ".json");
             Directory.CreateDirectory(Path.GetDirectoryName(ReadyFile));
+            Generation++;
+            int generation = Generation;
+            string log = DiagnosticLog = Path.Combine(
+                Root,
+                "outputs",
+                "services",
+                "observer-" + Token + "-" + generation + ".log"
+            );
+            lastOutput = "";
             if (File.Exists(ReadyFile))
                 File.Delete(ReadyFile);
             var info = new ProcessStartInfo(
@@ -569,12 +590,34 @@ namespace CoDriver
             process.ErrorDataReceived += (s, e) =>
             {
                 if (e.Data != null)
-                    Status = e.Data;
+                    Trace(log, generation, "stderr", e.Data);
+            };
+            process.OutputDataReceived += (s, e) =>
+            {
+                if (e.Data != null)
+                    Trace(log, generation, "stdout", e.Data);
             };
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
             Status = "Loading camera model";
             started = Time.unscaledTime;
+        }
+
+        void Trace(string log, int generation, string channel, string message)
+        {
+            lock (logLock)
+            {
+                if (generation == Generation)
+                    lastOutput = message;
+                try
+                {
+                    File.AppendAllText(
+                        log,
+                        DateTime.UtcNow.ToString("O") + " " + channel + " " + message + "\n"
+                    );
+                }
+                catch (Exception e) when (e is IOException || e is UnauthorizedAccessException) { }
+            }
         }
 
         public void Poll()
@@ -583,7 +626,12 @@ namespace CoDriver
                 return;
             if (process.HasExited)
             {
-                Status = "Observer stopped. Use Restart services.";
+                Status =
+                    "Observer stopped (exit "
+                    + process.ExitCode
+                    + "). "
+                    + lastOutput
+                    + " Use Restart camera service.";
                 return;
             }
             if (Link == null && File.Exists(ReadyFile))
@@ -592,6 +640,9 @@ namespace CoDriver
                 {
                     var ready = JsonUtility.FromJson<Ready>(File.ReadAllText(ReadyFile));
                     Link = new SensorLink();
+                    string log = DiagnosticLog;
+                    int generation = Generation;
+                    Link.Failure = message => Trace(log, generation, "transport", message);
                     Link.Start(ready.port);
                     Status = "Observer ready";
                 }

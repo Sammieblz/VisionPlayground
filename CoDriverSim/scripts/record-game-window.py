@@ -11,6 +11,28 @@ import numpy as np
 from PIL import ImageGrab
 
 
+def process_installation(pid):
+    """Resolve the actual window owner's executable, without guessing its package."""
+    kernel = ctypes.windll.kernel32
+    kernel.OpenProcess.restype = ctypes.c_void_p
+    process = kernel.OpenProcess(0x1000, False, pid)
+    if not process:
+        raise OSError("Cannot inspect the requested game process")
+    try:
+        path = ctypes.create_unicode_buffer(32768)
+        size = ctypes.c_ulong(len(path))
+        if not kernel.QueryFullProcessImageNameW(
+            ctypes.c_void_p(process), 0, path, ctypes.byref(size)
+        ):
+            raise OSError("Cannot resolve the game executable")
+        executable = Path(path.value).resolve(strict=True)
+        if executable.name.casefold() != "codriversim.exe":
+            raise ValueError("The window does not belong to a CoDriverSim executable")
+        return executable.parent
+    finally:
+        kernel.CloseHandle(ctypes.c_void_p(process))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pid", type=int, required=True)
@@ -32,6 +54,17 @@ def main():
     user32.GetWindowThreadProcessId(ctypes.c_void_p(window), ctypes.byref(owner))
     if not window or owner.value != args.pid:
         raise ValueError("The requested process does not own the CoDriverSim window")
+    installation = process_installation(args.pid)
+    identity = json.loads((installation / "BuildIdentity.json").read_text(encoding="utf-8"))
+    sessions = installation / "outputs/sessions"
+    active_sessions = [
+        p
+        for p in sessions.glob("*/driving-diagnostics.jsonl")
+        if p.stat().st_mtime >= time.time() - 10
+    ]
+    if len(active_sessions) != 1:
+        raise ValueError("Expected one live diagnostic session before recording")
+    session = active_sessions[0].parent.name
     first = np.asarray(ImageGrab.grab(window=int(window)))
     height, width = first.shape[:2]
     writer = cv2.VideoWriter(
@@ -63,6 +96,9 @@ def main():
         writer.release()
         report = dict(
             pid=args.pid,
+            installation=str(installation),
+            session=session,
+            build=identity,
             width=width,
             height=height,
             encoded_fps=args.fps,
