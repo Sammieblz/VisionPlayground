@@ -25,7 +25,6 @@ namespace CoDriver
         Quaternion gasRest,
             brakeRest;
         Quaternion wheelRest;
-        TextMesh instruments;
         readonly List<Camera> mirrors = new List<Camera>();
         readonly List<Renderer> mirrorSurfaces = new List<Renderer>();
         readonly List<RenderTexture> textures = new List<RenderTexture>();
@@ -77,20 +76,18 @@ namespace CoDriver
                 Debug.LogWarning(
                     "Modeled cockpit missing; run the pinned asset preparation before packaging"
                 );
-            var display = new GameObject("Live instruments");
-            display.transform.SetParent(transform, false);
-            display.transform.localPosition = new Vector3(-.35f, 1.075f, 1.0f);
-            instruments = display.AddComponent<TextMesh>();
-            instruments.fontSize = 48;
-            instruments.characterSize = .006f;
-            instruments.anchor = TextAnchor.MiddleCenter;
-            instruments.alignment = TextAlignment.Center;
-            instruments.color = new Color(.7f, .95f, .9f);
-            var renderer = display.GetComponent<MeshRenderer>();
-            var material = new Material(Shader.Find("CoDriver/WorldText"));
-            RuntimeResources.Register(gameObject, material);
-            material.mainTexture = renderer.sharedMaterial.mainTexture;
-            renderer.sharedMaterial = material;
+            var cluster = new Vector3(-.35f, 1.06f, 1.0f);
+            Art.Box(
+                "Dashboard instrument housing",
+                transform,
+                cluster + Vector3.forward * .045f,
+                new Vector3(.56f, .21f, .08f),
+                Art.Rubber,
+                false
+            );
+            gameObject
+                .AddComponent<CockpitInstruments>()
+                .Initialize(owner, cluster, Vector3.zero, new Vector2(.52f, .17f));
             for (int side = -1; side <= 1; side += 2)
                 Mirror(side);
             foreach (var child in GetComponentsInChildren<Transform>())
@@ -230,16 +227,6 @@ namespace CoDriver
                 gas.localRotation = gasRest * Quaternion.Euler(vehicle.Throttle * 18, 0, 0);
             if (brake)
                 brake.localRotation = brakeRest * Quaternion.Euler(vehicle.Brake * 15, 0, 0);
-            if (instruments)
-                instruments.text =
-                    (vehicle.Indicator < 0 ? "◀  " : "   ")
-                    + (vehicle.Speed * 2.23694f).ToString("F0")
-                    + " mph  "
-                    + (vehicle.Reverse ? "R" : vehicle.Gear.ToString())
-                    + (vehicle.Indicator > 0 ? "  ▶" : "")
-                    + "\n"
-                    + (vehicle.EngineRpm / 1000).ToString("F1")
-                    + " ×1000 rpm";
             if (
                 Time.unscaledTime >= nextMirror
                 && CoDriverApp.Instance

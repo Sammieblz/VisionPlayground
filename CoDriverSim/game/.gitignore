@@ -6,6 +6,7 @@
 /Builds/
 /Assets/External/
 /Assets/ExternalLocalExcluded/
+/Assets/ExternalLocalExcluded.meta
 /Assets/Resources/BuildIdentity.json*
 /Assets/Resources/PerformanceTestRunInfo.json*
 /Assets/Resources/PerformanceTestRunSettings.json*

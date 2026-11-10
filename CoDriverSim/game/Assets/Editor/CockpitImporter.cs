@@ -44,6 +44,26 @@ namespace CoDriver.Editor
                     Object.DestroyImmediate(renderer);
                 }
             }
+            WorldArtImporter.PrepareMaterials(model, folder + "Materials");
+            foreach (
+                var material in model
+                    .GetComponentsInChildren<Renderer>()
+                    .SelectMany(r => r.sharedMaterials)
+                    .Distinct()
+            )
+            {
+                if (!material.name.StartsWith("Interior"))
+                    continue;
+                // Adapt the concept's blue, highly reflective upholstery to a
+                // neutral road-car cabin while retaining its licensed mesh/maps.
+                material.color = material.name.StartsWith("Interior 3")
+                    ? new Color(.07f, .073f, .078f)
+                    : new Color(.035f, .038f, .042f);
+                material.SetFloat("_Metallic", 0);
+                material.SetFloat("_Smoothness", .18f);
+                material.SetFloat("_BumpScale", .18f);
+                EditorUtility.SetDirty(material);
+            }
             // Controls were authored for a central driving position. Seat meshes
             // contain several seats/material sections, so do not translate one
             // material section independently and tear the seat assembly apart.

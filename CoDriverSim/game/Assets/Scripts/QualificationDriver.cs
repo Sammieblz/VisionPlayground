@@ -50,8 +50,10 @@ namespace CoDriver
                 route.Position(axleProgress + lookahead) - axle
             );
             float angle =
-                Mathf.Atan2(2 * 2.7f * local.x, local.x * local.x + local.z * local.z)
-                * Mathf.Rad2Deg;
+                Mathf.Atan2(
+                    2 * vehicle.Profile.wheelbase * local.x,
+                    local.x * local.x + local.z * local.z
+                ) * Mathf.Rad2Deg;
             vehicle.CommandedRoadAngle = Mathf.Clamp(
                 angle,
                 -vehicle.Profile.maxSteering,

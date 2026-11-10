@@ -394,3 +394,19 @@ Original project code now carries an MIT license. The Python wheel declares the
 MIT/Apache combination because its adapted MetaDrive shader retains Apache-2.0;
 the wheel and Windows package include the corresponding texts and upstream
 notices. Existing pinned dependency versions are unchanged.
+
+Both traffic-corrected profiles built with code identity
+`6ba37c4fb9c1331fc324306eec842e7fb56d796fd3e634926c22be4aabeab9d6`.
+The isolated local package is `Realism-local-20261110-112822`; the public package
+is `Realism-public-20261110-113200`, with 2,305 packed source assets and zero
+local-only assets. Both passed integrity and isolated CLI verification.
+
+The public 180-second launch check, session `225a9f3d95664512b4e704e4333bf435`,
+recorded no player contacts or sampled traffic/rail overlaps. Its startup-inclusive
+mean was 28.64 FPS, camera delivery 19.11 Hz and detection 6.33 Hz. It is not a
+sustained performance pass. The cockpit capture exposed the fallback's legacy
+floating readout; it is being replaced with the same live Canvas instrument
+cluster used by the local cabin, in a dashboard housing with neutral matte
+upholstery. The qualification driver also now uses the selected profile's
+wheelbase, replacing its Honda-only constant. Neither change modifies Comma's
+upstream models or control logic. Both profiles are being rebuilt before delivery.
