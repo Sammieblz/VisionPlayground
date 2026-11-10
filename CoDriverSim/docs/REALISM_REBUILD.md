@@ -776,3 +776,34 @@ collision, open-door clearance and floor support at every mapped activity entran
 129-case editor suite and all 23 populated-world cases are being rerun before the
 new local/public packages are produced. All four Python 3.11/3.12 Windows/Linux CI
 jobs passed for `1613b56`; those do not qualify Unity behavior.
+
+### Anticipating approaching rail vehicles
+
+The landing candidate passes all 129 editor and 23 physical-world assertions in
+`realism-architecture-landing-editor.xml` / `realism-architecture-landing-world.xml`.
+All ten ambulance seeds returned without ambulance contacts; the copied cycle
+report is `ambulance-architecture-landing-qualified.json`. The world suite took
+1,599.38 seconds. However, its ordinary Cedar traffic case logged a pedestrian
+impact with the streetcar at 4.16 m/s. Traffic continuing after an impact is not a
+contact-avoidance pass. A new assertion now rejects unscripted rail contacts.
+
+The isolated traffic rerun did not repeat that timing-dependent event. A controlled
+7 m/s streetcar course did reproduce the underlying short-lookahead failure:
+the walker had entered the track before the forward obstacle probe could detect
+the approaching nose (`realism-approaching-streetcar-side.xml`, impact 7.09 m/s).
+Actors now forecast measured rail movement along track tangents at 10 Hz, over a
+three-second horizon. They wait only when remaining outside the rail envelope is
+safer; actors already in the path retain their escape movement. Forces remain
+bounded, and the forecast does not change a vehicle pose or reach perception.
+
+The reproduced course passes after this change
+(`realism-approaching-streetcar-yield.xml`). A separate already-on-track escape
+case and the full 25-case world suite are running. These changes are not yet
+packaged or performance-qualified. Python CI passed all four jobs for `0a80a18`.
+
+Review of the older Davis activity recording `9b4dcb7e3eab49268ad192b4f4386868`
+found three sampled complete shop returns. During simulation seconds 60–180,
+34–35 people were within 200 m of the player, but moving vehicles ranged from
+0–9 (mean 3.68); only 28.0% of samples met the six-moving-vehicle target. The
+hotspot traffic target did not pass in that earlier recording. Fresh activity
+footage and counts remain necessary after the walking/traffic corrections.

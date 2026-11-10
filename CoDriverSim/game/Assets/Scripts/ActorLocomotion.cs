@@ -14,6 +14,9 @@ namespace CoDriver
         float detourExpires;
         float nextDetourAttempt;
         Rigidbody body;
+        Town town;
+        float nextRailLook;
+        bool waitingForRail;
         NavMeshAgent agent;
         Collider shape;
         Transform visual;
@@ -49,11 +52,14 @@ namespace CoDriver
             + " ledge="
             + stepLedge.ToString("F2")
             + " contact="
-            + (Time.time < sideContactUntil ? sideContact : "None");
+            + (Time.time < sideContactUntil ? sideContact : "None")
+            + " rail_wait="
+            + waitingForRail;
 
         public void Initialize(string species, Transform model = null)
         {
             body = GetComponent<Rigidbody>();
+            town = GetComponentInParent<Town>();
             physics = gameObject.scene.GetPhysicsScene();
             agent = GetComponent<NavMeshAgent>();
             shape = GetComponent<Collider>();
@@ -249,6 +255,24 @@ namespace CoDriver
                 if (into < 0)
                     desired -= vehicleContactNormal * into;
             }
+            if (!flying && town && desired.sqrMagnitude > .01f)
+            {
+                if (Time.time >= nextRailLook)
+                {
+                    nextRailLook = Time.time + .1f;
+                    var bounds = shape.bounds;
+                    float radius = Mathf.Max(bounds.extents.x, bounds.extents.z);
+                    var extent = new Vector3(radius, bounds.extents.y, radius);
+                    waitingForRail =
+                        town.Tram && town.Tram.ApproachesWalkingPath(bounds.center, extent, desired)
+                        || town.Train
+                            && town.Train.ApproachesWalkingPath(bounds.center, extent, desired);
+                }
+                if (waitingForRail)
+                    desired = Vector3.zero;
+            }
+            else
+                waitingForRail = false;
             Vector3 current = flying
                 ? body.linearVelocity
                 : Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
@@ -408,6 +432,14 @@ namespace CoDriver
                     + contact.relativeVelocity.magnitude.ToString("F2")
                     + " impulse="
                     + contact.impulse.magnitude.ToString("F2")
+                    + " at="
+                    + body.position.ToString("F2")
+                    + " other_at="
+                    + other.position.ToString("F2")
+                    + " other_velocity="
+                    + other.linearVelocity.ToString("F2")
+                    + " actor="
+                    + (GetComponent<Walker>()?.NavigationDetail ?? "Physical fixture")
             );
             if (contact.relativeVelocity.magnitude > 1)
             {

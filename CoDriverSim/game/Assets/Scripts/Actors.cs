@@ -2969,6 +2969,74 @@ namespace CoDriver
             }
         }
 
+        // World-actor avoidance only. No rail/map truth enters the camera observer.
+        // Forecast measured movement along the guide without changing any pose.
+        public bool ApproachesWalkingPath(Vector3 centre, Vector3 actorExtent, Vector3 walking)
+        {
+            if (!gameObject.activeInHierarchy || CollisionBodies == null)
+                return false;
+            bool movingConflict = false,
+                standingConflict = false;
+            foreach (var collider in CollisionBodies)
+            {
+                var body = collider ? collider.attachedRigidbody : null;
+                if (
+                    !collider
+                    || !collider.enabled
+                    || !body
+                    || body.linearVelocity.sqrMagnitude < .09f
+                    || (collider.bounds.center - centre).sqrMagnitude > 3600
+                )
+                    continue;
+                var dynamics = body.GetComponent<RailDynamics>();
+                bool guided = dynamics && !dynamics.Derailed && dynamics.Path != null;
+                float along = guided ? dynamics.Along : 0;
+                var tangent = guided ? dynamics.Path.Direction(along) : body.transform.forward;
+                float speed = Vector3.Dot(body.linearVelocity, tangent);
+                var localCentre = body.transform.InverseTransformPoint(
+                    collider.transform.TransformPoint(collider.center)
+                );
+                var localRotation = Quaternion.Inverse(body.rotation) * collider.transform.rotation;
+                var extent =
+                    Vector3.Scale(collider.size * .5f, collider.transform.lossyScale)
+                    + actorExtent
+                    + new Vector3(.25f, .05f, .25f);
+                for (float seconds = .25f; seconds <= 3; seconds += .25f)
+                {
+                    var position = body.position + body.linearVelocity * seconds;
+                    var rotation =
+                        Quaternion.AngleAxis(
+                            body.angularVelocity.y * seconds * Mathf.Rad2Deg,
+                            Vector3.up
+                        ) * body.rotation;
+                    if (guided)
+                    {
+                        position =
+                            body.position
+                            + dynamics.Path.Position(along + speed * seconds)
+                            - dynamics.Path.Position(along);
+                        rotation =
+                            Quaternion.FromToRotation(
+                                tangent,
+                                dynamics.Path.Direction(along + speed * seconds)
+                            ) * body.rotation;
+                    }
+                    var inverse = Quaternion.Inverse(rotation * localRotation);
+                    var stationary = inverse * (centre - (position + rotation * localCentre));
+                    var proposed = stationary + inverse * (walking * seconds);
+                    bool Inside(Vector3 p) =>
+                        Mathf.Abs(p.x) <= extent.x
+                        && Mathf.Abs(p.y) <= extent.y
+                        && Mathf.Abs(p.z) <= extent.z;
+                    movingConflict |= Inside(proposed);
+                    standingConflict |= Inside(stationary);
+                }
+            }
+            // If already in the rail envelope, preserve motion out of it rather
+            // than freezing an actor in front of an approaching vehicle.
+            return movingConflict && !standingConflict;
+        }
+
         public bool CrossingOccupied(Vector3 crossing)
         {
             if (Streetcar)

@@ -1022,7 +1022,28 @@ namespace CoDriver.Tests
         [UnityTest, Timeout(300000)]
         public IEnumerator CedarOrdinaryTrafficDoesNotFormPermanentRoadblocks()
         {
-            return OrdinaryTrafficRemainsLive(MapDefinition.Cedar(), "cedar-clearance");
+            var railContacts = new List<string>();
+            void ObserveContact(string message, string trace, LogType type)
+            {
+                if (
+                    message.StartsWith("CODRIVER_ACTOR_CONTACT ")
+                    && (message.Contains(" with Streetcar ") || message.Contains(" with Carriage "))
+                )
+                    railContacts.Add(message);
+            }
+            Application.logMessageReceived += ObserveContact;
+            try
+            {
+                yield return OrdinaryTrafficRemainsLive(MapDefinition.Cedar(), "cedar-clearance");
+            }
+            finally
+            {
+                Application.logMessageReceived -= ObserveContact;
+            }
+            Assert.IsEmpty(
+                railContacts,
+                "Unscripted pedestrian/rail contact: " + string.Join("; ", railContacts)
+            );
         }
 
         [UnityTest, Timeout(300000)]
@@ -1031,6 +1052,89 @@ namespace CoDriver.Tests
             return OrdinaryTrafficRemainsLive(
                 MapDefinition.Load("davis-downtown"),
                 "davis-clearance"
+            );
+        }
+
+        [UnityTest, Timeout(120000)]
+        public IEnumerator PedestrianWaitsForApproachingStreetcarBeforeCrossing()
+        {
+            return RailPedestrianCourse(-2.5f, -20, true);
+        }
+
+        [UnityTest, Timeout(120000)]
+        public IEnumerator PedestrianAlreadyOnTrackContinuesToSafety()
+        {
+            return RailPedestrianCourse(0, -24, false);
+        }
+
+        IEnumerator RailPedestrianCourse(float startZ, float trainX, bool shouldWait)
+        {
+            Art.Initialize();
+            var town = Own("Rail pedestrian conflict course").AddComponent<Town>();
+            town.Map = MapDefinition.Cedar();
+            var ground = Own("Rail crossing physical surface");
+            ground.transform.position = Vector3.down * .5f;
+            ground.AddComponent<BoxCollider>().size = new Vector3(160, 1, 40);
+            ground.layer = TrafficClearance.RoadLayer;
+            var tram = Own("Streetcar").AddComponent<RailVehicle>();
+            tram.transform.SetParent(town.transform);
+            tram.Initialize(town, true);
+            town.Tram = tram;
+            tram.enabled = false;
+            tram.Path = new TrackPath(
+                new[] { new Vector3(-70, 0, 0), new Vector3(70, 0, 0) },
+                false
+            );
+            var drive = tram.GetComponent<RailDynamics>();
+            drive.Path = tram.Path;
+            tram.PlaceForScenario(new Vector3(trainX, 0, 0));
+            drive.Body.linearVelocity = Vector3.right * 7;
+            drive.TargetSpeed = 7;
+
+            var actor = Own("Rail crossing pedestrian");
+            actor.transform.SetParent(town.transform);
+            actor.transform.position = new Vector3(0, .05f, startZ);
+            actor.layer = TrafficClearance.WalkerLayer;
+            var shape = actor.AddComponent<CapsuleCollider>();
+            shape.height = 1.8f;
+            shape.radius = .24f;
+            shape.center = Vector3.up * .9f;
+            var body = actor.AddComponent<Rigidbody>();
+            var locomotion = actor.AddComponent<ActorLocomotion>();
+            locomotion.Initialize("Person");
+            locomotion.enabled = false;
+            float began = Time.time;
+            bool waitedOutside = false;
+            while (Time.time - began < 16 && body.position.z < 3.5f)
+            {
+                locomotion.StepVelocity(Vector3.forward * 1.25f, .01f);
+                yield return new WaitForFixedUpdate();
+                if (Time.time - began > .5f && body.position.z < -1.8f && locomotion.Speed < .1f)
+                    waitedOutside = true;
+            }
+            Assert.AreEqual(shouldWait, waitedOutside);
+            Assert.AreEqual(
+                0,
+                locomotion.ImpactSpeed,
+                "The person must wait before entering the moving rail envelope."
+            );
+            Assert.Greater(
+                body.position.z,
+                3.5f,
+                "The person must continue after the streetcar passes."
+            );
+            Assert.Less(
+                Mathf.Abs(body.position.x),
+                .4f,
+                "Crossing must not depend on being pushed along the track."
+            );
+            Assert.Greater(
+                drive.Body.linearVelocity.x,
+                6.5f,
+                "The walker cannot stop or displace the streetcar to pass this check."
+            );
+            Debug.Log(
+                $"CODRIVER_RAIL_WALK start_z={startZ:F2} waited={waitedOutside} seconds={Time.time - began:F2} impacts={locomotion.ImpactSpeed:F2}"
             );
         }
 
