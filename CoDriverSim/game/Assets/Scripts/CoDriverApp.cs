@@ -36,6 +36,7 @@ namespace CoDriver
                 Time.realtimeSinceStartupAsDouble
             );
         public int ObserverGeneration => services?.Generation ?? 0;
+        public int CameraTransportDropped => services?.TransportDropped ?? 0;
         public string ObserverTransportStatus => services?.Link?.Status ?? ServiceStatus;
         readonly ServiceMeasurements serviceMeasurements = new ServiceMeasurements();
         public Action<bool> CommaRequest;
@@ -1368,6 +1369,7 @@ namespace CoDriver
                 p99_ms = sorted[(int)(sorted.Length * .99)],
                 camera_frames = Sensors.Captures,
                 camera_drops = Sensors.Dropped,
+                camera_transport_drops = CameraTransportDropped,
                 sensor_to_warning_p95_ms =
                     latencies.Length > 0 ? latencies[(int)(latencies.Length * .95)] : -1,
                 warning_samples = latencies.Length,
@@ -1494,7 +1496,8 @@ namespace CoDriver
                 p99_ms;
             public int frames,
                 camera_frames,
-                camera_drops;
+                camera_drops,
+                camera_transport_drops;
             public int observer_updates;
             public string driver_mode;
             public float moving_seconds;

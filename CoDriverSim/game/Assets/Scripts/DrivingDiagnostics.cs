@@ -85,6 +85,7 @@ namespace CoDriver
                 observer_received_frames = app.Observation?.received_frames ?? 0,
                 observer_processed_frames = app.Observation?.processed_frames ?? 0,
                 camera_reordered_drops = app.Sensors.ReorderedDropped,
+                camera_transport_drops = app.CameraTransportDropped,
                 map = app.Town.Map.id,
                 comma_acceleration = app.Command?.acceleration_mps2 ?? 0,
                 comma_status = app.CommandFresh
@@ -182,7 +183,8 @@ namespace CoDriver
             public int observer_generation,
                 observer_received_frames,
                 observer_processed_frames,
-                camera_reordered_drops;
+                camera_reordered_drops,
+                camera_transport_drops;
             public string observer_transport;
         }
     }

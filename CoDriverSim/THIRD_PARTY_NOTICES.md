@@ -215,3 +215,9 @@ retains its own EPL-2.0/GPL-2.0-or-later notices in the external tool cache.
   two mesh detail levels, URP materials and separately licensed Quaternius UAL
   animation retargeting. Shirt surfaces use the attributed ambientCG Fabric034
   texture with authored colors. No MPFB executable or source is required at runtime.
+
+- **Python MSS 10.2.0 — Mickaël Schoentgen**, MIT:
+  https://pypi.org/project/mss/10.2.0/ ;
+  https://github.com/BoboTiG/python-mss . Optional Windows visual-review tooling,
+  pinned separately in `requirements-capture-lock.txt`; not bundled into the game
+  observer runtime. The installed wheel retains its upstream license text.

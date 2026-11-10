@@ -608,3 +608,59 @@ stops on focus loss, and records distinct frame counts and completion/error stat
 The Diagnostics page also now hides stale rate/latency values and labels valid
 rates as session averages. The brief queued local attempt was stopped to rebuild
 these presentation corrections before another long run.
+
+
+### Sustained service recovery follow-up
+
+Packages `Realism-local-20261110-144828` and `Realism-public-20261110-145311`
+share code `8edc9a95f94fd53c6d1bca16218e49b2027d757160d92deabfc64ae7c637be97`.
+Both passed integrity and isolated CLI checks. All four CoDriverSim Python CI jobs
+passed for `83b60a9`. Public session `2e78836886e04b0db50ef02e37781873` passed
+the owned-observer fault/restart check; verified foreground captures show stale
+rates becoming unavailable, restored service status, and the return to driving.
+Its deliberate outage is excluded from performance qualification.
+
+Local session `765cfb71a0d648c7b3dd5c3d70b7e887` completed **1,876.53 seconds**
+of advancing Davis simulation and **10,039.63 metres**, with no controller input,
+pauses, service restart or recorded player contact. It measured **32.37 FPS**,
+p95/p99 frame time **56.84/77.49 ms**, whole-session camera delivery **19.17 Hz**,
+and detection **6.33 Hz**. Warning latency p95 was **422.56 ms** across 978 samples.
+Fresh observer/model/healthy-command coverage was **99.91% / 99.07% / 99.14%**.
+The earlier observer shutdown did not recur, but its original cause remains unknown.
+
+No sampled traffic/rail overlap or two-minute vehicle wait was found. The longest
+bus wait was **115.32 seconds** and cleared; the longest ordinary wait was **79.06
+seconds**. Five complete parking visits, six bus stops, 49 train stops and complete
+emergency phases were observed. Pedestrians at the busy shop crossing sometimes
+congested and later cleared; this run does not establish polished animation or the
+required nearby population at every test hotspot. The actual midpoint screenshot
+shows readable local instruments, mirrors and the clipped mounted Comma display;
+facade repetition remains visible. Stock Comma supplied live model/control data,
+while the explicitly labelled qualification harness drove the car. This is not a
+Comma autonomous-driving result.
+
+**The camera-rate gate failed** (19.5 Hz is the recorded near-20 tolerance), so
+this is not complete performance qualification. There were 36,831 captured/submitted
+frames versus 36,041 received, and no GPU queue-capacity drops. The follow-up
+replaces the single pending transport slot with at most two waiting frames,
+discarding frames queued longer than 100 ms and waking the worker on submission.
+This is intended to absorb GPU completion bursts without obsolete-frame buildup.
+It adds separate transport-drop measurements and burst/expiry/ownership tests;
+its measured benefit remains to be verified in new packages. No threshold is relaxed.
+
+
+The delivery follow-up passes **29/29 focused Unity checks** in
+`outputs/unity/realism-camera-delivery.xml`, including a real socket response held
+while two further frames arrive, bounded overload, age expiry and buffer cleanup.
+Its local/public packages are being rebuilt; the rate improvement is unmeasured.
+
+Two complete 220-second activity-view recordings are retained as
+`activity-davis-status.mp4` and `activity-cedar-status.mp4`, with identity/timestamp
+sidecars and H.264 browser copies. The game camera changes activity targets; the AI
+still receives the vehicle camera. Foreground desktop capture sampled only
+**3.41 / 3.39 Hz**, despite 15 FPS encoding, so repeated frames preserve wall time
+and limit animation assessment. The optional pinned MSS 10.2.0 backend is being
+compared; its first short probe competed with the Cedar recorder and is not a
+clean speed comparison. The review page now explicitly labels actual sampling.
+Frames show the remaining primitive construction machine and repeated facades;
+these are unresolved visual defects, not first-release acceptance.

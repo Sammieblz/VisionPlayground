@@ -151,9 +151,8 @@ namespace CoDriver
         public int Port;
         public Action<byte[], CameraHeader> Encoded;
         public Action<string> Failure;
-        readonly object sync = new object();
-        CameraFrameBuffer pendingImage;
-        string pendingHeader;
+        readonly CameraDeliveryQueue delivery = new CameraDeliveryQueue();
+        public int Dropped => delivery.Dropped;
         volatile bool stop;
         TcpClient client;
         Task task;
@@ -174,18 +173,10 @@ namespace CoDriver
         // Transfers ownership, including when a stopped link discards the frame.
         public void Submit(CameraFrameBuffer image, string header)
         {
-            lock (sync)
-            {
-                if (stop)
-                {
-                    image.Dispose();
-                    return;
-                }
-                pendingImage?.Dispose();
-                pendingImage = image;
-                pendingHeader = header;
-            }
+            delivery.Submit(image, header, Clock());
         }
+
+        static double Clock() => Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency;
 
         void Run()
         {
@@ -200,22 +191,16 @@ namespace CoDriver
                 using (var stream = client.GetStream())
                     while (!stop)
                     {
-                        CameraFrameBuffer image;
-                        string header;
-                        lock (sync)
+                        var packet = delivery.Take(Clock());
+                        if (packet == null)
                         {
-                            image = pendingImage;
-                            header = pendingHeader;
-                            pendingImage = null;
-                            pendingHeader = null;
-                        }
-                        if (image == null)
-                        {
-                            Thread.Sleep(5);
+                            delivery.WaitForFrame();
                             continue;
                         }
-                        using (image)
+                        string header = packet.Header;
+                        using (packet)
                         {
+                            var image = packet.Image;
                             byte[] json = Encoding.UTF8.GetBytes(header);
                             stream.Write(BitConverter.GetBytes(json.Length), 0, 4);
                             stream.Write(BitConverter.GetBytes(image.Length), 0, 4);
@@ -247,13 +232,8 @@ namespace CoDriver
             }
             finally
             {
-                lock (sync)
-                {
-                    stop = true;
-                    pendingImage?.Dispose();
-                    pendingImage = null;
-                    pendingHeader = null;
-                }
+                stop = true;
+                delivery.Dispose();
                 client?.Close();
             }
         }
@@ -274,13 +254,8 @@ namespace CoDriver
 
         public void Dispose()
         {
-            lock (sync)
-            {
-                stop = true;
-                pendingImage?.Dispose();
-                pendingImage = null;
-                pendingHeader = null;
-            }
+            stop = true;
+            delivery.Dispose();
             client?.Close();
         }
     }
@@ -515,6 +490,8 @@ namespace CoDriver
             Token = Guid.NewGuid().ToString("N"),
             ReadyFile;
         public int Generation { get; private set; }
+        int completedTransportDrops;
+        public int TransportDropped => completedTransportDrops + (Link?.Dropped ?? 0);
         public string DiagnosticLog { get; private set; }
         string lastOutput = "";
         readonly object logLock = new object();
@@ -698,6 +675,7 @@ namespace CoDriver
         void DisposeProcess()
         {
             Link?.Dispose();
+            completedTransportDrops += Link?.Dropped ?? 0;
             Link = null;
             if (process != null)
             {

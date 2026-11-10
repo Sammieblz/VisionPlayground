@@ -5,6 +5,7 @@ import ctypes
 import hashlib
 import json
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 import cv2
@@ -39,7 +40,7 @@ def focus_game(user32, window):
         raise RuntimeError("The owned game must have focus before capture")
 
 
-def capture_client(user32, window):
+def capture_client(user32, window, grabber=None):
     # PrintWindow/window= can return a stale D3D surface. Read only the visible,
     # verified foreground client; refuse focus changes rather than film another app.
     if user32.GetForegroundWindow() != window:
@@ -47,10 +48,12 @@ def capture_client(user32, window):
     rect, origin = Rect(), Point()
     user32.GetClientRect(ctypes.c_void_p(window), ctypes.byref(rect))
     user32.ClientToScreen(ctypes.c_void_p(window), ctypes.byref(origin))
-    image = ImageGrab.grab(
-        bbox=(origin.x, origin.y, origin.x + rect.right, origin.y + rect.bottom),
-        all_screens=True,
-    )
+    bounds = (origin.x, origin.y, origin.x + rect.right, origin.y + rect.bottom)
+    if grabber is None:
+        image = np.asarray(ImageGrab.grab(bbox=bounds, all_screens=True))
+    else:
+        # MSS copies this region directly, avoiding a full multi-monitor bitmap.
+        image = cv2.cvtColor(np.asarray(grabber.grab(bounds)), cv2.COLOR_BGRA2RGB)
     if user32.GetForegroundWindow() != window:
         raise RuntimeError("Focus changed during capture; frame discarded")
     return np.asarray(image)
@@ -83,6 +86,7 @@ def main():
     parser.add_argument("--pid", type=int, required=True)
     parser.add_argument("--seconds", type=float, default=60)
     parser.add_argument("--fps", type=int, default=15)
+    parser.add_argument("--backend", choices=("mss", "pillow"), default="mss")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if not 1 <= args.seconds <= 600 or not 1 <= args.fps <= 30:
@@ -111,8 +115,21 @@ def main():
     if len(active_sessions) != 1:
         raise ValueError("Expected one live diagnostic session before recording")
     session = active_sessions[0].parent.name
+    if args.backend == "mss":
+        try:
+            from mss import MSS
+        except ImportError as exc:
+            raise RuntimeError("Install requirements-capture-lock.txt for region capture") from exc
+        capture_context = MSS()
+    else:
+        capture_context = nullcontext(None)
+    with capture_context as grabber:
+        record(args, output, user32, window, owner, installation, identity, session, grabber)
+
+
+def record(args, output, user32, window, owner, installation, identity, session, grabber):
     focus_game(user32, window)
-    first = capture_client(user32, window)
+    first = capture_client(user32, window, grabber)
     height, width = first.shape[:2]
     writer = cv2.VideoWriter(
         str(output), cv2.VideoWriter_fourcc(*"mp4v"), args.fps, (width, height)
@@ -129,7 +146,7 @@ def main():
             user32.GetWindowThreadProcessId(ctypes.c_void_p(window), ctypes.byref(owner))
             if not user32.IsWindow(ctypes.c_void_p(window)) or owner.value != args.pid:
                 break
-            image = capture_client(user32, window)
+            image = capture_client(user32, window, grabber)
             if image.shape != first.shape:
                 raise RuntimeError("Window size changed during capture")
             now = time.monotonic() - start
@@ -158,6 +175,9 @@ def main():
             encoded_frames=frames,
             capture_times=samples,
             capture_method="verified_foreground_client_pixels",
+            capture_backend=args.backend,
+            effective_capture_hz=len(samples) / (time.monotonic() - start),
+            duplicated_encoded_frames=frames - len(samples),
             distinct_captured_frames=len(distinct_frames),
             seconds=time.monotonic() - start,
             requested_seconds=args.seconds,

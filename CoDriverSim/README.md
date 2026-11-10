@@ -81,6 +81,14 @@ CLI recording/video replay uses the same observer:
 Uncalibrated footage retains unknown range estimates. Camera replay currently reruns NanoDet
 and sign/light processing; it does not rerun the separate WSL openpilot model.
 
+Optional Windows visual-review capture uses `scripts/record-game-window.py` with
+an explicit game PID. Install `requirements-capture-lock.txt` into the development
+environment first. Its pinned MSS backend reads the verified foreground client
+region; `--backend pillow` retains the slower compatibility path. Capture stops on
+focus loss and records actual sampling times, distinct frames and completion status.
+The encoded video frame rate is not the game's frame rate. Keep capture separate
+from performance runs. These tools are not required by the packaged observer.
+
 For Comma's own driving stack and interface, see the separate
 [upstream Comma simulator experiment](docs/COMMA_SIM.md). Official openpilot v0.9.7 runs with
 ONNX CPU inference in WSL on the target machine and passed its 60-second simulator driving test.

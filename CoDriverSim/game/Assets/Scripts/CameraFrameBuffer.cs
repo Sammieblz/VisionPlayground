@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace CoDriver
 {
-    // One owner at a time: readback -> latest-frame slot -> socket writer.
+    // One owner at a time: readback -> bounded delivery queue -> socket writer.
     // Pool capacity is bounded; the wire always uses Length, not rented capacity.
     public sealed class CameraFrameBuffer : IDisposable
     {

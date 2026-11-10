@@ -146,11 +146,14 @@ def main():
         metadata_uri = html.escape(
             destination.with_suffix(".json").relative_to(folder).as_posix(), quote=True
         )
+        sample_hz = len(capture.get("capture_times", [])) / max(0.001, capture["seconds"])
         sections.append(
             f"<section><h2>{html.escape(label)}</h2>"
             f'<video controls preload="metadata" style="width:100%" src="{uri}"></video>'
             f"<p>{capture['seconds']:.1f} seconds of the owned game window, "
             f"encoded at {capture['encoded_fps']} FPS. "
+            f"Actual screen sampling: {sample_hz:.2f} Hz; duplicated frames preserve duration. "
+            "Low capture rates limit animation assessment. "
             "Capture overhead excludes this session from performance qualification. "
             f'<a href="{metadata_uri}">'
             "Capture metadata</a>.</p></section>"
