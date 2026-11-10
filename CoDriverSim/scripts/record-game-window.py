@@ -2,6 +2,7 @@
 
 import argparse
 import ctypes
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -9,6 +10,50 @@ from pathlib import Path
 import cv2
 import numpy as np
 from PIL import ImageGrab
+
+
+class Rect(ctypes.Structure):
+    _fields_ = [(name, ctypes.c_long) for name in ("left", "top", "right", "bottom")]
+
+
+class Point(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
+
+def focus_game(user32, window):
+    user32.ShowWindow(ctypes.c_void_p(window), 9)
+    user32.SetForegroundWindow(ctypes.c_void_p(window))
+    if user32.GetForegroundWindow() != window:
+        foreground = user32.GetForegroundWindow()
+        thread = user32.GetWindowThreadProcessId(ctypes.c_void_p(foreground), None)
+        own_thread = ctypes.windll.kernel32.GetCurrentThreadId()
+        attached = user32.AttachThreadInput(own_thread, thread, True)
+        try:
+            user32.BringWindowToTop(ctypes.c_void_p(window))
+            user32.SetForegroundWindow(ctypes.c_void_p(window))
+        finally:
+            if attached:
+                user32.AttachThreadInput(own_thread, thread, False)
+    time.sleep(0.2)
+    if user32.GetForegroundWindow() != window:
+        raise RuntimeError("The owned game must have focus before capture")
+
+
+def capture_client(user32, window):
+    # PrintWindow/window= can return a stale D3D surface. Read only the visible,
+    # verified foreground client; refuse focus changes rather than film another app.
+    if user32.GetForegroundWindow() != window:
+        raise RuntimeError("Game lost focus; capture stopped")
+    rect, origin = Rect(), Point()
+    user32.GetClientRect(ctypes.c_void_p(window), ctypes.byref(rect))
+    user32.ClientToScreen(ctypes.c_void_p(window), ctypes.byref(origin))
+    image = ImageGrab.grab(
+        bbox=(origin.x, origin.y, origin.x + rect.right, origin.y + rect.bottom),
+        all_screens=True,
+    )
+    if user32.GetForegroundWindow() != window:
+        raise RuntimeError("Focus changed during capture; frame discarded")
+    return np.asarray(image)
 
 
 def process_installation(pid):
@@ -49,6 +94,7 @@ def main():
     user32 = ctypes.windll.user32
     user32.SetProcessDPIAware()
     user32.FindWindowW.restype = ctypes.c_void_p
+    user32.GetForegroundWindow.restype = ctypes.c_void_p
     window = user32.FindWindowW(None, "CoDriverSim")
     owner = ctypes.c_ulong()
     user32.GetWindowThreadProcessId(ctypes.c_void_p(window), ctypes.byref(owner))
@@ -65,7 +111,8 @@ def main():
     if len(active_sessions) != 1:
         raise ValueError("Expected one live diagnostic session before recording")
     session = active_sessions[0].parent.name
-    first = np.asarray(ImageGrab.grab(window=int(window)))
+    focus_game(user32, window)
+    first = capture_client(user32, window)
     height, width = first.shape[:2]
     writer = cv2.VideoWriter(
         str(output), cv2.VideoWriter_fourcc(*"mp4v"), args.fps, (width, height)
@@ -74,16 +121,19 @@ def main():
         raise RuntimeError("Cannot open video storage")
     start = time.monotonic()
     samples = []
+    distinct_frames = set()
     frames = 0
+    failure = None
     try:
         while time.monotonic() - start < args.seconds:
             user32.GetWindowThreadProcessId(ctypes.c_void_p(window), ctypes.byref(owner))
             if not user32.IsWindow(ctypes.c_void_p(window)) or owner.value != args.pid:
                 break
-            image = np.asarray(ImageGrab.grab(window=int(window)))
+            image = capture_client(user32, window)
             if image.shape != first.shape:
                 raise RuntimeError("Window size changed during capture")
             now = time.monotonic() - start
+            distinct_frames.add(hashlib.sha256(image.tobytes()).hexdigest())
             frame = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             # Preserve wall-clock playback duration if screen capture falls behind.
             target = int(now * args.fps) + 1
@@ -92,6 +142,9 @@ def main():
                 frames += 1
             samples.append(now)
             time.sleep(max(0, frames / args.fps - (time.monotonic() - start)))
+    except Exception as exc:
+        failure = str(exc)
+        raise
     finally:
         writer.release()
         report = dict(
@@ -104,7 +157,12 @@ def main():
             encoded_fps=args.fps,
             encoded_frames=frames,
             capture_times=samples,
+            capture_method="verified_foreground_client_pixels",
+            distinct_captured_frames=len(distinct_frames),
             seconds=time.monotonic() - start,
+            requested_seconds=args.seconds,
+            completed=failure is None and time.monotonic() - start >= args.seconds,
+            capture_error=failure,
             scope=(
                 "Owned game-window visual evidence; capture overhead excludes this "
                 "from performance qualification"

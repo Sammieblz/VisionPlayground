@@ -608,7 +608,11 @@ namespace CoDriver
             lock (logLock)
             {
                 if (generation == Generation)
-                    lastOutput = message;
+                {
+                    lastOutput = message.Split('\n')[0].Trim();
+                    if (lastOutput.Length > 180)
+                        lastOutput = lastOutput.Substring(0, 180) + "…";
+                }
                 try
                 {
                     File.AppendAllText(

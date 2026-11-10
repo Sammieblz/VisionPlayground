@@ -64,6 +64,10 @@ namespace CoDriver
         public string ServiceStatus => services?.Status ?? "Starting";
         public string CommaStatus => comma?.Status ?? "Starting";
         public ObserverResult Observation => services?.Link?.Result;
+        public float CameraDeliveryHz =>
+            serviceMeasurements.CameraHz(Time.realtimeSinceStartupAsDouble);
+        public float GeneralDetectionHz =>
+            serviceMeasurements.DetectionHz(Time.realtimeSinceStartupAsDouble);
         public float FramesPerSecond => fps;
         public bool FullMapOpen;
         GameInterface interfaceView;

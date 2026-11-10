@@ -233,8 +233,19 @@ namespace CoDriver
                     + "    ·    "
                     + (Gamepad.current != null ? "Xbox connected" : "Keyboard controls");
             if (diagnostics)
+            {
+                string cameraMetrics = app.ObserverFresh
+                    ? $"CAMERA (session)     {app.CameraDeliveryHz:F1} Hz\nDETECTION (session) {app.GeneralDetectionHz:F1} Hz\nLATENCY                     {app.Observation.latency_ms:F0} ms"
+                    : "CAMERA          No fresh frames\nDETECTION     Unavailable\nLATENCY          Unavailable";
+                string observerState = app.ObserverFresh
+                    ? app.ServiceStatus
+                    : "No fresh camera result\n" + app.ServiceStatus;
+                string commaState = app.CommandFresh
+                    ? app.CommaStatus
+                    : "No fresh control messages\n" + app.CommaStatus;
                 diagnostics.text =
-                    $"RENDERING     {app.FramesPerSecond:F1} FPS\nCAMERA          {app.Observation?.camera_hz:F1} Hz\nDETECTION     {app.Observation?.detection_hz:F1} Hz\nLATENCY          {app.Observation?.latency_ms:F0} ms\n\nOBSERVER\n{app.ServiceStatus}\n\nCOMMA\n{app.CommaStatus}\n\nCONTROL AUTHORITY\n{app.Arbiter.Reason}\n\n{app.ScenarioSummary}";
+                    $"RENDERING     {app.FramesPerSecond:F1} FPS\n{cameraMetrics}\n\nOBSERVER\n{observerState}\n\nCOMMA\n{commaState}\n\nCONTROL AUTHORITY\n{app.Arbiter.Reason}\n\n{app.ScenarioSummary}";
+            }
             if (app.Page == "Map" && fullMap)
             {
                 Vector2 move = Gamepad.current?.leftStick.ReadValue() ?? Vector2.zero;

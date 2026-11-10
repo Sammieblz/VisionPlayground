@@ -588,3 +588,23 @@ exit evidence and stale-health reporting. The focused Unity measurement, buffer
 and control suite passes **26/26** (`realism-service-measurements.xml`). The user
 has finished testing the untimed game; rebuilt local/public applications and
 renewed sustained/recovery checks are next. No root-cause or release pass is claimed.
+
+The follow-up packages are `Realism-local-20261110-142937` and
+`Realism-public-20261110-143601`, code
+`6e6510600df26eb9fb14c0b2b442c33b578cc68eb5eba32fd3fff481e9dc6400`.
+Both passed integrity/isolated CLI checks, and all four Python CI jobs passed for
+`c65bc83`. In public session `be5f611926ab4f45918ea363bb0374d3`, the fault probe
+terminated only the verified game-owned observer. Recorded observer/command health
+became false; the Diagnostics restart buttons restored observer generation 2 and
+fresh model output. The recovered stream remained live through application time
+165 seconds. This intentional-outage check is not a performance qualification.
+
+Its visual review exposed a separate capture defect: Windows `PrintWindow`/Pillow
+`window=` could return an old D3D surface after the game's state changed. Those
+screenshots and the older window-method video remain preserved but are excluded
+from current visual/motion acceptance. Internal Unity screenshots are unaffected.
+Capture now verifies the foreground owner and reads the visible client rectangle,
+stops on focus loss, and records distinct frame counts and completion/error state.
+The Diagnostics page also now hides stale rate/latency values and labels valid
+rates as session averages. The brief queued local attempt was stopped to rebuild
+these presentation corrections before another long run.
