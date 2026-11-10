@@ -87,6 +87,48 @@ namespace CoDriver
             return float.PositiveInfinity;
         }
 
+        // When a turning vehicle is almost stopped, a straight nose cast can
+        // point into the opposing queue even though the steered body clears it.
+        // Check the actual pose along a short bicycle arc before permitting a
+        // walking-speed continuation. Never move or rotate the physical body here.
+        public static float TurningCreepLimit(BoxCollider body, float wheelbase, float roadAngle)
+        {
+            LastBlocker = "";
+            Quaternion rotation = body.transform.rotation;
+            Vector3 axle = body.transform.position - body.transform.forward * wheelbase * .5f;
+            float curvature = Mathf.Tan(roadAngle * Mathf.Deg2Rad) / wheelbase;
+            const float step = .1f;
+            for (float ahead = 0; ahead <= 3; ahead += step)
+            {
+                if (ahead > 0)
+                {
+                    Quaternion half = Quaternion.AngleAxis(
+                        curvature * step * Mathf.Rad2Deg * .5f,
+                        Vector3.up
+                    );
+                    axle += half * rotation * Vector3.forward * step;
+                    rotation = half * half * rotation;
+                }
+                Vector3 centre =
+                    axle + rotation * (body.center + Vector3.forward * wheelbase * .5f);
+                int count = Physics.OverlapBoxNonAlloc(
+                    centre,
+                    body.size * .5f + new Vector3(.08f, 0, .1f),
+                    nearby,
+                    rotation,
+                    ~(1 << RoadLayer),
+                    QueryTriggerInteraction.Ignore
+                );
+                for (int i = 0; i < count; i++)
+                    if (nearby[i] != body && !nearby[i].transform.IsChildOf(body.transform))
+                    {
+                        LastBlocker = nearby[i].name;
+                        return Mathf.Min(1, Mathf.Max(0, ahead - .4f) / 1.7f);
+                    }
+            }
+            return 1;
+        }
+
         public static bool ClearExit(
             TrackPath route,
             float distance,

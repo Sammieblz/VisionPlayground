@@ -154,8 +154,16 @@ namespace CoDriver
                 }
                 target = Mathf.Min(
                     target,
-                    TrafficClearance.SafeSpeed(route, progress, 0, vehicle.Speed, body),
-                    TrafficClearance.ForwardSpeedLimit(body, vehicle.Speed, immediate: true)
+                    TrafficClearance.SafeSpeed(
+                        route,
+                        progress,
+                        0,
+                        vehicle.Speed,
+                        body,
+                        staticObstacles: true
+                    ),
+                    TrafficClearance.ForwardSpeedLimit(body, vehicle.Speed, immediate: true),
+                    town.RailSpeedLimit(body)
                 );
                 vehicle.ApplyDesiredAcceleration(
                     Mathf.Clamp((target - vehicle.Speed) * 1.2f, -4, 1.5f)
@@ -193,7 +201,8 @@ namespace CoDriver
                 target = Mathf.Min(target, Mathf.Sqrt(Mathf.Max(0, ahead - 16) * 3));
             target = Mathf.Min(
                 target,
-                TrafficClearance.SafeSpeed(route, progress, 0, vehicle.Speed, body)
+                TrafficClearance.SafeSpeed(route, progress, 0, vehicle.Speed, body),
+                town.RailSpeedLimit(body)
             );
             float crossingAhead =
                 (110 - vehicle.transform.position.z) * Mathf.Sign(vehicle.transform.forward.z);

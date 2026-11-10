@@ -58,13 +58,18 @@ namespace CoDriver
                 vehicle_speeds = town.Traffic.Select(t => t.Speed).ToArray(),
                 signed_vehicle_speeds = town.Traffic.Select(t => t.SignedSpeed).ToArray(),
                 reverse_requested = town.Traffic.Select(t => t.ReverseRequested).ToArray(),
-                nearby_people = town.Walkers.Count(w => !w.IsAnimal
-                    && (w.transform.position - app.Vehicle.transform.position).sqrMagnitude <= 40000),
-                nearby_moving_vehicles = town.Traffic.Count(t => t.Speed > .5f
-                    && (t.transform.position - app.Vehicle.transform.position).sqrMagnitude <= 40000),
+                nearby_people = town.Walkers.Count(w =>
+                    !w.IsAnimal
+                    && (w.transform.position - app.Vehicle.transform.position).sqrMagnitude <= 40000
+                ),
+                nearby_moving_vehicles = town.Traffic.Count(t =>
+                    t.Speed > .5f
+                    && (t.transform.position - app.Vehicle.transform.position).sqrMagnitude <= 40000
+                ),
                 requested_speeds = town.Traffic.Select(t => t.RequestedSpeed).ToArray(),
                 path_errors = town.Traffic.Select(t => t.PathError).ToArray(),
                 contacts = town.Traffic.Select(t => t.Contact).ToArray(),
+                clearances = town.Traffic.Select(t => t.Clearance).ToArray(),
                 grounded = town.Traffic.Select(t => t.Grounded).ToArray(),
                 actor_positions = town.Walkers.Select(w => w.transform.position).ToArray(),
                 traffic_overlaps = TrafficOverlaps(town),
@@ -132,7 +137,8 @@ namespace CoDriver
         {
             public float[] requested_speeds,
                 path_errors;
-            public string[] contacts;
+            public string[] contacts,
+                clearances;
             public int[] grounded;
             public Vector3 train_position,
                 tram_position;
@@ -161,7 +167,8 @@ namespace CoDriver
             public float[] vehicle_speeds;
             public float[] signed_vehicle_speeds;
             public bool[] reverse_requested;
-            public int nearby_people, nearby_moving_vehicles;
+            public int nearby_people,
+                nearby_moving_vehicles;
             public string[] traffic_overlaps;
             public string[] junction_reservations;
         }

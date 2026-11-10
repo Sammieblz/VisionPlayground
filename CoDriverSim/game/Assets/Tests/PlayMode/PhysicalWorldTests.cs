@@ -466,6 +466,125 @@ namespace CoDriver.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator DavisTruckClearsRecordedBusDeadlockUsingPhysicalSteering()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis turn").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var truck = town.Traffic[0];
+            var bus = town.Bus;
+            foreach (var actor in town.Traffic)
+                if (actor != truck && actor != bus)
+                    actor.gameObject.SetActive(false);
+            foreach (var walker in town.Walkers)
+                walker.gameObject.SetActive(false);
+            bus.ScenarioSpeed = 0;
+            PlaceFixture(
+                truck,
+                new Vector3(80.53678f, .119454f, -357.92062f),
+                new Vector3(-.777291f, -.007504f, .629097f)
+            );
+            PlaceFixture(
+                bus,
+                new Vector3(75.76129f, -.053773f, -354.50024f),
+                new Vector3(.220793f, 0, -.975321f)
+            );
+            Vector3 start = truck.transform.position;
+            float begin = Time.time;
+            var a = truck.GetComponent<BoxCollider>();
+            var b = bus.GetComponent<BoxCollider>();
+            while (Time.time - begin < 60 && Vector3.Distance(start, truck.transform.position) < 15)
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.IsFalse(
+                    Physics.ComputePenetration(
+                        a,
+                        truck.transform.position,
+                        truck.transform.rotation,
+                        b,
+                        bus.transform.position,
+                        bus.transform.rotation,
+                        out _,
+                        out _
+                    ),
+                    "The turning truck must clear the stopped bus physically"
+                );
+            }
+            Debug.Log(
+                $"CODRIVER_RECORDED_BUS_CONFLICT moved={Vector3.Distance(start, truck.transform.position):F2} state={truck.State} clearance={truck.Clearance} contact={truck.Contact}"
+            );
+            Assert.Greater(
+                Vector3.Distance(start, truck.transform.position),
+                15,
+                "Truck must finish its turn without pushing or repositioning the bus: "
+                    + truck.Clearance
+            );
+        }
+
+        static void PlaceFixture(TrafficActor actor, Vector3 position, Vector3 forward)
+        {
+            actor.transform.SetPositionAndRotation(position, Quaternion.LookRotation(forward));
+            actor.Body.position = position;
+            actor.Body.rotation = actor.transform.rotation;
+            actor.Body.linearVelocity = actor.Body.angularVelocity = Vector3.zero;
+            actor.Distance = actor.Path.NearestDistance(position);
+            Physics.SyncTransforms();
+        }
+
+        [UnityTest]
+        public IEnumerator RoadVehicleStopsBeforeClosedRailArmAndWaitsForReopening()
+        {
+            Art.Initialize();
+            var town = Own("Rail warning fixture").AddComponent<Town>();
+            town.Map = MapDefinition.Cedar();
+            var surface = Own("Rail test pavement").AddComponent<BoxCollider>();
+            surface.gameObject.layer = TrafficClearance.RoadLayer;
+            surface.transform.position = new Vector3(0, -.5f, -20);
+            surface.size = new Vector3(30, 1, 150);
+            var gate = Own("Test physical railway gate").AddComponent<RailGate>();
+            gate.transform.position = new Vector3(5, 0, 0);
+            gate.Initialize(town);
+            var arm = gate.transform.Find("Gate hinge");
+            var vehicle = Own("Rail approach car").AddComponent<Vehicle>();
+            vehicle.transform.position = new Vector3(0, .1f, -55);
+            vehicle.Initialize();
+            vehicle.Handbrake = true;
+            yield return new WaitForSeconds(1);
+            vehicle.Handbrake = false;
+            vehicle.Body.linearVelocity = Vector3.forward * 13.4f;
+            var envelope = vehicle.GetComponent<BoxCollider>();
+            float begin = Time.time;
+            do
+            {
+                // Keep the fixture closed, then exercise the production opening
+                // animation below. No train or hidden truth enters perception.
+                arm.localRotation = Quaternion.identity;
+                float target = Mathf.Min(13.4f, town.RailSpeedLimit(envelope));
+                vehicle.ApplyDesiredAcceleration(
+                    Mathf.Clamp((target - vehicle.Speed) * 1.2f, -4, 2)
+                );
+                yield return new WaitForFixedUpdate();
+            } while (Time.time - begin < 25 && vehicle.Speed > .15f);
+            Assert.Less(vehicle.Speed, .15f, "Car must finish braking before the closed arm");
+            Assert.Less(vehicle.transform.position.z + envelope.size.z * .5f, -1.5f);
+            Assert.AreEqual(0, vehicle.Collisions);
+            begin = Time.time;
+            while (Time.time - begin < 20 && vehicle.transform.position.z < 12)
+            {
+                float target = Mathf.Min(8, town.RailSpeedLimit(envelope));
+                if (gate.MustWait)
+                    Assert.AreEqual(0, target, "Do not drive into a rising arm");
+                vehicle.ApplyDesiredAcceleration(
+                    Mathf.Clamp((target - vehicle.Speed) * 1.2f, -4, 2)
+                );
+                yield return new WaitForFixedUpdate();
+            }
+            Assert.Greater(vehicle.transform.position.z, 12, "Resume once the actual arm clears");
+            Assert.AreEqual(0, vehicle.Collisions);
+        }
+
+        [UnityTest, Timeout(300000)]
         public IEnumerator CedarOrdinaryTrafficDoesNotFormPermanentRoadblocks()
         {
             return OrdinaryTrafficRemainsLive(MapDefinition.Cedar(), "cedar-clearance");

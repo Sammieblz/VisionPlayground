@@ -50,7 +50,7 @@ This uses the Honda comparison vehicle when the local Mercedes prefab is absent.
 The packaging command rejects a Unity build marked `local-prototype`. Both build
 types remain development builds until the combined acceptance checks pass.
 
-## Current repair and qualification (November 10, 2026)
+## Earlier input/bridge repair (November 10, 2026)
 
 The build-16 Xbox Comma attempt failed: all nine X presses reached the app, but
 upstream timing/radar health errors prevented engagement. A rejected request then
@@ -70,7 +70,9 @@ low-speed animal/parking contact, so it is not described as globally collision-f
 The new packaged game accepted three keyboard Comma requests and revoked authority on
 all three brake takeovers. A forced bridge crash cancelled control, removed all 19 owned
 processes in 2.44 s, and recovered healthy controls through the in-game restart button.
-The full 30-minute workload remains pending while the user tests the current application.
+The full 30-minute workload was still pending at this checkpoint. The subsequent
+realism candidate's measured run and remaining traffic failures are recorded in
+[REALISM_REBUILD.md](REALISM_REBUILD.md).
 See [the acceptance checklist](OVERHAUL_ACCEPTANCE.md) for scope and evidence.
 
 ## Physics and Davis overhaul (November 9, 2026)

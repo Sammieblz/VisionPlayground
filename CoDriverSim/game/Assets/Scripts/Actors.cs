@@ -1263,21 +1263,48 @@ namespace CoDriver
                 ScenarioLateral + yieldOffset,
                 PlannerStep * Mathf.Min(1.2f, Speed * .35f)
             );
-            target = Mathf.Min(
-                target,
-                TrafficClearance.ForwardSpeedLimit(
-                    GetComponent<BoxCollider>(),
-                    Speed,
-                    immediate: true
-                ),
-                TrafficClearance.SafeSpeed(
-                    Path,
-                    Distance,
-                    lateral,
-                    Speed,
-                    GetComponent<BoxCollider>()
-                )
+            var envelope = GetComponent<BoxCollider>();
+            float forwardLimit = TrafficClearance.ForwardSpeedLimit(
+                envelope,
+                Speed,
+                immediate: true
             );
+            string forwardBlocker = TrafficClearance.LastBlocker;
+            float pathLimit = TrafficClearance.SafeSpeed(
+                Path,
+                Distance,
+                lateral,
+                Speed,
+                envelope,
+                staticObstacles: true
+            );
+            string pathBlocker = TrafficClearance.LastBlocker;
+            if (
+                Speed < 1.2f
+                && forwardLimit < 1
+                && pathLimit > forwardLimit
+                && Mathf.Abs(driver.Dynamics.LastSteering) > 5
+            )
+            {
+                float creep = TrafficClearance.TurningCreepLimit(
+                    envelope,
+                    driver.Dynamics.Profile.wheelbase,
+                    driver.Dynamics.LastSteering
+                );
+                if (creep > forwardLimit)
+                {
+                    forwardLimit = creep;
+                    forwardBlocker = "Checked turning clearance at walking speed";
+                }
+            }
+            float railLimit = town.RailSpeedLimit(envelope);
+            if (Mathf.Min(forwardLimit, pathLimit, railLimit) < target)
+                Clearance =
+                    railLimit <= Mathf.Min(forwardLimit, pathLimit)
+                        ? "Railway warning or moving gate"
+                    : forwardLimit <= pathLimit ? "Forward: " + forwardBlocker
+                    : "Path: " + pathBlocker;
+            target = Mathf.Min(target, forwardLimit, pathLimit, railLimit);
             RequestedSpeed = target;
             blockedSeconds =
                 target < .1f
@@ -3026,6 +3053,24 @@ namespace CoDriver
 
     public static class RailCrossing
     {
+        // Physical gate geometry, used only by simulated traffic and the explicit
+        // qualification driver. It never reaches the image observer or Comma.
+        public static float GateSpeedLimit(Transform gate, BoxCollider body)
+        {
+            Vector3 local = gate.InverseTransformPoint(body.transform.TransformPoint(body.center));
+            if (
+                Vector3.Dot(gate.forward, body.transform.forward) < .5f
+                || local.z > 0
+                || local.z < -80
+                || Mathf.Abs(local.y - body.center.y) > 2.5f
+                || local.x < -8 - body.size.x * .5f
+                || local.x > body.size.x * .5f
+            )
+                return float.PositiveInfinity;
+            float clearance = Mathf.Max(0, -local.z - body.size.z * .5f - 2);
+            return Mathf.Min(clearance / 1.7f, Mathf.Sqrt(6 * clearance));
+        }
+
         public static bool Active(
             TrackPath path,
             float distance,
@@ -3058,10 +3103,21 @@ namespace CoDriver
         Material redLight;
         public bool ExplicitCrossing;
         public Vector3 CrossingPoint;
+        public bool MustWait =>
+            town
+            && (
+                town.RailClosedAt(
+                    ExplicitCrossing
+                        ? CrossingPoint
+                        : transform.position + transform.rotation * new Vector3(-5, 0, 4)
+                )
+                || Quaternion.Angle(arm.localRotation, Quaternion.Euler(0, 0, -85)) > 5
+            );
 
         public void Initialize(Town t)
         {
             town = t;
+            town.RailGates.Add(this);
             Art.Box(
                 "Gate pedestal",
                 transform,

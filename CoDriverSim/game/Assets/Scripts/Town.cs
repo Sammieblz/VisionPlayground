@@ -11,6 +11,7 @@ namespace CoDriver
         public readonly List<TrafficActor> Traffic = new List<TrafficActor>();
         public readonly List<Walker> Walkers = new List<Walker>();
         public readonly List<Signal> Signals = new List<Signal>();
+        public readonly List<RailGate> RailGates = new List<RailGate>();
         public readonly List<ActivityDoor> Doors = new List<ActivityDoor>();
         public readonly List<NavMeshBuildSource> WalkSurfaces = new List<NavMeshBuildSource>();
         public readonly LaneGraph TrafficGraph = new LaneGraph();
@@ -41,6 +42,15 @@ namespace CoDriver
                     return false;
             }
             return Train && Train.CrossingOccupied(crossing);
+        }
+
+        public float RailSpeedLimit(BoxCollider body)
+        {
+            float limit = float.PositiveInfinity;
+            foreach (var gate in RailGates)
+                if (gate.MustWait)
+                    limit = Mathf.Min(limit, RailCrossing.GateSpeedLimit(gate.transform, body));
+            return limit;
         }
 
         public Transform Player;

@@ -301,19 +301,7 @@ namespace CoDriver
                 controller.Initialize(town, 0);
                 town.Signals.Add(controller);
                 town.MappedJunctions[signal.id] = controller;
-                foreach (var lane in map.lanes.Where(l => l.signal == signal.id && !l.internalLane))
-                {
-                    var p = lane.points[lane.points.Length - 1];
-                    var f = lane.Path.Direction(lane.Path.Length);
-                    var head = new GameObject("Signal for " + lane.id);
-                    head.transform.SetParent(town.transform, false);
-                    head.transform.SetPositionAndRotation(
-                        p + Vector3.Cross(Vector3.up, f) * (lane.width * .5f + .5f),
-                        Quaternion.LookRotation(f)
-                    );
-                    head.AddComponent<MappedSignalHead>()
-                        .Initialize(signal, lane.signalIndex, town);
-                }
+                MappedSignalAssembly.Build(town, signal);
             }
             foreach (var junction in map.junctions)
             {
@@ -678,13 +666,6 @@ namespace CoDriver
             signal = definition;
             index = link;
             town = owner;
-            Art.Box(
-                "Signal pole",
-                transform,
-                new Vector3(0, 2, 0),
-                new Vector3(.12f, 4, .12f),
-                Art.Metal
-            );
             Realism.Spawn("Signal", transform, new Vector3(0, 3.5f, 0), 180);
             for (int i = 0; i < 3; i++)
                 lights[i] = Art.Shape(
