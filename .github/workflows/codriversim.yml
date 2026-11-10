@@ -3,7 +3,6 @@ name: CoDriverSim Python regression
 on:
   workflow_dispatch:
   push:
-    branches: [main]
     paths:
       - 'CoDriverSim/**'
       - '.github/workflows/codriversim.yml'
@@ -14,6 +13,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: codriversim-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   observer-and-cli:
