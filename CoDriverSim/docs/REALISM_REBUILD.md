@@ -530,3 +530,20 @@ a missing explicit CanvasRenderer dependency on the companion in the editor;
 that dependency is now declared. Evidence: `realism-cockpit-clipping.xml`, with
 the earlier renderer-dependency failure retained in `realism-cockpit-clipping-before.xml`.
 The combined long run is still pending this final presentation rebuild.
+
+The clipped-display packages are `Realism-local-20261110-133433` and
+`Realism-public-20261110-133910`, code
+`770bc026817d7a38fcd4ad92d828b75b6379238966f65719db248b49c5dd0345`.
+Both passed integrity and isolated CLI verification. The four-job Python
+matrix passed for `1a64af7`. Public session `7c9f4d1093414123b7460e9c68b61c56`
+completed 200 seconds with zero player contacts, no sampled traffic/rail overlap,
+and no two-minute vehicle wait. Its actual cockpit capture shows readable speed,
+gear and RPM, the mounted Comma display and the animated HUD companion.
+
+That short run measured **27.54 FPS**, p95/p99 **60.35/95.52 ms**, camera
+**18.98 Hz**, detection **6.26 Hz**, and warning latency p95 **352.50 ms** across
+41 samples. It does not pass the performance target. The local sustained run is
+in progress; neither the rendered-pixel clipping test nor a short screenshot
+check substitutes for that result. Public packaging also now includes the
+previously omitted MakeHuman core-asset provenance manifest and a controls guide;
+these packaging-only changes do not alter the measured game binaries.

@@ -151,6 +151,7 @@ def main():
         "world-art-sources.json",
         "fabric-source.json",
         "leather-source.json",
+        "makehuman-core-manifest.json",
     ):
         shutil.copy2(root / "game" / name, notices)
     district = target / "DistrictData"
@@ -208,12 +209,18 @@ def main():
         "CoDriverSim development build - release qualification incomplete\n\n"
         "Run CoDriverSim.exe. The bundled Python runtime starts automatically.\n"
         "Keep this entire folder together in a location you can write to.\n"
+        "Select Play for manual driving; Settings selects Davis or Cedar Grove.\n"
+        "Xbox: RT accelerate, LT brake, left stick steer, B select reverse while stopped,\n"
+        "Y camera, View full map, Menu pause, X request/cancel Comma.\n"
+        "Keyboard: W/A/S/D drive, C camera, Tab map, Esc pause, X Comma.\n"
+        "Braking or deliberate steering takes over from Comma.\n\n"
         "Recordings and session diagnostics are saved under outputs.\n"
         "Stock Comma requires the existing WSL v0.9.7 installation.\n"
         "Set wsl_distribution and openpilot_directory in codriversim-app.json if needed.\n"
         "An empty openpilot_directory uses ~/VisionPlayground-experiments/openpilot-onnx-v0.9.7.\n"
         "Human control is the default. Camera warnings cannot control a real car.\n"
-        "See DEVELOPMENT-STATUS.md for measured checks and remaining work.\n",
+        "See REALISM-STATUS.md and DEVELOPMENT-STATUS.md for measurements and remaining work.\n"
+        "Source, setup and third-party notices: https://github.com/Sammieblz/VisionPlayground\n",
         encoding="utf-8",
     )
     validation = subprocess.run(
