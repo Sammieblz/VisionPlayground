@@ -39,7 +39,7 @@ jobs:
       - name: Install pinned dependencies and build the package
         run: |
           python -m pip install -r CoDriverSim/requirements-lock.txt
-          python -m pip wheel --no-deps --no-build-isolation --wheel-dir CoDriverSim/dist CoDriverSim
+          python -m pip wheel --no-deps --no-build-isolation --wheel-dir CoDriverSim/dist ./CoDriverSim
           python -c "import pathlib, subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-deps', str(next(pathlib.Path('CoDriverSim/dist').glob('*.whl')))])"
       - name: Check Python style
         run: |
