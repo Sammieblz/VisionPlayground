@@ -3067,7 +3067,10 @@ namespace CoDriver
                 || local.x > body.size.x * .5f
             )
                 return float.PositiveInfinity;
-            float clearance = Mathf.Max(0, -local.z - body.size.z * .5f - 2);
+            // Leave response distance for the progressive pedal controller as it
+            // settles from its braking request; the body must remain well clear
+            // of the arm throughout reopening, not merely avoid penetration.
+            float clearance = Mathf.Max(0, -local.z - body.size.z * .5f - 4);
             return Mathf.Min(clearance / 1.7f, Mathf.Sqrt(6 * clearance));
         }
 

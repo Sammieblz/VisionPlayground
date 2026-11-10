@@ -363,3 +363,34 @@ The CoDriverSim wheel/CLI/Python checks passed on Windows and Linux with Python
 3.11 and 3.12 in GitHub Actions. The unrelated pre-existing EyePause workflow is
 outside this change. A public binary release and final visual/controller checks
 are still pending.
+
+### Traffic corrections and physical follow-up
+
+The mapped signal change passed **120/120 editor checks**, including bus-sized
+clearance at every incoming signal lane and the exact 5th Street stopped-car pose.
+World diagnostics now record the planner's actual clearance blocker per vehicle.
+The subsequent populated suite passed **18 of 19 CoDriverSim PlayMode cases**,
+including all ten ambulance seeds, both towns' ordinary traffic, Davis boarding/
+alighting and parking, animal/civilian animation and finite-contact regressions.
+Its one failure was the newly added railway stop fixture: a requested two-metre
+margin left only 0.41 m of physical clearance after progressive braking settled.
+The upstream Input System also ran two passing integration cases and skipped two
+of its own mouse tests; those are not counted as project verification.
+
+After increasing the rail approach allowance, a focused **3/3 PlayMode** follow-up
+passed: Honda and GLS stop/reopen/resume, plus the recorded truck/bus conflict with
+a waiting-bus displacement limit of 0.15 m. At near-stop (0.149 m/s), Honda front
+clearance was **2.39 m** and GLS **1.87 m**, both with zero contacts. Both remained
+clear while the arm rose and then resumed. The truck physically travelled 15.07 m
+through its turn without penetration or pushing the bus aside. The earlier failed
+suite is preserved; it is not rewritten as a full passing run of the later source.
+
+Evidence: `outputs/unity/realism-traffic-editor.xml`,
+`realism-traffic-populated.xml`, `realism-rail-margin.xml`, and
+`outputs/qualification/realism/ambulance-traffic-qualified.json`.
+Local/public packages and a new sustained run are the next gates.
+
+Original project code now carries an MIT license. The Python wheel declares the
+MIT/Apache combination because its adapted MetaDrive shader retains Apache-2.0;
+the wheel and Windows package include the corresponding texts and upstream
+notices. Existing pinned dependency versions are unchanged.

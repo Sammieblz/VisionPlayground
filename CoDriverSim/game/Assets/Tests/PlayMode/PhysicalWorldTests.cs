@@ -491,6 +491,7 @@ namespace CoDriver.Tests
                 new Vector3(.220793f, 0, -.975321f)
             );
             Vector3 start = truck.transform.position;
+            Vector3 busStart = bus.transform.position;
             float begin = Time.time;
             var a = truck.GetComponent<BoxCollider>();
             var b = bus.GetComponent<BoxCollider>();
@@ -509,6 +510,11 @@ namespace CoDriver.Tests
                         out _
                     ),
                     "The turning truck must clear the stopped bus physically"
+                );
+                Assert.Less(
+                    Vector3.ProjectOnPlane(bus.transform.position - busStart, Vector3.up).magnitude,
+                    .15f,
+                    "The turning truck must not push the waiting bus aside"
                 );
             }
             Debug.Log(
@@ -535,6 +541,17 @@ namespace CoDriver.Tests
         [UnityTest]
         public IEnumerator RoadVehicleStopsBeforeClosedRailArmAndWaitsForReopening()
         {
+            return RailApproach(new VehicleProfile());
+        }
+
+        [UnityTest]
+        public IEnumerator GlsStopsBeforeClosedRailArmAndWaitsForReopening()
+        {
+            return RailApproach(VehicleProfile.GlsSimulation());
+        }
+
+        IEnumerator RailApproach(VehicleProfile profile)
+        {
             Art.Initialize();
             var town = Own("Rail warning fixture").AddComponent<Town>();
             town.Map = MapDefinition.Cedar();
@@ -547,6 +564,7 @@ namespace CoDriver.Tests
             gate.Initialize(town);
             var arm = gate.transform.Find("Gate hinge");
             var vehicle = Own("Rail approach car").AddComponent<Vehicle>();
+            vehicle.Profile = profile;
             vehicle.transform.position = new Vector3(0, .1f, -55);
             vehicle.Initialize();
             vehicle.Handbrake = true;
@@ -567,7 +585,13 @@ namespace CoDriver.Tests
                 yield return new WaitForFixedUpdate();
             } while (Time.time - begin < 25 && vehicle.Speed > .15f);
             Assert.Less(vehicle.Speed, .15f, "Car must finish braking before the closed arm");
-            Assert.Less(vehicle.transform.position.z + envelope.size.z * .5f, -1.5f);
+            float front = vehicle
+                .transform.TransformPoint(envelope.center + Vector3.forward * envelope.size.z * .5f)
+                .z;
+            Debug.Log(
+                $"CODRIVER_RAIL_STOP profile={profile.id} clearance={-front:F2} speed={vehicle.Speed:F3} contacts={vehicle.Collisions}"
+            );
+            Assert.Less(front, -1.5f);
             Assert.AreEqual(0, vehicle.Collisions);
             begin = Time.time;
             while (Time.time - begin < 20 && vehicle.transform.position.z < 12)
