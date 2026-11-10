@@ -1,0 +1,50 @@
+{
+  "source": "https://github.com/JustInvoke/Randomation-Vehicle-Physics",
+  "revision": "192ba860c3c92a16363ffe87fb943dc282e62398",
+  "license": "MIT",
+  "author": "Justin Couch",
+  "adapter": "Assets/Scripts/VehicleDynamics.cs",
+  "files": [
+    {
+      "path": "Drivetrain/DriveForce.cs",
+      "sha256": "0c58f4683c44f937f71fc3b158f448d709d9acffd65c596a2d57ac7bf28423fd",
+      "url": "https://raw.githubusercontent.com/JustInvoke/Randomation-Vehicle-Physics/192ba860c3c92a16363ffe87fb943dc282e62398/Assets/Scripts/Drivetrain/DriveForce.cs"
+    },
+    {
+      "path": "Drivetrain/GasMotor.cs",
+      "sha256": "b88637e14245b5e28287673776a9cff656aadce900807f5dd6aa883a89c0982a",
+      "url": "https://raw.githubusercontent.com/JustInvoke/Randomation-Vehicle-Physics/192ba860c3c92a16363ffe87fb943dc282e62398/Assets/Scripts/Drivetrain/GasMotor.cs"
+    },
+    {
+      "path": "Drivetrain/GearboxTransmission.cs",
+      "sha256": "0c452f68f1c8b33f02173a2a518b2625710ffd0da12cc700882a24d8696ea3d8",
+      "url": "https://raw.githubusercontent.com/JustInvoke/Randomation-Vehicle-Physics/192ba860c3c92a16363ffe87fb943dc282e62398/Assets/Scripts/Drivetrain/GearboxTransmission.cs"
+    },
+    {
+      "path": "Drivetrain/Transmission.cs",
+      "sha256": "a08ff49ad70046804e504ed145c79bc302cefa4f8f5b280b9a229f73830a6262",
+      "url": "https://raw.githubusercontent.com/JustInvoke/Randomation-Vehicle-Physics/192ba860c3c92a16363ffe87fb943dc282e62398/Assets/Scripts/Drivetrain/Transmission.cs"
+    },
+    {
+      "path": "Drivetrain/Wheel.cs",
+      "sha256": "1ed6ad01ea7ad88815b4a49a1ac8e59734f8aac3423572b37d6925ffa2c0c9d0",
+      "url": "https://raw.githubusercontent.com/JustInvoke/Randomation-Vehicle-Physics/192ba860c3c92a16363ffe87fb943dc282e62398/Assets/Scripts/Drivetrain/Wheel.cs"
+    },
+    {
+      "path": "Suspension/Suspension.cs",
+      "sha256": "a73eba8cea1cefefb9c73fa48513a3e8ec9bf1b850f1512e731004a9cf38ce12",
+      "url": "https://raw.githubusercontent.com/JustInvoke/Randomation-Vehicle-Physics/192ba860c3c92a16363ffe87fb943dc282e62398/Assets/Scripts/Suspension/Suspension.cs"
+    }
+  ],
+  "modifications": [
+    "Consolidated independent suspension, wheel and drivetrain stepping behind IVehicleDynamics; no upstream scene globals or VehicleParent dependency.",
+    "Converted suspension spring/damping and propulsion/braking to SI forces and torque; finite body mass participates in all responses.",
+    "Finite-radius spherecast tire contact and tire forces use the owning PhysicsScene; equal and opposite forces on movable supporting bodies. The footprint is a simulation approximation for curb/driveway transitions.",
+    "Combined load-bounded tire forces replace acceleration-based slip defaults; ABS and traction limits based on contact load.",
+    "Automatic six-speed road-car gearbox with throttle-dependent downshift and finite shift interruption.",
+    "Added explicit Ackermann steering and anti-roll forces; no boost, burnout, stunt, air steering or rollover assist.",
+    "Simulation calibration only; no claim of measured Honda tire or suspension data.",
+    "Suspension damping uses contact-plane-relative travel speed divided by the suspension-axis projection. Corrected bridge grade response; verified both directions at 8 and 26.82 m/s with no chassis contacts."
+  ],
+  "integration": "Adapted/reimplemented core dynamics calculations, not the unmodified upstream component package."
+}

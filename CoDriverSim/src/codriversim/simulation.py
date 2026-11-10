@@ -7,10 +7,13 @@ from codriversim.adapters import MetaDriveTruthSource
 from codriversim.domain import evaluate
 
 
-def drive(*, seed: int, density: float, steps: int | None, headless: bool) -> dict:
+def drive(
+    *, seed: int, density: float, steps: int | None, headless: bool, scene: str = "city"
+) -> dict:
     try:
-        from metadrive import MetaDriveEnv
         from metadrive.policy.idm_policy import IDMPolicy
+
+        from codriversim.rendering import create_environment
     except ImportError as exc:
         raise RuntimeError(
             'Simulator dependency missing. Install with: python -m pip install ".[sim]"'
@@ -23,7 +26,9 @@ def drive(*, seed: int, density: float, steps: int | None, headless: bool) -> di
         "traffic_mode": "respawn",
         "num_scenarios": 100,
         "start_seed": seed,
-        "map": 3,
+        "map": "XTX" if scene == "city" else 3,
+        "map_region_size": 1024 if scene == "city" else 2048,
+        "height_scale": 1 if scene == "city" else 50,
         "window_size": (960, 540),
         "show_fps": True,
         "on_continuous_line_done": False,
@@ -32,7 +37,7 @@ def drive(*, seed: int, density: float, steps: int | None, headless: bool) -> di
     if headless:
         # Test-harness driver only. The co-driver never sends control commands.
         config["agent_policy"] = IDMPolicy
-    env = MetaDriveEnv(config)
+    env = create_environment(config, city=scene == "city")
     count = 0
     transitions = []
     last_level = None
@@ -60,6 +65,7 @@ def drive(*, seed: int, density: float, steps: int | None, headless: bool) -> di
                         "Co-driver": warning.level.upper(),
                         "Message": warning.message,
                         "Speed": f"{state.speed_mps * 3.6:.0f} km/h",
+                        "Scene": scene,
                         "Gap": "unknown" if state.gap_m is None else f"{state.gap_m:.1f} m",
                         "Controls": "WASD drive | H help | R reset | Esc exit",
                     }
@@ -78,6 +84,11 @@ def drive(*, seed: int, density: float, steps: int | None, headless: bool) -> di
             "vehicle_control": False,
             "test_driver": "IDMPolicy" if headless else "manual",
             "seed": seed,
+            "scene": scene,
+            "map": config["map"],
+            "terrain_renderer": env.terrain_renderer,
+            "terrain_pixels_per_meter": env.terrain_pixels_per_meter,
+            "decorative_buildings": env.building_count,
             "steps": count,
             "wall_seconds": elapsed,
             "simulation_seconds": count * timestep,

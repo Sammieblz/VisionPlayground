@@ -1,0 +1,9 @@
+# Windows Python 3.11 game observer; shares the existing MetaDrive-compatible pins.
+numpy==2.4.6
+opencv-python==5.0.0.93
+setuptools==84.2.1
+requests==2.34.2
+certifi==2026.10.23
+charset-normalizer==3.5.2
+idna==3.20
+urllib3==2.8.0

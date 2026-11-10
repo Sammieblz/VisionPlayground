@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "visionplayground-codriversim"
 version = "0.1.0.dev0"
-description = "Observer-only co-driver experiments in a MetaDrive world."
+description = "Portable camera co-driver and driving simulation experiments."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 authors = [{name = "Samuel"}]
@@ -22,7 +22,7 @@ codriversim = "codriversim.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-codriversim = ["examples/*.json"]
+codriversim = ["examples/*.json", "shaders/*.glsl", "licenses/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

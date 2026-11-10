@@ -1,0 +1,6 @@
+{
+  "name":"CoDriver.PlayMode",
+  "references":["CoDriver.Game","Unity.InputSystem","Unity.InputSystem.TestFramework"],
+  "optionalUnityReferences":["TestAssemblies"],
+  "defineConstraints":["UNITY_INCLUDE_TESTS"]
+}

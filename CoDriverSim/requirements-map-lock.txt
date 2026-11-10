@@ -1,0 +1,6 @@
+# Offline Davis map compiler only; not an observer/runtime dependency.
+shapely==2.2.0
+pyproj==3.7.2
+numpy==2.4.6
+certifi==2026.10.23
+Pillow==13.0.0

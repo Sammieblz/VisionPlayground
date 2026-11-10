@@ -1,0 +1,17 @@
+/Library/
+/Temp/
+/Obj/
+/Logs/
+/UserSettings/
+/Builds/
+/Assets/External/
+/Assets/ExternalLocalExcluded/
+/Assets/Resources/BuildIdentity.json*
+/Assets/Resources/PerformanceTestRunInfo.json*
+/Assets/Resources/PerformanceTestRunSettings.json*
+*.csproj
+*.sln
+*.slnx
+*.user
+*.pidb
+*.booproj
