@@ -4,6 +4,7 @@ using UnityEngine.UI;
 namespace CoDriver
 {
     // Screen presentation only: no actor queries, world truth or actuator references.
+    [RequireComponent(typeof(CanvasRenderer))]
     public sealed class CompanionFace : MaskableGraphic
     {
         public Companion Observer;

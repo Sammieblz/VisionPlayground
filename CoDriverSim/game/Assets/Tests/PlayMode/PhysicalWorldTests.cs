@@ -71,6 +71,135 @@ namespace CoDriver.Tests
         }
 
         [UnityTest]
+        public IEnumerator ProjectedModelGeometryStaysInsideCockpitScreen()
+        {
+            Art.Initialize();
+            var vehicle = Own("Viewport clipping vehicle").AddComponent<Vehicle>();
+            vehicle.Initialize();
+            vehicle.Body.isKinematic = true;
+            vehicle.GetComponentInChildren<Cockpit>().AttachDisplay(null);
+            var display = vehicle.GetComponentInChildren<OpenpilotDisplay>();
+            var camera = Own("Driver viewport camera").AddComponent<Camera>();
+            camera.transform.position = vehicle.Profile.driverEye;
+            camera.transform.rotation = Quaternion.Euler(6, 0, 0);
+            camera.fieldOfView = 70;
+            camera.nearClipPlane = .04f;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = Color.black;
+            camera.cullingMask = 1 << 9;
+            camera.enabled = false;
+            var target = new RenderTexture(640, 360, 24);
+            target.Create();
+            camera.targetTexture = target;
+            var snapshot = new OpenpilotUiSnapshot
+            {
+                schema_version = 1,
+                session_id = "viewport",
+                timestamp = 100,
+                healthy = true,
+                calibration = new Calibration(),
+                alert_size = "none",
+            };
+            yield return null;
+            try
+            {
+                display.Present(
+                    snapshot,
+                    "viewport",
+                    100,
+                    0,
+                    false,
+                    false,
+                    false,
+                    Texture2D.blackTexture,
+                    42,
+                    _ => Texture2D.blackTexture,
+                    "",
+                    "quiet"
+                );
+                var before = ReadViewport(camera, target);
+                snapshot.road = new UiModelGeometry
+                {
+                    schema_version = 2,
+                    session_id = "viewport",
+                    timestamp = 100,
+                    frame_id = 42,
+                    model = "deliberately out-of-bounds layout fixture",
+                    path = new ModelLine
+                    {
+                        x = new[] { 2f, 4, 8, 16 },
+                        y = new[] { -20f, 20, -20, 20 },
+                        z = new[] { 0f, 0, 0, 0 },
+                    },
+                };
+                display.Present(
+                    snapshot,
+                    "viewport",
+                    100,
+                    0,
+                    false,
+                    false,
+                    false,
+                    Texture2D.blackTexture,
+                    42,
+                    _ => Texture2D.blackTexture,
+                    "",
+                    "quiet"
+                );
+                var after = ReadViewport(camera, target);
+                var viewport = display.transform.Find("Camera viewport") as RectTransform;
+                var corners = new Vector3[4];
+                viewport.GetWorldCorners(corners);
+                var projected = corners.Select(camera.WorldToScreenPoint).ToArray();
+                float left = projected.Min(p => p.x) - 2,
+                    right = projected.Max(p => p.x) + 2;
+                float bottom = projected.Min(p => p.y) - 2,
+                    top = projected.Max(p => p.y) + 2;
+                int inside = 0,
+                    outside = 0;
+                for (int i = 0; i < after.Length; i++)
+                {
+                    int delta =
+                        Mathf.Abs(after[i].r - before[i].r)
+                        + Mathf.Abs(after[i].g - before[i].g)
+                        + Mathf.Abs(after[i].b - before[i].b);
+                    if (delta < 20)
+                        continue;
+                    int x = i % target.width,
+                        y = i / target.width;
+                    if (x >= left && x <= right && y >= bottom && y <= top)
+                        inside++;
+                    else
+                        outside++;
+                }
+                Assert.Greater(inside, 10, "The fixture must actually draw model geometry");
+                Assert.AreEqual(0, outside, "Model geometry cannot spill across the dashboard");
+            }
+            finally
+            {
+                camera.targetTexture = null;
+                target.Release();
+                UnityEngine.Object.Destroy(target);
+            }
+        }
+
+        static Color32[] ReadViewport(Camera camera, RenderTexture target)
+        {
+            Canvas.ForceUpdateCanvases();
+            camera.Render();
+            camera.Render();
+            var previous = RenderTexture.active;
+            RenderTexture.active = target;
+            var image = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);
+            image.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);
+            image.Apply();
+            var pixels = image.GetPixels32();
+            RenderTexture.active = previous;
+            UnityEngine.Object.Destroy(image);
+            return pixels;
+        }
+
+        [UnityTest]
         public IEnumerator CedarBridgeHasContinuousPhysicalApproaches()
         {
             Art.Initialize();

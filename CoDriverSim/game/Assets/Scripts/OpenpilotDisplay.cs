@@ -42,6 +42,9 @@ namespace CoDriver
             cameraImage = inner.gameObject.AddComponent<RawImage>();
             cameraImage.color = Color.white;
             cameraImage.raycastTarget = false;
+            // Camera-projected paths can leave the image bounds. Clip every
+            // overlay to this viewport, including on the world-space device.
+            inner.gameObject.AddComponent<RectMask2D>();
             var overlay = UiDrawing.Rect(
                 "Actual model geometry",
                 inner,

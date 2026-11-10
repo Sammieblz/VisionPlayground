@@ -510,3 +510,23 @@ The updated service-free captures completed for all seven Comma layout states at
 RPM above the dashboard without the decorative panel covering them. These are
 labelled inspection/layout fixtures; the next packaged captures must verify the
 new direct Canvas in the running application before delivery.
+
+The direct-Canvas candidates are `Realism-local-20261110-131707` and
+`Realism-public-20261110-132121`, code
+`b97a59b8a533fee47ee930cd83d021512d29d020d2a1710aef24490523f65b77`.
+Public session `9b0bf0d0c6a44f36b284fda5823ee876` recorded **29.42 FPS**,
+p95/p99 **55.84/69.69 ms**, camera **19.66 Hz**, detector **6.22 Hz**, and warning
+latency p95 **387.80 ms** across 42 warning samples, including startup. It had no
+recorded player contacts, sampled traffic/rail overlaps or two-minute vehicle
+waits. This is a short comparison, not a 30-minute qualification. The Python CI
+matrix passed for `04da31e`.
+
+Its packaged capture verified the readable instrument cluster and direct device
+Canvas, but exposed model road-edge lines drawing beyond the device. The camera
+viewport now clips its children. Two focused PlayMode cases pass: observer-camera
+exclusion and a rendered pixel comparison requiring an oversized model path to
+draw inside the screen without changing pixels outside it. The test also exposed
+a missing explicit CanvasRenderer dependency on the companion in the editor;
+that dependency is now declared. Evidence: `realism-cockpit-clipping.xml`, with
+the earlier renderer-dependency failure retained in `realism-cockpit-clipping-before.xml`.
+The combined long run is still pending this final presentation rebuild.
