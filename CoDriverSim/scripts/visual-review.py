@@ -93,6 +93,7 @@ def main():
     folder = root / "outputs/qualification/realism"
     panels = [
         ("Cockpit", "cockpit-720.png", "cockpit-720.png"),
+        ("Public instrument placement", "public-instruments-720.png", "public-instruments-720.png"),
         ("Vehicle exterior", "exterior-720.png", "exterior-720.png"),
         ("Ordinary traffic model", "fleet-720.png", "fleet-720.png"),
         ("Bridge extension", "bridge-720.png", "bridge-720.png"),

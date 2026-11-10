@@ -9,6 +9,42 @@ namespace CoDriver.Editor
     // Actual world/cabin rendering, without starting external services or claiming a drive test.
     public static class RealismCaptures
     {
+        public static void CapturePublicCockpit()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
+            Art.Initialize();
+            GraphicsSettings.useScriptableRenderPipelineBatching = false;
+            var map = MapDefinition.Load("davis-downtown");
+            var vehicle = new GameObject("Public cockpit inspection").AddComponent<Vehicle>();
+            vehicle.Profile = new VehicleProfile();
+            vehicle.transform.SetPositionAndRotation(map.Spawn, map.SpawnRotation);
+            vehicle.Initialize();
+            var town = new GameObject("Davis cockpit backdrop").AddComponent<Town>();
+            town.Map = map;
+            town.Build(vehicle.transform);
+            vehicle.GetComponentInChildren<CockpitInstruments>().SendMessage("LateUpdate");
+            var camera = new GameObject("Driver eye inspection").AddComponent<Camera>();
+            camera.nearClipPlane = .04f;
+            camera.farClipPlane = 900;
+            camera.fieldOfView = 70;
+            camera.clearFlags = CameraClearFlags.Skybox;
+            camera.cullingMask = ~((1 << 8) | (1 << 16));
+            camera.transform.SetPositionAndRotation(
+                vehicle.transform.TransformPoint(vehicle.Profile.driverEye),
+                vehicle.transform.rotation * Quaternion.Euler(6, 0, 0)
+            );
+            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            Directory.CreateDirectory(folder);
+            foreach (int height in new[] { 720, 1080 })
+            {
+                var target = new RenderTexture(height * 16 / 9, height, 24);
+                camera.targetTexture = target;
+                Save(camera, target, Path.Combine(folder, $"public-instruments-{height}.png"));
+                target.Release();
+                Object.DestroyImmediate(target);
+            }
+        }
+
         public static void CaptureVegetation()
         {
             RealismImporter.PrepareFoliageTextures();

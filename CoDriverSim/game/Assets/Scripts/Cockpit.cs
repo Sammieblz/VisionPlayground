@@ -31,8 +31,6 @@ namespace CoDriver
         GameObject deviceUi;
         float nextMirror;
         int mirrorIndex;
-        Camera displayCamera;
-        float nextDisplay;
 
         public void Initialize(Vehicle owner)
         {
@@ -56,6 +54,9 @@ namespace CoDriver
             {
                 var model = Instantiate(prefab, transform);
                 var parts = model.GetComponentsInChildren<Transform>();
+                foreach (var panel in model.GetComponentsInChildren<Renderer>())
+                    if (panel.name == "InteriorSteeringDash")
+                        panel.enabled = false; // Replaced by the live instrument cluster below.
                 var sourceWheel = parts.FirstOrDefault(t => t.name == "InteriorSteeringWheel01");
                 wheel = new GameObject("Animated steering assembly").transform;
                 wheel.SetParent(transform, false);
@@ -76,7 +77,8 @@ namespace CoDriver
                 Debug.LogWarning(
                     "Modeled cockpit missing; run the pinned asset preparation before packaging"
                 );
-            var cluster = new Vector3(-.35f, .95f, 1.08f);
+            // Sit beyond and above the wheel rim at the default driver eye.
+            var cluster = new Vector3(-.35f, 1.075f, 1.35f);
             Art.Box(
                 "Dashboard instrument housing",
                 transform,
@@ -96,40 +98,6 @@ namespace CoDriver
 
         public void AttachDisplay(CoDriverApp app)
         {
-            deviceUi = new GameObject("Cockpit Comma interface");
-            var camera = new GameObject("Cockpit display renderer").AddComponent<Camera>();
-            camera.transform.SetParent(deviceUi.transform, false);
-            camera.transform.position = new Vector3(0, -5000, 0);
-            camera.orthographic = true;
-            camera.orthographicSize = 540;
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = Color.black;
-            camera.cullingMask = 1 << 16;
-            var target = new RenderTexture(960, 540, 16, RenderTextureFormat.ARGB32);
-            target.Create();
-            textures.Add(target);
-            camera.targetTexture = target;
-            displayCamera = camera;
-            camera.enabled = false;
-            var mirrorSettings = camera.GetUniversalAdditionalCameraData();
-            mirrorSettings.renderShadows = false;
-            mirrorSettings.requiresColorOption = CameraOverrideOption.Off;
-            mirrorSettings.requiresDepthOption = CameraOverrideOption.Off;
-            var canvas = new GameObject(
-                "Comma display Canvas",
-                typeof(RectTransform)
-            ).AddComponent<Canvas>();
-            canvas.transform.SetParent(deviceUi.transform, false);
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = camera;
-            canvas.planeDistance = 1;
-            var scaler = canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.matchWidthOrHeight = .5f;
-            canvas.gameObject.AddComponent<OpenpilotDisplay>().Initialize(app);
-            foreach (var child in canvas.GetComponentsInChildren<Transform>())
-                child.gameObject.layer = 16;
             var frame = Art.Box(
                 "Comma device housing",
                 transform,
@@ -140,17 +108,18 @@ namespace CoDriver
                 Art.Rubber,
                 false
             );
-            var screen = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            DisposeObject(screen.GetComponent<Collider>());
-            screen.name = "Comma device display";
-            screen.transform.SetParent(frame.transform, false);
-            screen.transform.localPosition = new Vector3(0, 0, -.55f);
-            screen.transform.localScale = new Vector3(.94f, .88f, 1);
-            var screenMaterial = new Material(Resources.Load<Material>("RuntimeUnlit"));
-            RuntimeResources.Register(gameObject, screenMaterial);
-            screenMaterial.mainTexture = target;
-            screen.GetComponent<Renderer>().sharedMaterial = screenMaterial;
-            screen.layer = frame.layer = 9;
+            deviceUi = new GameObject("Cockpit Comma interface", typeof(RectTransform));
+            var rect = deviceUi.GetComponent<RectTransform>();
+            rect.SetParent(frame.transform, false);
+            rect.localPosition = new Vector3(0, 0, -.55f);
+            rect.sizeDelta = new Vector2(1920, 1080);
+            rect.localScale = new Vector3(.94f / 1920, .88f / 1080, 1);
+            // The same read-only UI draws directly on the physical screen. This
+            // avoids an auxiliary camera/texture pass and keeps native text sharp.
+            deviceUi.AddComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            deviceUi.AddComponent<OpenpilotDisplay>().Initialize(app);
+            foreach (var child in frame.GetComponentsInChildren<Transform>())
+                child.gameObject.layer = 9; // Excluded from the independent AI camera.
         }
 
         void Mirror(int side)
@@ -239,16 +208,6 @@ namespace CoDriver
                 // cadence, but spend no render work on an off-screen side mirror.
                 if (mirrorSurfaces[index].isVisible)
                     CameraRenderCost.Render("mirror", mirrors[index]);
-            }
-            if (
-                displayCamera
-                && Time.unscaledTime >= nextDisplay
-                && CoDriverApp.Instance
-                && CoDriverApp.Instance.ViewMode == 1
-            )
-            {
-                nextDisplay = Time.unscaledTime + .05f;
-                CameraRenderCost.Render("device", displayCamera);
             }
         }
 

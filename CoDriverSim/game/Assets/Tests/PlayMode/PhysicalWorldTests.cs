@@ -47,6 +47,30 @@ namespace CoDriver.Tests
         }
 
         [UnityTest]
+        public IEnumerator CockpitPresentationIsExcludedFromIndependentCamera()
+        {
+            Art.Initialize();
+            var vehicle = Own("Cockpit isolation vehicle").AddComponent<Vehicle>();
+            vehicle.Initialize();
+            vehicle.Body.isKinematic = true;
+            var cockpit = vehicle.GetComponentInChildren<Cockpit>();
+            cockpit.AttachDisplay(null);
+            var sensors = Own("Isolated camera rig").AddComponent<SensorRig>();
+            sensors.Initialize(vehicle, "cockpit-isolation", "test-token");
+            yield return null;
+            var display = vehicle.GetComponentInChildren<OpenpilotDisplay>();
+            Assert.IsNotNull(display);
+            Assert.IsNotNull(vehicle.GetComponentInChildren<CockpitInstruments>());
+            foreach (var canvas in vehicle.GetComponentsInChildren<Canvas>())
+            foreach (var part in canvas.GetComponentsInChildren<Transform>(true))
+                Assert.AreEqual(
+                    0,
+                    sensors.Sensor.cullingMask & (1 << part.gameObject.layer),
+                    "Cockpit presentation must never appear in the observer camera: " + part.name
+                );
+        }
+
+        [UnityTest]
         public IEnumerator CedarBridgeHasContinuousPhysicalApproaches()
         {
             Art.Initialize();

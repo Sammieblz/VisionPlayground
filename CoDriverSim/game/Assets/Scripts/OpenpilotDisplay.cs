@@ -149,8 +149,13 @@ namespace CoDriver
                 new Vector2(1550, 60),
                 TextAnchor.MiddleCenter
             );
-            CompanionFace.Create(inner, app.Companion, new Vector2(1, 0),
-                new Vector2(-95, 75), new Vector2(110, 105));
+            CompanionFace.Create(
+                inner,
+                app ? app.Companion : null,
+                new Vector2(1, 0),
+                new Vector2(-95, 75),
+                new Vector2(110, 105)
+            );
             controlNotice = UiDrawing.Label(
                 "",
                 inner,

@@ -478,3 +478,35 @@ departed, searched and returned. Evidence: `outputs/unity/realism-crossing-popul
 and `outputs/qualification/realism/ambulance-crossing-qualified.json`. These are
 accelerated behavior tests, not the real-time rendering/inference qualification.
 New local and public packages are being built from this follow-up.
+
+Those packages are `Realism-local-20261110-125442` and
+`Realism-public-20261110-125938`, sharing code identity
+`9d944517f28121c2a84e4ff9275c13a51927cc53925a0eab8e3c95c5aeb97d05`.
+Both passed integrity and isolated CLI checks; the public packed-asset audit
+contains 2,340 source assets and no local-only assets. The Python/wheel/CLI matrix
+also passed all four Windows/Linux, Python 3.11/3.12 jobs for source `634f445`.
+
+Public session `23d8740d6a694a94b761fdbf36548fea` completed its 200-second
+presentation check with zero recorded player contacts, no sampled traffic/rail
+overlaps, and no two-minute vehicle wait. Startup-inclusive performance was
+**26.50 FPS**, p95/p99 **60.56/79.95 ms**, camera **19.13 Hz**, detector **6.33 Hz**,
+and warning latency p95 **455.85 ms** over 41 warning samples. It is not a
+performance pass. Its screenshot showed the public wheel/decorative display
+obscuring the cluster, despite resolving the separate Comma-device overlap.
+
+The following presentation change moves the cluster above that obstruction and
+disables the replaced concept-car display. The cockpit Comma UI now renders as
+a world-space Canvas on the device, removing a redundant auxiliary camera pass
+while keeping the same read-only layout/model-overlay component. A focused
+PlayMode camera-isolation check passes. That test first exposed a null-reference
+error in the existing service-free UI fixture path; null-owner initialization is
+now supported again, with the companion shown disconnected. The failed test is
+retained as `realism-cockpit-isolation-before.xml`; the passing follow-up is
+`realism-cockpit-isolation.xml`. No dynamics or traffic changes are in this pass;
+actual presentation and performance still need renewed packaged measurements.
+
+The updated service-free captures completed for all seven Comma layout states at
+720p and 1080p. The public instrument inspection now shows speed, gear, mph and
+RPM above the dashboard without the decorative panel covering them. These are
+labelled inspection/layout fixtures; the next packaged captures must verify the
+new direct Canvas in the running application before delivery.
