@@ -61,6 +61,13 @@ namespace CoDriver.Editor
         {
             ActorImporter.Prepare();
             WorldArtImporter.Prepare();
+            if (
+                !Resources.Load<GameObject>("WorldArt/Construction/Excavator")
+                || !Resources.Load<GameObject>("WorldArt/Civilians/Citizen_A")
+            )
+                throw new System.InvalidOperationException(
+                    "Prepared construction/civilian art is missing. Run scripts/setup-world-art.ps1 before packaging."
+                );
             RealismImporter.Prepare();
             CockpitImporter.Prepare();
             Directory.CreateDirectory("Assets/Resources");

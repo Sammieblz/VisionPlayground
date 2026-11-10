@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "asset_id": "innerscene-compact-tracked-excavator",
+  "author": "Innerscene Corp",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://www.innerscene.com/tools/library/3d-parts/compact-tracked-excavator-76c41cd5",
+  "url": "https://files.innerscene.com/library/compact-tracked-excavator-76c41cd5/8d43eacb36b24dbfd865/compact-tracked-excavator.glb",
+  "sha256": "d7ab61533437b330b2107150092d10bf5f51fce66c1fb06ee554669a4eff4f17",
+  "size": 6471512,
+  "preparation": "scripts/blender-construction.py with Blender 4.5.15 LTS",
+  "modifications": [
+    "Normalize to Unity +Z forward, +Y up; combine source meshes into five moving sections",
+    "Add hinge hierarchy at source pins, transparent cab glazing, and two detail levels",
+    "Replace static hydraulic geometry with runtime telescoping cylinders",
+    "Add finite-mass track/cabin collision independently of visual articulation"
+  ],
+  "simulation_mass_kg": 3600,
+  "measurement_limit": "Operating mass and activity timings are simulation estimates; this is not a validated equipment dynamics model."
+}

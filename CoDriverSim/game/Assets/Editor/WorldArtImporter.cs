@@ -19,6 +19,7 @@ namespace CoDriver.Editor
             AnimalArtImporter.Prepare();
             FleetArtImporter.Prepare();
             BuildingArtImporter.Prepare();
+            ConstructionArtImporter.Prepare();
             var source = AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath);
             if (!source)
                 return; // Public builds and existing checkouts need no private asset.

@@ -152,6 +152,7 @@ def main():
         "fabric-source.json",
         "leather-source.json",
         "makehuman-core-manifest.json",
+        "construction-manifest.json",
     ):
         shutil.copy2(root / "game" / name, notices)
     district = target / "DistrictData"

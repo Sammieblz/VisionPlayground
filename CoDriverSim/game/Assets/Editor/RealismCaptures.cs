@@ -9,6 +9,53 @@ namespace CoDriver.Editor
     // Actual world/cabin rendering, without starting external services or claiming a drive test.
     public static class RealismCaptures
     {
+        public static void CaptureConstruction()
+        {
+            ConstructionArtImporter.Prepare();
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
+            Art.Initialize();
+            GraphicsSettings.useScriptableRenderPipelineBatching = false;
+            Realism.Lighting();
+            var sun = new GameObject("Construction inspection daylight").AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.intensity = 1.35f;
+            sun.transform.rotation = Quaternion.Euler(42, -35, 0);
+            RenderSettings.ambientMode = AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(.6f, .72f, .85f);
+            RenderSettings.ambientEquatorColor = new Color(.46f, .5f, .54f);
+            RenderSettings.ambientGroundColor = new Color(.25f, .28f, .2f);
+            var root = Object.Instantiate(
+                Resources.Load<GameObject>("WorldArt/Construction/Excavator")
+            );
+            var visual = root.GetComponent<ExcavatorVisual>();
+            root.GetComponent<LODGroup>().ForceLOD(0);
+            Art.Box(
+                "Construction pad",
+                null,
+                Vector3.down * .5f,
+                new Vector3(80, 1, 80),
+                Art.Concrete,
+                false
+            );
+            var camera = new GameObject("Construction inspection camera").AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.Skybox;
+            camera.fieldOfView = 48;
+            camera.transform.position = new Vector3(-4.5f, 3.2f, 5.5f);
+            camera.transform.LookAt(new Vector3(0, 1.1f, .7f));
+            var target = new RenderTexture(1280, 720, 24);
+            camera.targetTexture = target;
+            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            Directory.CreateDirectory(folder);
+            foreach (int time in new[] { 0, 5, 9, 12, 14, 16 })
+            {
+                visual.Pose(time);
+                Save(camera, target, Path.Combine(folder, $"construction-{time:00}-720.png"));
+            }
+            target.Release();
+            Object.DestroyImmediate(target);
+            Debug.Log("CONSTRUCTION_CAPTURES_READY");
+        }
+
         public static void CapturePublicCockpit()
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);

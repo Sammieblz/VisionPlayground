@@ -29,6 +29,10 @@ function Prepare-Art([string]$source, [string]$kind, [string]$output) {
 }
 Prepare-Art (Join-Path $worldArt 'FacadeSource/modular_urban_apartments_facade.gltf') 'facades' (Join-Path $worldArt 'FacadePrepared')
 & (Join-Path $PSScriptRoot 'setup-civilians.ps1') -Blender $Blender
+& $python (Join-Path $PSScriptRoot 'fetch-construction.py')
+if ($LASTEXITCODE -ne 0) { throw 'Construction download failed' }
+& $Blender --background --factory-startup --disable-autoexec --python-exit-code 1 --python (Join-Path $PSScriptRoot 'blender-construction.py') -- --source (Join-Path $projectRoot 'outputs/asset-downloads/construction/compact-tracked-excavator.glb') --output (Join-Path $worldArt 'ConstructionSource')
+if ($LASTEXITCODE -ne 0) { throw 'Construction preparation failed' }
 $concept = Join-Path $projectRoot 'game/Assets/External/Resources/Cockpit/Source/CarConcept.glb'
 if (Test-Path -LiteralPath $concept) {
     Prepare-Art $concept 'fleet' (Join-Path $worldArt 'FleetSource')

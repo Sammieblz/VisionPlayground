@@ -83,7 +83,7 @@ and sign/light processing; it does not rerun the separate WSL openpilot model.
 
 Optional Windows visual-review capture uses `scripts/record-game-window.py` with
 an explicit game PID. Install `requirements-capture-lock.txt` into the development
-environment first. Its pinned MSS backend reads the verified foreground client
+environment first. Its pinned MSS or optional DXGI (`--backend dxcam`) backend reads the verified foreground client
 region; `--backend pillow` retains the slower compatibility path. Capture stops on
 focus loss and records actual sampling times, distinct frames and completion status.
 The encoded video frame rate is not the game's frame rate. Keep capture separate

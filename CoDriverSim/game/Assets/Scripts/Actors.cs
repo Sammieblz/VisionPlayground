@@ -3250,6 +3250,7 @@ namespace CoDriver
     public sealed class ConstructionSite : MonoBehaviour
     {
         public string State = "Digging";
+        ExcavatorVisual machine;
         Transform boom,
             bucket;
         float start;
@@ -3278,39 +3279,58 @@ namespace CoDriver
                 );
                 MovableProp.Add(cone, 3.5f);
             }
-            Art.Box(
-                "Excavator tracks",
-                transform,
-                new Vector3(6, .4f, 0),
-                new Vector3(3, .8f, 4),
-                Art.Rubber
-            );
-            Art.Box(
-                "Excavator cab",
-                transform,
-                new Vector3(6, 1.6f, 0),
-                new Vector3(2.5f, 1.8f, 2.5f),
-                Art.Yellow
-            );
-            boom = new GameObject("Boom hinge").transform;
-            boom.SetParent(transform, false);
-            boom.localPosition = new Vector3(6, 2, 1);
-            Art.Box(
-                "Hydraulic boom",
-                boom,
-                new Vector3(0, 0, 2),
-                new Vector3(.4f, .5f, 4),
-                Art.Yellow,
-                false
-            );
-            bucket = Art.Box(
-                "Bucket",
-                boom,
-                new Vector3(0, -.5f, 4),
-                new Vector3(1.2f, .8f, 1),
-                Art.Metal,
-                false
-            ).transform;
+            var prefab = Resources.Load<GameObject>("WorldArt/Construction/Excavator");
+            if (prefab)
+            {
+                var excavator = Instantiate(prefab, transform);
+                excavator.transform.localPosition = new Vector3(6, .04f, 0);
+                var tracks = excavator.AddComponent<BoxCollider>();
+                tracks.center = new Vector3(0, .35f, 0);
+                tracks.size = new Vector3(1.63f, .65f, 1.95f);
+                var cabin = excavator.AddComponent<BoxCollider>();
+                cabin.center = new Vector3(-.24f, 1.48f, .1f);
+                cabin.size = new Vector3(.8f, 1.4f, 1.2f);
+                MovableProp.Add(excavator, 3600); // Estimated simulation operating mass, not a vehicle specification.
+                excavator.GetComponent<Rigidbody>().centerOfMass = new Vector3(0, .55f, 0);
+                machine = excavator.GetComponent<ExcavatorVisual>();
+                machine.Pose(0);
+            }
+            else
+            {
+                Art.Box(
+                    "Excavator tracks",
+                    transform,
+                    new Vector3(6, .4f, 0),
+                    new Vector3(3, .8f, 4),
+                    Art.Rubber
+                );
+                Art.Box(
+                    "Excavator cab",
+                    transform,
+                    new Vector3(6, 1.6f, 0),
+                    new Vector3(2.5f, 1.8f, 2.5f),
+                    Art.Yellow
+                );
+                boom = new GameObject("Boom hinge").transform;
+                boom.SetParent(transform, false);
+                boom.localPosition = new Vector3(6, 2, 1);
+                Art.Box(
+                    "Hydraulic boom",
+                    boom,
+                    new Vector3(0, 0, 2),
+                    new Vector3(.4f, .5f, 4),
+                    Art.Yellow,
+                    false
+                );
+                bucket = Art.Box(
+                    "Bucket",
+                    boom,
+                    new Vector3(0, -.5f, 4),
+                    new Vector3(1.2f, .8f, 1),
+                    Art.Metal,
+                    false
+                ).transform;
+            }
             for (int i = 0; i < 3; i++)
                 MovableProp.Add(
                     Art.Box(
@@ -3337,6 +3357,13 @@ namespace CoDriver
                 : t < 9 ? "Lifting"
                 : t < 12 ? "Swinging"
                 : "Unloading";
+            if (machine)
+            {
+                if (t >= 14)
+                    State = "Returning";
+                machine.Pose(t);
+                return;
+            }
             float pitch,
                 yaw,
                 bend;

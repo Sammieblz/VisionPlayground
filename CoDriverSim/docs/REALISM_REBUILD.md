@@ -664,3 +664,30 @@ compared; its first short probe competed with the Cedar recorder and is not a
 clean speed comparison. The review page now explicitly labels actual sampling.
 Frames show the remaining primitive construction machine and repeated facades;
 these are unresolved visual defects, not first-release acceptance.
+
+
+### Articulated construction follow-up
+
+The primitive excavator is replaced by the CC0 Innerscene compact tracked model,
+pinned in `game/construction-manifest.json`. Its 928 mesh objects are prepared as
+five articulated sections with two detail levels (106,568 / 29,835 triangles),
+transparent cab glazing and runtime telescoping hydraulics. The seated MakeHuman
+operator uses the existing Quaternius driving animation with hands fitted to the
+measured controls. Source/pin geometry and modifications remain in the preparation
+report; the 3,600 kg body mass and timings are simulation estimates.
+
+Actual Unity captures (`visual/construction-00-720.png` through the cycle) show
+the prepared machine. Three focused checks pass in `realism-construction-physical.xml`: public
+provenance/detail levels, the full 16-second cycle without rod detachment or
+ground penetration, and two cycles of physical settling followed by a finite
+impact response. No activity code resets the machine's physical root. The Python
+regression remains 100/100. Both packaged profiles are being rebuilt; these checks
+do not establish whole-town visual or performance acceptance.
+
+The prior queue-only public recovery probe (`b1f71beccb574c19883e69cb4f8df6e4`)
+restored generation 2 and kept the stream live, but its pre-injection checkpoint
+was already stale. It is retained as recovery evidence, not a clean healthy-to-failed
+transition proof. The probe now requires consecutive fresh samples after opening
+Diagnostics and immediately before injection. A clean 67.22-second post-recovery
+window received 19.97 camera frames/s and 6.11 detections/s; that stationary short
+window does not replace sustained qualification of the bounded queue.

@@ -221,3 +221,16 @@ retains its own EPL-2.0/GPL-2.0-or-later notices in the external tool cache.
   https://github.com/BoboTiG/python-mss . Optional Windows visual-review tooling,
   pinned separately in `requirements-capture-lock.txt`; not bundled into the game
   observer runtime. The installed wheel retains its upstream license text.
+
+- **Compact tracked excavator ? Innerscene Corp**, CC0-1.0:
+  https://www.innerscene.com/tools/library/3d-parts/compact-tracked-excavator-76c41cd5 .
+  Source bytes are pinned in `game/construction-manifest.json`. Adaptations: forward-axis
+  normalization, five articulated sections, two detail levels, transparent cab glazing,
+  and animated telescoping hydraulics. Collision uses an estimated finite-mass body;
+  the animation is a staged construction activity, not validated machinery dynamics.
+
+- **DXcam 0.3.0 ? Rain**, MIT: https://github.com/ra1nty/DXcam/tree/v0.3.0 .
+  Optional Windows desktop-duplication capture for visual review, with
+  **comtypes 1.5.0**, MIT: https://github.com/enthought/comtypes .
+  These tools are pinned in `requirements-capture-lock.txt`; their wheels retain
+  license texts. Neither is bundled into the game observer runtime.
