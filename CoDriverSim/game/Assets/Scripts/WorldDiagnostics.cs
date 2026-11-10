@@ -36,6 +36,8 @@ namespace CoDriver
             var row = new Snapshot
             {
                 timestamp = Time.time,
+                monotonic_timestamp = Time.realtimeSinceStartupAsDouble,
+                player_position = app.Vehicle.transform.position,
                 bus = town.Bus.State,
                 bus_stop_visits = town.Bus.StopVisits,
                 bus_boarding = town.Bus.BoardingUsers,
@@ -146,7 +148,12 @@ namespace CoDriver
             public string[] contacts,
                 clearances;
             public int[] grounded;
-            public Vector3 train_position,
+
+            // These measurements share this activity sample. Do not join scaled
+            // simulation time to DrivingDiagnostics' real elapsed time.
+            public double monotonic_timestamp;
+            public Vector3 player_position,
+                train_position,
                 tram_position;
             public float train_speed,
                 tram_speed;

@@ -807,3 +807,28 @@ found three sampled complete shop returns. During simulation seconds 60–180,
 0–9 (mean 3.68); only 28.0% of samples met the six-moving-vehicle target. The
 hotspot traffic target did not pass in that earlier recording. Fresh activity
 footage and counts remain necessary after the walking/traffic corrections.
+
+### Combined rail/contact regression result
+
+`realism-architecture-rail-anticipation-editor.xml` passes 129/129, and
+`realism-architecture-rail-anticipation-world.xml` passes 25/25 in 1,514.10 seconds.
+The latter includes both approaching-rail waiting and already-on-track escape,
+ordinary traffic on both maps, storefront access, transit boarding/alighting,
+parking, and all ten ambulance seeds. Review of every case's contact output found
+only the deliberately initialized truck contact and the deliberate vehicle-impact
+fixture. No unscripted rail contact was recorded in this run. This is a finite
+regression sample, not a guarantee against every possible encounter.
+
+The behavior under test is commit `daaf6dc`; the subsequent packaging change only
+adds linked setup/evaluation documents to the installed folder. All four Python
+Windows/Linux, 3.11/3.12 CI jobs passed for `daaf6dc`.
+
+Activity diagnostics now also save player position and real elapsed time in the
+same world sample. Previously, world time was scaled simulation time while driving
+diagnostics used real elapsed time. Joining those clocks directly is invalid,
+especially after loading or pausing. The original directly recorded nearby counts
+remain usable; reconstruction of an outdoor-only count from the older moving-player
+recording is unavailable. Its two-minute window contains two sampled complete shop
+returns, but no complete transit trip. This logging-only correction does not change
+actor or vehicle behavior. Fresh packages, recovery, sustained performance and
+visual/activity checks remain pending.
