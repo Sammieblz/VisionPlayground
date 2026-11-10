@@ -188,6 +188,7 @@ namespace CoDriver
 
         void FinishWorld()
         {
+            PedestrianNavigation.AddStreetFurniture(this);
             var settings = NavMesh.GetSettingsByID(0);
             settings.agentRadius = .3f;
             settings.agentHeight = 1.8f;

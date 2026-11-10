@@ -581,6 +581,102 @@ namespace CoDriver.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedDavisCatCompletesCrossing()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis cat crossing").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var cat = town.Walkers[17];
+            foreach (var traffic in town.Traffic)
+                traffic.gameObject.SetActive(false);
+            foreach (var other in town.Walkers)
+                if (other != cat)
+                    other.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            var goal = new Vector3(61.64f, .11f, 216.93f);
+            cat.PrepareCrossing(new Vector3(59.34f, .10f, 228.96f), goal);
+            cat.BeginCrossing();
+            float start = Time.time;
+            while (cat.Crossing && Time.time - start < 30)
+                yield return new WaitForFixedUpdate();
+            string details =
+                cat.NavigationDetail + " " + cat.GetComponent<ActorLocomotion>().Diagnostic;
+            Debug.Log("CODRIVER_RECORDED_CAT " + details);
+            Assert.Less(
+                Vector3.ProjectOnPlane(cat.transform.position - goal, Vector3.up).magnitude,
+                .65f,
+                details
+            );
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedCedarCrossingClearsTruckContact()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Cedar truck crossing").AddComponent<Town>();
+            town.Build(null);
+            var truck = town.Traffic[8];
+            var pedestrian = town.Walkers[50];
+            foreach (var other in town.Traffic)
+                if (other != truck)
+                    other.gameObject.SetActive(false);
+            foreach (var other in town.Walkers)
+                if (other != pedestrian)
+                    other.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            truck.enabled = false;
+            var holding = new PhysicalDriver(truck.Body, VehicleProfile.ForTraffic("Truck"));
+            PlaceFixture(
+                truck,
+                new Vector3(-13.51f, .12f, -.30f),
+                Quaternion.Euler(0, 101.9f, 0) * Vector3.forward
+            );
+            for (int step = 0; step < 250; step++)
+            {
+                holding.Hold();
+                yield return new WaitForFixedUpdate();
+            }
+            var parked = truck.Body.position;
+            var goal = new Vector3(-11.5f, .19f, 11);
+            pedestrian.PrepareCrossing(new Vector3(-11.22f, .01f, -1.37f), goal);
+            pedestrian.BeginCrossing();
+            var body = pedestrian.GetComponent<Rigidbody>();
+            var locomotion = pedestrian.GetComponent<ActorLocomotion>();
+            var previous = body.position;
+            float start = Time.time;
+            while (pedestrian.Crossing && Time.time - start < 40)
+            {
+                holding.Hold();
+                yield return new WaitForFixedUpdate();
+                Assert.Less(
+                    Vector3.Distance(previous, body.position),
+                    .09f,
+                    "Contact recovery must use finite locomotion without repositioning"
+                );
+                previous = body.position;
+            }
+            Debug.Log(
+                "CODRIVER_CEDAR_TRUCK_CROSSING "
+                    + pedestrian.NavigationDetail
+                    + " "
+                    + locomotion.Diagnostic
+            );
+            Assert.Less(
+                Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude,
+                .65f,
+                pedestrian.NavigationDetail + " " + locomotion.Diagnostic
+            );
+            Assert.Less(
+                Vector3.Distance(parked, truck.Body.position),
+                .15f,
+                "Walking cannot move the stopped truck aside"
+            );
+        }
+
+        [UnityTest, Timeout(300000)]
         public IEnumerator RecordedDavisCrossingDetoursToSameSideOfStoppedCar()
         {
             Art.Initialize();
@@ -999,6 +1095,8 @@ namespace CoDriver.Tests
             float trainTravel = 0,
                 tramTravel = 0;
             float start = Time.time;
+            bool trace = Array.IndexOf(Environment.GetCommandLineArgs(), "-traffic-trace") >= 0;
+            float nextTrace = start + 30;
             while (Time.time - start < 360 && longestWait.Max() < 121)
             {
                 yield return new WaitForSeconds(.5f);
@@ -1017,6 +1115,35 @@ namespace CoDriver.Tests
                         lastMotion[i] = Time.time;
                     }
                     longestWait[i] = Mathf.Max(longestWait[i], Time.time - lastMotion[i]);
+                }
+                if (trace && Time.time >= nextTrace)
+                {
+                    CapturePopulation(
+                        town,
+                        evidence + "-trace-" + Mathf.RoundToInt(Time.time - start),
+                        Time.time - start
+                    );
+                    Debug.Log(
+                        "CODRIVER_TRAFFIC_TRACE "
+                            + evidence
+                            + " t="
+                            + (Time.time - start).ToString("F1")
+                            + " "
+                            + string.Join(
+                                "; ",
+                                cars.Select(
+                                    (car, i) =>
+                                        car.name
+                                        + " wait="
+                                        + (Time.time - lastMotion[i]).ToString("F1")
+                                        + " "
+                                        + car.State
+                                        + " "
+                                        + car.Clearance
+                                )
+                            )
+                    );
+                    nextTrace += 30;
                 }
             }
             CapturePopulation(town, evidence, Time.time - start);
@@ -1441,7 +1568,15 @@ namespace CoDriver.Tests
                         + t.Contact
                     )
                     .ToArray(),
-                walkers = town.Walkers.Select(w => w.name + ":" + w.NavigationDetail).ToArray(),
+                walkers = town
+                    .Walkers.Select(w =>
+                        w.name
+                        + ":"
+                        + w.NavigationDetail
+                        + " "
+                        + w.GetComponent<ActorLocomotion>().Diagnostic
+                    )
+                    .ToArray(),
                 junctions = town
                     .Signals.Where(s => s.Reservation != "None")
                     .Select(s =>

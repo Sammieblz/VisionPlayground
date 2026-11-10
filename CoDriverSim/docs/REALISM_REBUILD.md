@@ -721,3 +721,24 @@ Construction packages `Realism-local-20261110-161424` and
 `83a76d19de1e097089520a348f8d59d7ecc9fc364739c657c47b935a196c0d55`;
 both passed integrity and isolated CLI checks. All four Python CI jobs passed for
 `fe3d506`. These packages predate the sidewalk changes above.
+
+### Street furniture and sustained contact recovery
+
+The wider walking rerun (`realism-walking-world.xml`) passed 10/12 cases, including
+all ten ambulance dispatch/return cycles, transit, parking and crossing fixtures.
+Both ordinary-traffic checks failed. Detailed traces showed a pedestrian held in
+continuing contact with a Cedar truck and a Davis cat physically blocked by a
+signal pole while vehicles correctly yielded. The initial suspicion about signal
+reservations did not explain these recorded failures; reservation logic is unchanged.
+
+Continuing vehicle contact now removes locomotion directed into the body without
+repeatedly freezing steps away from it. Small static street furniture is included
+in the navigation bake using conservative physical bounds. A held-truck fixture
+uses explicit handbraking rather than the NPC route controller during the contact
+check. The original failing fixtures and traces are retained.
+
+`realism-furniture-contact.xml` passes 3/3: the recorded truck contact clears without
+moving the handbraked vehicle more than 0.15 m, the cat completes its recorded
+crossing around the pole, and eight sidewalk journeys still physically complete.
+The populated traffic, shop access and activity checks require a fresh rerun.
+Python CI for `ab39485` passed all four Windows/Linux, Python 3.11/3.12 jobs.

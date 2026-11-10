@@ -20,6 +20,10 @@ namespace CoDriver
         Quaternion restRotation;
         float recoverUntil,
             blockedUntil;
+        Vector3 vehicleContactNormal;
+        float vehicleContactUntil,
+            sideContactUntil;
+        string sideContact = "";
         bool flying;
         bool skeletalReaction;
         float reactionStarted;
@@ -43,7 +47,9 @@ namespace CoDriver
             + " rise="
             + stepRise.ToString("F2")
             + " ledge="
-            + stepLedge.ToString("F2");
+            + stepLedge.ToString("F2")
+            + " contact="
+            + (Time.time < sideContactUntil ? sideContact : "None");
 
         public void Initialize(string species, Transform model = null)
         {
@@ -234,6 +240,15 @@ namespace CoDriver
                 if (blocked || Time.time < blockedUntil)
                     desired = Vector3.zero;
             }
+            if (Time.time < vehicleContactUntil)
+            {
+                // A continuing side contact must not freeze all locomotion.
+                // Remove motion into the vehicle while allowing a bounded step
+                // away or along its side after the initial impact reaction.
+                float into = Vector3.Dot(desired, vehicleContactNormal);
+                if (into < 0)
+                    desired -= vehicleContactNormal * into;
+            }
             Vector3 current = flying
                 ? body.linearVelocity
                 : Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
@@ -404,8 +419,19 @@ namespace CoDriver
 
         void OnCollisionStay(Collision contact)
         {
-            if (contact.rigidbody && contact.rigidbody.mass > 150)
-                blockedUntil = Time.time + .15f;
+            for (int i = 0; i < contact.contactCount; i++)
+            {
+                var normal = contact.GetContact(i).normal;
+                if (Mathf.Abs(normal.y) > .5f)
+                    continue;
+                sideContact = contact.collider.name;
+                sideContactUntil = Time.time + .15f;
+                if (contact.rigidbody && contact.rigidbody.mass > 150)
+                {
+                    vehicleContactNormal = Vector3.ProjectOnPlane(normal, Vector3.up).normalized;
+                    vehicleContactUntil = Time.time + .15f;
+                }
+            }
         }
     }
 }

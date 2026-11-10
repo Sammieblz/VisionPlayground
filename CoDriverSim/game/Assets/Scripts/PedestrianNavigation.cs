@@ -12,6 +12,38 @@ namespace CoDriver
         public const int CrossingArea = 3;
         public const int WalkingMask = NavMesh.AllAreas & ~(1 << CrossingArea);
 
+        public static void AddStreetFurniture(Town town)
+        {
+            Physics.SyncTransforms();
+            foreach (var collider in town.GetComponentsInChildren<Collider>())
+            {
+                if (
+                    !collider.enabled
+                    || collider.isTrigger
+                    || collider.attachedRigidbody
+                    || collider.gameObject.layer != 0
+                    || collider.GetComponentInParent<ActivityDoor>()
+                )
+                    continue;
+                var bounds = collider.bounds;
+                if (bounds.size.y < .35f || bounds.size.x > 3 || bounds.size.z > 3)
+                    continue;
+                // Small static furniture (signal posts, trees, bollards, benches)
+                // must be present in the navigation bake as well as PhysX.
+                // Conservative bounds keep every species clear of their shape.
+                // Large building walls have their exact mesh sources separately.
+                town.WalkSurfaces.Add(
+                    new NavMeshBuildSource
+                    {
+                        shape = NavMeshBuildSourceShape.Box,
+                        transform = Matrix4x4.TRS(bounds.center, Quaternion.identity, Vector3.one),
+                        size = bounds.size,
+                        area = 1,
+                    }
+                );
+            }
+        }
+
         public static bool TryWalkRoute(
             Vector3 position,
             System.Random random,
