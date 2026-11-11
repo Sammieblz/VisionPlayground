@@ -165,6 +165,79 @@ namespace CoDriver.Tests
             Assert.Greater(body.linearVelocity.z, 3);
         }
 
+        [TestCase("Truck", 0f)]
+        [TestCase("Truck", 5f)]
+        [TestCase("Car", 0f)]
+        [TestCase("Emergency", 0f)]
+        [TestCase("Bus", 0f)]
+        public void BrakedVehicleHoldsPositionThroughLongQueue(string kind, float crossSlope)
+        {
+            var surface = new GameObject("Stationary queue surface");
+            SceneManager.MoveGameObjectToScene(surface, course);
+            surface.transform.SetPositionAndRotation(
+                new Vector3(20, 1, 0),
+                Quaternion.Euler(0, 0, crossSlope)
+            );
+            surface.AddComponent<BoxCollider>().size = new Vector3(30, 1, 100);
+            var go = new GameObject("Stationary " + kind);
+            SceneManager.MoveGameObjectToScene(go, course);
+            go.layer = TrafficClearance.TrafficLayer;
+            go.transform.SetPositionAndRotation(
+                new Vector3(20, 1.8f, 0),
+                surface.transform.rotation * Quaternion.Euler(0, -13, 0)
+            );
+            var profile = VehicleProfile.ForTraffic(kind);
+            var shape = go.AddComponent<BoxCollider>();
+            shape.center = profile.collisionCentre;
+            shape.size = profile.collisionSize;
+            var body = go.AddComponent<Rigidbody>();
+            var dynamics = new RvpVehicleDynamics(body, profile);
+            body.interpolation = RigidbodyInterpolation.None;
+            var controls = new VehicleControls
+            {
+                brake = 1,
+                handbrake = true,
+                roadWheelAngle = 23,
+            };
+            for (int i = 0; i < 500; i++)
+            {
+                dynamics.Step(controls, .01f);
+                physics.Simulate(.01f);
+            }
+            Assert.AreEqual(4, dynamics.GroundedWheels);
+            Vector3 start = body.position;
+            Quaternion rotation = body.rotation;
+            float maximumDrift = 0;
+            float maximumTurn = 0;
+            for (int i = 0; i < 60000; i++)
+            {
+                dynamics.Step(controls, .01f);
+                physics.Simulate(.01f);
+                maximumDrift = Mathf.Max(maximumDrift, Vector3.Distance(start, body.position));
+                maximumTurn = Mathf.Max(maximumTurn, Quaternion.Angle(rotation, body.rotation));
+            }
+            TestContext.WriteLine(
+                $"{kind} slope={crossSlope}: 600 s drift={maximumDrift:F4} m, rotation={maximumTurn:F3} degrees; start={rotation.eulerAngles:F3}; end={body.rotation.eulerAngles:F3}"
+            );
+            Assert.Less(maximumDrift, .10f, "A braked queue cannot creep into another lane");
+            Assert.Less(maximumTurn, 1f, "A braked queue cannot rotate into oncoming traffic");
+            Assert.IsFalse(body.isKinematic);
+            // Tire grip must remain finite: an external impact can still move it.
+            body.AddForce(Vector3.right * profile.mass * 2, ForceMode.Impulse);
+            float impactTravel = 0;
+            for (int i = 0; i < 200; i++)
+            {
+                dynamics.Step(controls, .01f);
+                physics.Simulate(.01f);
+                impactTravel = Mathf.Max(impactTravel, Vector3.Distance(start, body.position));
+            }
+            Assert.Greater(
+                impactTravel,
+                .08f,
+                "Stationary holding must not freeze the physical body"
+            );
+        }
+
         [TestCase(false)]
         [TestCase(true)]
         public void CurvedBayManoeuvreArrivesPhysically(bool reverse)
@@ -246,13 +319,18 @@ namespace CoDriver.Tests
             car.Throttle = 1;
             float elapsed = 0;
             while (elapsed < 20 && car.Speed < 26.8224f)
-            { Step(.01f); elapsed += .01f; }
+            {
+                Step(.01f);
+                elapsed += .01f;
+            }
             var atBrake = car.Body.position;
             car.Throttle = 0;
             car.Brake = 1;
             Step(8);
             float stoppingDistance = car.Body.position.z - atBrake.z;
-            TestContext.WriteLine($"GLS 0-60 mph: {elapsed:F2} s; braking: {stoppingDistance:F2} m");
+            TestContext.WriteLine(
+                $"GLS 0-60 mph: {elapsed:F2} s; braking: {stoppingDistance:F2} m"
+            );
             Assert.That(elapsed, Is.InRange(5.2f, 6.2f));
             Assert.That(stoppingDistance, Is.InRange(40f, 55f));
             Assert.Less(car.Speed, .2f);
@@ -266,8 +344,12 @@ namespace CoDriver.Tests
             var points = new System.Collections.Generic.List<Vector3>();
             for (int z = -20; z <= 190; z += 2)
                 points.Add(new Vector3(0, SimulatedBridgeExtension.Height(z), z));
-            var road = DavisWorld.Surface("Bridge course", null,
-                SimulatedBridgeExtension.Ribbon(points, 8), Art.Asphalt);
+            var road = DavisWorld.Surface(
+                "Bridge course",
+                null,
+                SimulatedBridgeExtension.Ribbon(points, 8),
+                Art.Asphalt
+            );
             SceneManager.MoveGameObjectToScene(road, course);
             car = new GameObject("GLS bridge course").AddComponent<Vehicle>();
             SceneManager.MoveGameObjectToScene(car.gameObject, course);
@@ -284,9 +366,15 @@ namespace CoDriver.Tests
                 car.ApplyDesiredAcceleration(Mathf.Clamp((speed - car.Speed) * 2, -2, 2));
                 Step(.01f);
             }
-            TestContext.WriteLine($"Bridge entry {speed:F2} m/s: final={car.Body.position}, contact={car.LastContact}");
+            TestContext.WriteLine(
+                $"Bridge entry {speed:F2} m/s: final={car.Body.position}, contact={car.LastContact}"
+            );
             Assert.Greater(car.Body.position.z, 154);
-            Assert.AreEqual("None", car.LastContact, "A wheel-supported crossing must not strike the body collider");
+            Assert.AreEqual(
+                "None",
+                car.LastContact,
+                "A wheel-supported crossing must not strike the body collider"
+            );
         }
 
         [Test]

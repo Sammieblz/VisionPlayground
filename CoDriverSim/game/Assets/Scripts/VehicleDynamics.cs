@@ -31,6 +31,7 @@ namespace CoDriver
         public float wheelMountHeight = .58f,
             maxSteering = 34,
             grip = .9f;
+        public float tireRelaxationTime = .04f;
         public float engineTorque = 175,
             finalDrive = 4.1f,
             efficiency = .9f;
@@ -316,8 +317,45 @@ namespace CoDriver
                         Profile.mass * 9.81f
                     );
                     loads[i] = load;
+                }
+                else
+                    travel[i] = Profile.suspensionLength;
+                centres[i] = origin - tr.up * travel[i];
+                rotations[i] = rotation;
+            }
+            // Anti-roll transfers normal load between the two supported tires.
+            // Apply it before calculating grip and slope holding, so those
+            // forces describe the same road reaction and its moment.
+            for (int axle = 0; axle < 2; axle++)
+            {
+                int left = axle * 2,
+                    right = left + 1;
+                if (!grounded[left] || !grounded[right])
+                    continue;
+                float antiRoll = Mathf.Clamp(
+                    (travel[left] - travel[right]) * Profile.spring * .35f,
+                    -Mathf.Min(loads[left], loads[right]) * .5f,
+                    Mathf.Min(loads[left], loads[right]) * .5f
+                );
+                loads[left] -= antiRoll;
+                loads[right] += antiRoll;
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                if (grounded[i])
+                {
+                    var hit = contact[i];
+                    float load = loads[i];
+                    Quaternion rotation = rotations[i];
+                    Vector3 groundVelocity = hit.rigidbody
+                        ? hit.rigidbody.GetPointVelocity(hit.point)
+                        : Vector3.zero;
+                    Vector3 velocity = Body.GetPointVelocity(hit.point) - groundVelocity;
                     Vector3 support = hit.normal * load;
-                    Body.AddForceAtPosition(support, origin, ForceMode.Force);
+                    // Normal and tangential road reactions share the contact
+                    // point. Using the suspension mount for only the normal
+                    // force created a spurious torque on a cross-slope.
+                    Body.AddForceAtPosition(support, hit.point, ForceMode.Force);
                     Vector3 forward = Vector3
                         .ProjectOnPlane(rotation * Vector3.forward, hit.normal)
                         .normalized;
@@ -347,11 +385,20 @@ namespace CoDriver
                         brake = limit * .96f;
                         AbsActive = true;
                     }
-                    float gravity = Vector3.Dot(Physics.gravity, forward) * cornerMass;
-                    float hold = -longitudinal * cornerMass / dt - propulsion - gravity;
+                    // The four contact forces share translation and rotation.
+                    // Cancelling every point's velocity in one explicit step
+                    // overcorrects roll on taller bodies and produces creep.
+                    float responseTime = Mathf.Max(dt * 2, Profile.tireRelaxationTime);
+                    float supportedMass =
+                        load / Mathf.Max(.25f, Vector3.Dot(-Physics.gravity, hit.normal));
+                    float gravity = Vector3.Dot(Physics.gravity, forward) * supportedMass;
+                    float hold = -longitudinal * cornerMass / responseTime - propulsion - gravity;
                     float brakeForce = Mathf.Clamp(hold, -brake, brake);
+                    // Rolling resistance only supplies the remaining stopping
+                    // demand. Applying a second full velocity-cancellation force
+                    // after the brakes pumped low-speed oscillation and yaw.
                     float rolling = Mathf.Clamp(
-                        -longitudinal * cornerMass / dt,
+                        hold - brakeForce,
                         -load * Profile.rollingResistance,
                         load * Profile.rollingResistance
                     );
@@ -360,7 +407,12 @@ namespace CoDriver
                     float slip = Mathf.Atan2(lateral, Mathf.Max(2, Mathf.Abs(longitudinal)));
                     float fy = -Mathf.Sign(slip) * Mathf.Min(Mathf.Abs(slip) / .10f, 1) * limit;
                     if (Mathf.Abs(longitudinal) < 2)
-                        fy = Mathf.Clamp(-lateral * cornerMass / dt, -limit, limit);
+                        fy = Mathf.Clamp(
+                            -lateral * cornerMass / responseTime
+                                - Vector3.Dot(Physics.gravity, right) * supportedMass,
+                            -limit,
+                            limit
+                        );
                     Vector2 tire = Vector2.ClampMagnitude(new Vector2(fx, fy), limit);
                     Vector3 force = forward * tire.x + right * tire.y;
                     Body.AddForceAtPosition(force, hit.point, ForceMode.Force);
@@ -379,35 +431,9 @@ namespace CoDriver
                         / (2 * Mathf.PI);
                 }
                 else
-                {
-                    travel[i] = Profile.suspensionLength;
                     Rpm[i] *= Mathf.Exp(-dt * .5f);
-                }
                 angles[i] = Mathf.Repeat(angles[i] + Rpm[i] * 6 * dt, 360);
-                centres[i] = origin - tr.up * travel[i];
-                rotations[i] = rotation * Quaternion.Euler(angles[i], 0, 90);
-            }
-            for (int axle = 0; axle < 2; axle++)
-            {
-                int left = axle * 2,
-                    right = left + 1;
-                if (!grounded[left] || !grounded[right])
-                    continue;
-                float antiRoll = Mathf.Clamp(
-                    (travel[left] - travel[right]) * Profile.spring * .35f,
-                    -Mathf.Min(loads[left], loads[right]) * .5f,
-                    Mathf.Min(loads[left], loads[right]) * .5f
-                );
-                Body.AddForceAtPosition(
-                    -tr.up * antiRoll,
-                    tr.TransformPoint(Mount(left)),
-                    ForceMode.Force
-                );
-                Body.AddForceAtPosition(
-                    tr.up * antiRoll,
-                    tr.TransformPoint(Mount(right)),
-                    ForceMode.Force
-                );
+                rotations[i] *= Quaternion.Euler(angles[i], 0, 90);
             }
             Body.AddForce(
                 -Body.linearVelocity * Body.linearVelocity.magnitude * Profile.drag,

@@ -1226,3 +1226,37 @@ The junction history reveals that truck 4's path error grows from about 0.3 m
 to over 3 m during a prolonged zero-speed request. Its body slowly drifts and
 rotates into the opposing lane while braked. Stationary tire/brake integration
 is being reproduced separately before changing junction priority.
+
+### Stationary vehicle drift reproduction and correction
+
+`realism-stationary-before.xml` reproduces the physical failure without traffic:
+over 600 seconds of braking with steered wheels, the truck drifts **6.4075 m /
+50.426 degrees** on level ground and **10.5829 m / 113.319 degrees** on a
+5-degree cross-slope. The bus drifts **0.4626 m**. Car and ambulance cases pass
+the original limits; the suite is 2/5, not a pass.
+
+Removing duplicated brake/rolling stopping demand alone is insufficient
+(`realism-stationary-after.xml`, 2/5). A 40 ms tire response stabilizes the level
+cases, but slope rotation remains (`realism-stationary-relaxation.xml`, 4/5;
+`realism-stationary-contact.xml`, 4/5). These attempts remain available.
+
+The final correction calculates suspension loads first, transfers anti-roll
+load between supported wheels, then uses those same loads for tire grip and
+gravity compensation. Normal/tangential reactions share the contact point;
+rolling resistance only supplies stopping demand left after braking. The
+simulation parameter `VehicleProfile.tireRelaxationTime` defaults to 0.04 s.
+Forces remain bounded by contact load and grip. Body poses/velocities are not
+overwritten, and no kinematic holding mode is introduced.
+
+`realism-stationary-load-transfer.xml` passes **24/24 vehicle-physics tests**
+in 38.06 seconds. All five long-hold cases report 0.0000 m / 0.000 degrees at
+their logged precision and pass the unchanged 0.10 m / 1-degree limits. Each
+also passes an external-impulse check demonstrating finite movement. The
+pedestrian/animal contact, reverse/bay, suspension, slope, turning and bridge
+regressions in that suite pass. Honda game calibration remains **10.60 s
+0–60 mph / 42.20 m braking from 60 mph**; GLS remains **5.41 s / 41.88 m**.
+These are game calibration results, not validated measurements of real cars.
+
+Full Editor/populated-world checks, a new package and sustained activity run
+are required for the combined arrival/vehicle changes. The prior 35.73 FPS
+package predates them and does not qualify this newer source.

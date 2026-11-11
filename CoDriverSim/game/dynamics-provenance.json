@@ -44,7 +44,8 @@
     "Automatic six-speed road-car gearbox with throttle-dependent downshift and finite shift interruption.",
     "Added explicit Ackermann steering and anti-roll forces; no boost, burnout, stunt, air steering or rollover assist.",
     "Simulation calibration only; no claim of measured Honda tire or suspension data.",
-    "Suspension damping uses contact-plane-relative travel speed divided by the suspension-axis projection. Corrected bridge grade response; verified both directions at 8 and 26.82 m/s with no chassis contacts."
+    "Suspension damping uses contact-plane-relative travel speed divided by the suspension-axis projection. Corrected bridge grade response; verified both directions at 8 and 26.82 m/s with no chassis contacts.",
+    "Rolling resistance acts on residual longitudinal stopping demand after brake force, avoiding duplicate low-speed velocity cancellation. A configurable 40 ms low-speed tire response accounts for coupled body rotation instead of cancelling each wheel-point velocity in one explicit step. Anti-roll transfers normal load before tire grip and gravity compensation are calculated. Normal and tangential road reactions share the same physical contact point. All forces remain load-limited; no body pose or velocity is overwritten. Long stationary-queue and finite-impact regression fixtures cover this adaptation."
   ],
   "integration": "Adapted/reimplemented core dynamics calculations, not the unmodified upstream component package."
 }
