@@ -17,6 +17,7 @@ from pathlib import Path
 
 from codriversim.contracts import CameraFrame, FrameOrder
 from codriversim.recording import EventRecorder, RecordingWorker
+from codriversim.service_diagnostics import ProgressWatchdog
 
 
 def receive(sock, count):
@@ -49,6 +50,7 @@ class ObservationService:
         self.recorder = RecordingWorker(EventRecorder(output))
         self.lock = threading.Lock()
         self.road_file, self.evidence = road_file, evidence
+        self.progress = None
         self.started = time.perf_counter()
         self.latencies = []
         self.latest = None
@@ -79,6 +81,8 @@ class ObservationService:
             "detection_hz": self.processed / (time.perf_counter() - self.started),
         }
         if self.evidence:
+            if self.progress:
+                self.progress.mark("status_evidence", frame.frame_id)
             try:
                 self.evidence.parent.mkdir(parents=True, exist_ok=True)
                 if self.frames == 20:
@@ -139,7 +143,11 @@ def serve(model: Path, ready: Path, output: Path, token: str):
         evidence=output.parent / "qualification" / f"observer-{token}.json",
     )
     ready.parent.mkdir(parents=True, exist_ok=True)
-    with socket.socket() as listener:
+    with (
+        ProgressWatchdog(ready.with_suffix(".stalls.log")) as progress,
+        socket.socket() as listener,
+    ):
+        service.progress = progress
         listener.bind(("127.0.0.1", 0))
         listener.listen(1)
         listener.settimeout(30)
@@ -154,6 +162,7 @@ def serve(model: Path, ready: Path, output: Path, token: str):
         failure_type = None
         last_header = None
         try:
+            progress.mark("accept_connection")
             connection, _ = listener.accept()
             with connection:
                 connection.settimeout(15)
@@ -161,7 +170,9 @@ def serve(model: Path, ready: Path, output: Path, token: str):
                 connection.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 8 * 1024 * 1024)
                 connection.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1024 * 1024)
                 while True:
+                    progress.mark("receive_camera")
                     header, image = packet(connection)
+                    progress.mark("validate_camera", header.get("frame_id", -1))
                     last_header = {
                         key: repr(header.get(key))[:160]
                         for key in ("session_id", "frame_id", "timestamp")
@@ -171,6 +182,7 @@ def serve(model: Path, ready: Path, output: Path, token: str):
                     frame = CameraFrame.parse(header, image)
                     order.accept(frame)
                     if frame.encoding.startswith("rgb24"):
+                        progress.mark("encode_camera", frame.frame_id)
                         import cv2
                         import numpy as np
 
@@ -185,9 +197,12 @@ def serve(model: Path, ready: Path, output: Path, token: str):
                             [cv2.IMWRITE_JPEG_QUALITY, 85],
                         )[1].tobytes()
                         frame = replace(frame, image=encoded, encoding="jpeg")
+                    progress.mark("submit_observation", frame.frame_id)
                     report = service.submit(frame)
                     report["image_bytes"] = len(frame.image)
+                    progress.mark("reply_camera", frame.frame_id)
                     reply(connection, report, frame.image)
+                    progress.mark("recording_requests", frame.frame_id)
                     save_request = ready.with_suffix(".save")
                     if save_request.is_file():
                         service.recorder.request(
@@ -220,6 +235,7 @@ def serve(model: Path, ready: Path, output: Path, token: str):
             reason, failure_type = str(exc), type(exc).__name__
             raise
         finally:
+            progress.close()
             # Retain the cause before recorder shutdown. The readiness file is
             # transient, and GUI children otherwise lose their terminal output.
             try:

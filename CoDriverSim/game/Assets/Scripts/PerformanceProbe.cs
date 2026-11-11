@@ -24,6 +24,9 @@ namespace CoDriver
                 {
                     "Main Thread",
                     "Render Thread",
+                    "CPU Main Thread Frame Time",
+                    "CPU Render Thread Frame Time",
+                    "Gfx.WaitForRenderThread",
                     "Physics.Simulate",
                     "Physics.Processing",
                     "BehaviourUpdate",

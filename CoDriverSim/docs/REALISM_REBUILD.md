@@ -871,3 +871,25 @@ including transformed geometry, UV/material retention and independent distant
 culling. `realism-spatial-facades-lifecycle.xml` passes both generated-geometry
 cleanup and independent-camera presentation isolation. A new packaged short
 performance probe is next; no improvement is claimed from these tests alone.
+
+### Spatial-batch probe and transport stall
+
+Package `Realism-local-20261110-191531`, session
+`a4e768fb64b242b7b53fcaee108af588`, completed its five-minute probe. It is a failed
+AI workload check: the observer stopped replying at frame 3,600 (camera timestamp
+211.015 seconds), then a 9.79-second main-thread stall was sampled. Both AI
+connections subsequently disconnected. No relevant System/Application event was
+returned for the inspected Windows event window. The cause remains unconfirmed.
+
+Whole-run 30.39 FPS cannot establish an improvement with AI enabled because the
+last part ran without fresh AI. Whole-session camera/detector rates were
+12.89/4.19 Hz; p95/p99 frame times were 61.82/83.80 ms. There were no player
+contacts, pauses, or sampled traffic/rail overlaps. The failed run is preserved.
+
+A bounded, separate watchdog now records the Python transport stage and thread
+stacks if a stage stalls for two seconds, up to eight reports per process. It
+never writes on the transport thread and logs no image data or capability token.
+Release-player profiling also requests the available CPU/render-thread/wait
+counters instead of assuming development-only physics markers are present.
+These are diagnostic changes, not a claimed fix for the failure. The Python
+regression suite passes 102 tests; a fresh ten-minute packaged probe is next.
