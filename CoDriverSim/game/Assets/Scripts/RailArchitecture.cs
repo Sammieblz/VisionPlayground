@@ -49,6 +49,9 @@ namespace CoDriver
                 ballast,
                 true
             );
+            var timber = Resources.Load<Material>("Realism/Prepared/RailTimber") ?? Art.Wood;
+            Mesh sleeperMesh = null;
+            var sleeperSize = new Vector3(2.6f, .16f, .23f);
             for (float distance = 0; distance < path.Length; distance += .65f)
             {
                 var point = path.Position(distance);
@@ -61,11 +64,22 @@ namespace CoDriver
                     "Timber sleeper",
                     town.transform,
                     point - Vector3.up * .11f,
-                    new Vector3(2.6f, .16f, .23f),
+                    sleeperSize,
                     Art.Wood,
                     false
                 );
                 sleeper.transform.rotation = rotation;
+                if (timber.mainTexture)
+                {
+                    var filter = sleeper.GetComponent<MeshFilter>();
+                    if (!sleeperMesh)
+                        sleeperMesh = RuntimeResources.Register(
+                            town.gameObject,
+                            TimberMesh(filter.sharedMesh, sleeperSize)
+                        );
+                    filter.sharedMesh = sleeperMesh;
+                    sleeper.GetComponent<Renderer>().sharedMaterial = timber;
+                }
                 // Low-profile plates bind the running rail to each sleeper. They
                 // are visual only; rail contact remains the finite-mass rail system.
                 foreach (int side in new[] { -1, 1 })
@@ -81,6 +95,29 @@ namespace CoDriver
                     plate.transform.rotation = rotation;
                 }
             }
+        }
+
+        static Mesh TimberMesh(Mesh source, Vector3 size)
+        {
+            // One shared mesh per track, with the source's vertical grain along
+            // the sleeper's long axis. Preserve 0.5 m scan scale on every face;
+            // a stretched cube UV would turn the wood into broad painted bands.
+            var mesh = Object.Instantiate(source);
+            mesh.name = "Metric weathered timber sleeper";
+            var vertices = mesh.vertices;
+            var normals = mesh.normals;
+            var uv = new Vector2[vertices.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                var p = Vector3.Scale(vertices[i], size);
+                uv[i] =
+                    Mathf.Abs(normals[i].y) > .5f ? new Vector2(p.z, p.x) * 2
+                    : Mathf.Abs(normals[i].z) > .5f ? new Vector2(p.y, p.x) * 2
+                    : new Vector2(p.z, p.y) * 2;
+            }
+            mesh.uv = uv;
+            mesh.RecalculateTangents();
+            return mesh;
         }
 
         static bool AtLevelCrossing(Town town, Vector3 point)

@@ -63,10 +63,7 @@ namespace CoDriver.Editor
                 importer.alphaTestReferenceValue = .45f;
             }
             if (name == "daylight")
-            {
-                importer.textureShape = TextureImporterShape.TextureCube;
-                importer.generateCubemap = TextureImporterGenerateCubemap.AutoCubemap;
-            }
+                ConfigureDaylight(importer);
             importer.maxTextureSize = 2048;
             importer.mipmapEnabled = true;
         }
@@ -521,15 +518,32 @@ namespace CoDriver.Editor
             UnityEngine.Object.DestroyImmediate(result);
         }
 
+        static bool ConfigureDaylight(TextureImporter importer)
+        {
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            bool changed =
+                importer.textureShape != TextureImporterShape.TextureCube
+                || !importer.mipmapEnabled
+                || settings.cubemapConvolution != TextureImporterCubemapConvolution.Specular;
+            importer.textureShape = TextureImporterShape.TextureCube;
+            importer.generateCubemap = TextureImporterGenerateCubemap.AutoCubemap;
+            importer.mipmapEnabled = true;
+            importer.ReadTextureSettings(settings);
+            // The same HDR cube supplies sky and material reflections. Ordinary
+            // mipmaps retain sharp sun/cloud glints even on rough surfaces;
+            // prefiltered specular mips are required by the URP roughness lookup.
+            // https://docs.unity.com/en-us/engine/6000.3/script-reference/unityeditor/textureimportercubemapconvolution/specular
+            settings.cubemapConvolution = TextureImporterCubemapConvolution.Specular;
+            importer.SetTextureSettings(settings);
+            return changed;
+        }
+
         public static void PrepareSurfaces()
         {
             var skyImporter = (TextureImporter)AssetImporter.GetAtPath(Root + "Daylight.hdr");
-            if (skyImporter && skyImporter.textureShape != TextureImporterShape.TextureCube)
-            {
-                skyImporter.textureShape = TextureImporterShape.TextureCube;
-                skyImporter.generateCubemap = TextureImporterGenerateCubemap.AutoCubemap;
+            if (skyImporter && ConfigureDaylight(skyImporter))
                 skyImporter.SaveAndReimport();
-            }
             foreach (
                 string name in new[]
                 {
@@ -543,6 +557,7 @@ namespace CoDriver.Editor
                     "PaintedStucco",
                     "WhiteStucco",
                     "FlatRoof",
+                    "RailTimber",
                 }
             )
             {
@@ -630,6 +645,14 @@ namespace CoDriver.Editor
                     material.mainTextureScale = Vector2.one * .25f;
                     material.SetFloat("_BumpScale", .2f);
                     material.SetFloat("_Smoothness", .08f);
+                }
+                if (name == "RailTimber")
+                {
+                    // An authored dark weathered treatment, not a measured
+                    // railway-timber material. The mesh supplies metric grain UVs.
+                    material.color = new Color(.58f, .54f, .46f);
+                    material.SetFloat("_BumpScale", .35f);
+                    material.SetFloat("_Smoothness", .18f);
                 }
                 Save(material, Prepared + name + ".mat");
             }

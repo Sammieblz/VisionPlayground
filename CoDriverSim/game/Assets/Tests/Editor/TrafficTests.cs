@@ -38,6 +38,12 @@ namespace CoDriver.Tests
                         TrafficClearance.CrossingSpeedLimit(body, new Vector3(0, 0, -7))
                     )
                 );
+                body.size = new Vector3(1.93f, 1.2f, 4.4f);
+                Assert.AreEqual(
+                    0,
+                    TrafficClearance.CrossingSpeedLimit(body, new Vector3(0, 0, 2.496f)),
+                    "The front-corner clearance exception must never release a truck into a person directly ahead"
+                );
             }
             finally
             {

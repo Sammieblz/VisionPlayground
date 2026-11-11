@@ -246,3 +246,10 @@ retains its own EPL-2.0/GPL-2.0-or-later notices in the external tool cache.
   **comtypes 1.5.0**, MIT: https://github.com/enthought/comtypes .
   These tools are pinned in `requirements-capture-lock.txt`; their wheels retain
   license texts. Neither is bundled into the game observer runtime.
+
+- **Rough Wood — Rob Tuytel / Poly Haven**, CC0-1.0:
+  https://polyhaven.com/a/rough_wood . The 2K diffuse, OpenGL normal, roughness
+  and occlusion maps are pinned in `game/surface-rail-manifest.json`. Railway
+  sleepers use the weathered timber surface with an authored dark treatment;
+  the source scan covers 0.5 metres per texture repeat. Original downloads and
+  upstream file metadata are retained outside source control.

@@ -596,6 +596,24 @@ namespace CoDriver.Tests
         [UnityTest]
         public IEnumerator OccupiedCrossingClearsWithoutBusPedestrianDeadlock()
         {
+            return OccupiedCrossingClears("Bus", new Vector3(1.9f, .05f, 3), Vector3.left);
+        }
+
+        [UnityTest]
+        public IEnumerator WalkerBesideTruckNoseAndTruckClearWithoutContact()
+        {
+            // Relative pose/direction from the retained Davis transit blockage.
+            // The pedestrian is outside the side of the truck, slightly beyond
+            // its nose, but its diagonal crossing request runs into the body.
+            return OccupiedCrossingClears(
+                "Truck",
+                new Vector3(-1.718f, .05f, 2.496f),
+                new Vector3(1, 0, -.36f).normalized
+            );
+        }
+
+        IEnumerator OccupiedCrossingClears(string leadingKind, Vector3 actorStart, Vector3 travel)
+        {
             var ground = Own("Crossing course");
             ground.transform.position = Vector3.down * .5f;
             ground.AddComponent<BoxCollider>().size = new Vector3(40, 1, 160);
@@ -605,11 +623,11 @@ namespace CoDriver.Tests
             );
             var drivers = new List<PhysicalDriver>();
             var shapes = new List<BoxCollider>();
-            foreach (string kind in new[] { "Bus", "Truck" })
+            foreach (string kind in new[] { leadingKind, "Truck" })
             {
                 var go = Own("Crossing " + kind);
                 go.layer = TrafficClearance.TrafficLayer;
-                go.transform.position = new Vector3(0, .2f, kind == "Bus" ? 0 : -15);
+                go.transform.position = new Vector3(0, .2f, drivers.Count == 0 ? 0 : -15);
                 var profile = VehicleProfile.ForTraffic(kind);
                 var shell = go.AddComponent<BoxCollider>();
                 shell.size = profile.collisionSize;
@@ -619,7 +637,7 @@ namespace CoDriver.Tests
             }
             var person = Own("Waiting beside occupied bus crossing");
             person.layer = TrafficClearance.WalkerLayer;
-            person.transform.position = new Vector3(1.9f, .05f, 3);
+            person.transform.position = actorStart;
             var capsule = person.AddComponent<CapsuleCollider>();
             capsule.height = 1.8f;
             capsule.radius = .25f;
@@ -666,11 +684,8 @@ namespace CoDriver.Tests
                         "Clearing the crossing must not drive through the pedestrian"
                     );
                 }
-                crossed |= actorBody.position.x < -6;
-                mover.StepVelocity(
-                    crossed ? Vector3.zero : Vector3.left * 1.4f,
-                    Time.fixedDeltaTime
-                );
+                crossed |= Vector3.Dot(actorBody.position - actorStart, travel) > 8;
+                mover.StepVelocity(crossed ? Vector3.zero : travel * 1.4f, Time.fixedDeltaTime);
                 yield return new WaitForFixedUpdate();
             }
             Assert.IsTrue(crossed, "Waiting pedestrian must finish after the occupied bus clears");

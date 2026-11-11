@@ -25,14 +25,14 @@ permission is established. CC0/CC-BY assets retain their individual provenance.
 ## Current work
 
 Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
-revised Davis streets are integrated. The `092d516` package's completed
-31.3-simulated-minute run meets rendering/inference targets but fails world
-qualification: unfinished pedestrian crossings and stationary truck drift create
-prolonged queues. The arrival and tire-load corrections pass the full 32-test
-physical-world suite, including ten ambulance seeds, in
-`realism-static-hold-v1-world.xml`. A separate late gate-pedestal obstruction
-found in its traffic logs is also corrected; the subsequent complete Editor
-suite passes 145/145. All five affected populated-world checks also pass.
+revised Davis streets are integrated. The latest completed packaged session,
+`7f74123cc75744cd9e6f60ccbdb42de0`, meets rendering/inference throughput targets
+over 1,878 advancing simulation seconds but fails world qualification: two
+unfinished pedestrian crossings create prolonged queues. The recorded corner
+and truck-nose fixes pass their focused physical reproductions; the complete
+Editor suite also passes 145/145. The combined populated-world suite is still
+being reviewed and has exposed a different truck/crossing blockage. No new
+packaged performance pass is claimed for those source changes.
 
 Current work is correcting those failures, measuring the combined workload,
 reviewing fresh activity/visual captures and preparing the eligible public
@@ -1386,3 +1386,43 @@ checks and formatting pass. `VISUAL_REVIEW.html` now uses the 22 fresh scene
 captures and identifies both completed world-failure runs; older activity
 videos remain labelled historical. `gate-performance-review/` contains a
 PNG/SVG comparison and source provenance, explicitly identifying unmet checks.
+
+### Combined walker suite: transit corner blockage
+
+`realism-walkers-final-editor.xml` passes **145/145**. The populated suite in
+`realism-walkers-final-world.xml` passes **33/34** in 1,929.26 seconds. All ten
+ambulance seeds, 21–30, complete without recorded contact; their preserved report
+is `overhaul/ambulance-walkers-final-qualified.json`. The Davis passenger-trip
+test exceeds its 300-second wall-clock timeout. Its saved late sample is
+`realism/transit-walkers-final-failure.json`, at 866.67 simulation seconds: the
+bus has visited one stop and waits behind truck 16 at a crossing.
+
+People 22 and 46 wait beside that truck's front corner. Person 22 is 0.296 m
+beyond the nose and 0.753 m outside the side of the collision body. Its diagonal
+walking request runs into the truck; the truck's crossing rule requests zero
+speed, and the available navigation area cannot accommodate the proposed detour.
+`realism-truck-corner-before.xml` reproduces this mutual wait in a small physical
+fixture and fails. The slow occupied-crossing clearance rule now also covers a
+person less than 0.5 m beyond the nose and more than 0.5 m outside the body's side.
+Direct-front stopping and the forward/curved-path collision checks remain active.
+`realism-truck-corner-after.xml` passes both that fixture and the existing occupied
+bus crossing, with no body penetration. The populated transit retest is still
+required; this focused pass is not a complete town qualification.
+
+### Reflection preparation and timber surface
+
+The daylight HDR cube was imported with `cubemapConvolution: 0`, then assigned
+as the custom material-reflection cube. This supplied ordinary sky mipmaps to
+URP's roughness lookup. Preparation now uses Unity's specular-prefiltered mipmaps
+for both new and existing imports. The matched 22-image sets in
+`visual-reflection-before/` and `visual-reflection-after/` use 2× MSAA at 720p and
+1080p. In the matched cabin views, the bright dashboard/vent glints are removed
+without changing the upholstery or trim values. This does not establish complete
+visual acceptance or live mirror/UI behavior.
+
+Railway sleepers now use the pinned CC0 Rough Wood maps with a dark authored
+treatment. A shared per-track mesh keeps grain along the timber at the source's
+0.5 m scale; tangents are regenerated after the UV change. The mesh is registered
+for cleanup when the town is destroyed. Sleeper geometry and collision behavior
+are unchanged. Python regression remains **112 passed / two skipped**, with Ruff
+and formatting checks passing. A new combined package/run is still required.

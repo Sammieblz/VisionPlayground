@@ -82,7 +82,15 @@ namespace CoDriver
             float front = body.size.z * .5f;
             if (local.z < -front - .5f)
                 return float.PositiveInfinity;
-            if (local.z < front)
+            if (
+                local.z < front
+                || (local.z < front + .5f && Mathf.Abs(local.x) > body.size.x * .5f + .5f)
+            )
+                // A walker waiting beside the front corner can be just beyond
+                // the nose while its diagonal route runs into the occupied body.
+                // Allow a slow clearance request only outside the body width;
+                // the forward and curved-path casts still require free space.
+                // A pedestrian directly ahead retains the full stopping rule.
                 return 2;
             float clearance = Mathf.Max(0, local.z - front - 1.5f);
             return Mathf.Min(clearance / 1.4f, Mathf.Sqrt(8 * clearance));

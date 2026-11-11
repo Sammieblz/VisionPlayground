@@ -430,6 +430,46 @@
       ],
       "sha256": "7c77345981cf41abd02b6793db3088aec529fca2807871b09df9786c34c5e697",
       "surface_metres": 2
+    },
+    {
+      "name": "RailTimber",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_wood/rough_wood_diff_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/RailTimber.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/rough_wood",
+      "authors": ["Rob Tuytel"],
+      "sha256": "0bd2b3195db9b54d55aa0f842801220ec5e1d389f5fc1e670b378bdaca3f8e7b",
+      "surface_metres": 0.5
+    },
+    {
+      "name": "RailTimberNormal",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_wood/rough_wood_nor_gl_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/RailTimberNormal.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/rough_wood",
+      "authors": ["Rob Tuytel"],
+      "sha256": "b75cb1e989407e442c3255f3e05ea8c40162c0e5dc2efc9ef2515fce61319194",
+      "surface_metres": 0.5
+    },
+    {
+      "name": "RailTimberRoughness",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_wood/rough_wood_rough_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/RailTimberRoughness.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/rough_wood",
+      "authors": ["Rob Tuytel"],
+      "sha256": "38343cb062e7fadcda513ded0b17271c9d7f1da56765d03508dc84c8ff1bd475",
+      "surface_metres": 0.5
+    },
+    {
+      "name": "RailTimberOcclusion",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_wood/rough_wood_ao_2k.jpg",
+      "local": "game/Assets/External/Resources/Materials/RailTimberOcclusion.jpg",
+      "license": "CC0-1.0",
+      "source": "https://polyhaven.com/a/rough_wood",
+      "authors": ["Rob Tuytel"],
+      "sha256": "3bf2da279765a3e183686b0c27f9a5322361092980a259a0f634a75189a742e2",
+      "surface_metres": 0.5
     }
   ]
 }

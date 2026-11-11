@@ -237,7 +237,8 @@ namespace CoDriver.Editor
             Directory.CreateDirectory(folder);
             foreach (int height in new[] { 720, 1080 })
             {
-                var target = new RenderTexture(height * 16 / 9, height, 24);
+                // Match the pinned Windows player's 2x MSAA in comparison captures.
+                var target = new RenderTexture(height * 16 / 9, height, 24) { antiAliasing = 2 };
                 camera.targetTexture = target;
                 camera.cullingMask = ~((1 << 8) | (1 << 16));
                 camera.transform.SetPositionAndRotation(
