@@ -961,3 +961,28 @@ impulse); this is retained for activity review and is not a contact-free town
 claim. Fresh release performance and visual/activity review remain pending.
 Visual capture commands now accept `-visual-output` so fresh captures can be
 stored beside previous evidence without replacing it.
+
+### Shared-memory lifetime correction
+
+Before starting the next release probe, WSL `/dev/shm` was found 97% full.
+Eighty-three **closed CoDriverSim sessions** retained 7,758,884,864 bytes of
+message-queue/camera files. Every exact namespace matched a retained game service
+log; normal-user and root read-only process audits found no live mappings/users.
+Only those verified directories were removed. Legacy manual Comma namespaces,
+unrelated IPC and WSL processes were left intact. `/dev/shm` fell to 4% used;
+Windows subsequently reported approximately 6.73 GiB of available physical memory.
+Evidence is retained in `ipc-audit.json`, `ipc-root-audit.json` and
+`ipc-cleanup.json` under `outputs/qualification/realism/`.
+
+The Linux supervisor now releases its exact session namespace after all adopted
+descendants exit, including after a hard bridge crash. It rejects redirected or
+unexpected directory contents and preserves accessible live users. Cleanup
+results are written beside the service records. A restart cleans only its own
+inactive namespace; no global cache purge or WSL shutdown is used. The new helper
+is included in packaged applications.
+
+Windows Python regression passes **110 tests** (two Linux-only lifecycle cases
+skipped). WSL passes all **10 IPC tests**, including real supervisor/subreaper
+checks for normal bridge exit and a SIGKILL bridge crash with an orphan worker.
+This fixes a verified resource leak. It does not establish the cause of the
+earlier transport stall or qualify current performance; a fresh probe is next.

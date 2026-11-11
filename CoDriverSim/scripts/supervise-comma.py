@@ -2,6 +2,7 @@
 
 import argparse
 import ctypes
+import json
 import os
 import signal
 import subprocess
@@ -43,6 +44,8 @@ def reap():
 
 
 def main():
+    from comma_ipc import cleanup, prepare
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", required=True)
     parser.add_argument("--ready", type=Path, required=True)
@@ -61,26 +64,41 @@ def main():
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     command = [sys.executable, str(Path(__file__).with_name("unity-comma.py")), *sys.argv[1:]]
-    child = subprocess.Popen(command)
+    prepare(args.token)
+    child = None
     try:
+        child = subprocess.Popen(command)
         while child.poll() is None and not stopping:
             time.sleep(0.1)
     finally:
         send(descendants(os.getpid()), signal.SIGTERM)
         deadline = time.monotonic() + 8
         while time.monotonic() < deadline:
-            if child.poll() is not None:
+            if child is None or child.poll() is not None:
                 reap()
             if not descendants(os.getpid()):
                 break
             time.sleep(0.1)
         send(descendants(os.getpid()), signal.SIGKILL)
-        child.wait()
+        if child is not None:
+            child.wait()
         for _ in range(20):
             reap()
             if not descendants(os.getpid()):
                 break
             time.sleep(0.05)
+        try:
+            if descendants(os.getpid()):
+                raise RuntimeError("Owned processes remain; preserving IPC")
+            result = {"status": "cleaned", **cleanup(args.token)}
+        except (OSError, ValueError, RuntimeError) as exc:
+            result = {"status": "preserved", "reason": str(exc)}
+        try:
+            args.ready.with_suffix(".ipc-cleanup.json").write_text(
+                json.dumps(result, indent=2), encoding="utf-8"
+            )
+        except OSError as exc:
+            print("Cannot record IPC cleanup:", exc, file=sys.stderr)
         for path in (
             args.ready,
             args.ready.with_suffix(".road.json"),
@@ -89,7 +107,7 @@ def main():
             args.ready.with_suffix(".stop"),
         ):
             path.unlink(missing_ok=True)
-    return child.returncode if child.returncode is not None else 1
+    return child.returncode if child is not None and child.returncode is not None else 1
 
 
 if __name__ == "__main__":

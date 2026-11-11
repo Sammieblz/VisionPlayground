@@ -120,6 +120,7 @@ def main():
         "unity-comma.sh",
         "launch-wsl-bridge.py",
         "supervise-comma.py",
+        "comma_ipc.py",
         "comma_vehicle_config.py",
         "comma_sim_card.py",
         "comma_sim_manager.py",
