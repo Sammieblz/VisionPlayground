@@ -256,6 +256,11 @@ def main():
         "reviewer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "comma_healthy_sample_fraction": healthy,
         "service_freshness": freshness,
+        "camera_deadlines_skipped": (
+            max(r["camera_missed_deadlines"] for r in driving)
+            if all("camera_missed_deadlines" in r for r in driving)
+            else None
+        ),
         "maps_observed": maps,
         "automation_episodes": automation_episodes(driving),
         "player_longest_stationary_seconds": player_stationary,
