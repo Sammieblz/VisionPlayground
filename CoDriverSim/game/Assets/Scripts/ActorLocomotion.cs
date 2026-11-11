@@ -161,7 +161,15 @@ namespace CoDriver
                     // NavMesh's simulated velocity can oscillate at the destination
                     // while a separate force-driven body catches up. Brake against
                     // the physical distance on the unobstructed final segment.
-                    float speed = Mathf.Min(agent.speed, Mathf.Max(0, toGoal.magnitude - .15f) * 2);
+                    // A force-driven body must still overcome contact friction
+                    // near the destination. Tapering to zero 15 cm early left
+                    // walkers stranded outside the far sidewalk indefinitely.
+                    // Keep a slow approach until the actual body arrives; the
+                    // same bounded acceleration then brakes it to rest.
+                    float speed =
+                        toGoal.magnitude <= .04f
+                            ? 0
+                            : Mathf.Min(agent.speed, Mathf.Max(.3f, (toGoal.magnitude - .04f) * 2));
                     bool personAhead =
                         speed > .05f
                         && physics.SphereCast(

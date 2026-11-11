@@ -25,16 +25,19 @@ permission is established. CC0/CC-BY assets retain their individual provenance.
 ## Current work
 
 Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
-revised Davis streets are integrated. The populated contact/traffic regressions
-and renewed physical turn review pass with the documented route exclusions.
-An earlier pooled-camera candidate met the sustained rendering/inference targets,
-but its long run exposed traffic and railway failures. The subsequent run had no
-recorded player contacts, but exposed a pedestrian crossing blockage and camera
-delivery below target. Current work is correcting those failures, qualifying the
-resulting application and preparing the eligible public package. Visual acceptance
-and the final controller/Comma check remain open. Measurements below
-identify their exact candidates; an earlier candidate's results are not a blanket
-pass for later changes.
+revised Davis streets are integrated. Commit `092d516` passes 139 Editor and 30
+physical-world tests, including ten ambulance dispatch/return seeds. Its external
+Windows package passes integrity and bundled-CLI verification. Its completed
+31.3-simulated-minute run meets the rendering/inference targets, but exposes
+pedestrians stopping just short of crossing endpoints and prolonged bus,
+ambulance and ordinary-vehicle queues. These are open findings, not waived by
+the automated test passes or the performance result.
+
+Current work is correcting those failures, measuring the combined workload,
+reviewing fresh activity/visual captures and preparing the eligible public
+package. Visual acceptance and the final controller/Comma check remain open.
+Measurements below identify their exact candidates; an earlier candidate's
+results are not a blanket pass for later changes.
 
 ## Measurements from the first packaged checkpoint
 
@@ -1136,3 +1139,90 @@ running before another full qualification attempt.
 pedestrian-pair fixture and the six-simulated-minute Davis ordinary-traffic
 check (149.17 seconds total). The complete suite is being restarted with this
 correction included; these two passes alone are not release qualification.
+
+### Combined neighborhood correction qualification
+
+Commit `092d516` passes **139/139 Editor tests** and **30/30 physical-world
+PlayMode tests** (`realism-neighborhood-v2-editor.xml` and
+`realism-neighborhood-v2-world.xml`). The world suite took 1,589.96 seconds.
+All ten ambulance dispatch/return seeds, 21–30, completed with no recorded
+ambulance contact; their simulation durations were 258.67–376 seconds.
+The retained cycle report is `ambulance-neighborhood-v2-qualified.json`.
+Both populated traffic checks, complete bus/parking activities, initial rail
+clearance, recorded pedestrian recoveries, bridge/gate physics, and camera
+isolation are included. Python CI run `42950105457` also passes for this commit.
+
+The Windows player built successfully and package
+`Realism-local-20261110-223436` passes integrity and bundled-CLI verification.
+Its sustained run is session `a5a7f130c2d34a46add57c5ad9748e6f`, with the controller
+off, 1280×720 cockpit view, AI services enabled, and the explicitly identified
+qualification driver. This driver is not Comma autonomy.
+
+During that run, pedestrians 1, 4 and 9 remain about 0.2 m from their
+crossing endpoints. The recorded physical approach force becomes too small to
+overcome contact friction before the body reaches the walking-area tolerance.
+The sampled poses and build identity are retained in
+`neighborhood-crossing-endpoint-repro/` for a targeted physical regression.
+Cars 9 and 15 also waited 126.19 and 127.20 simulated seconds at a junction with
+pedestrian, vehicle and emergency-yield conflicts; both subsequently cleared
+without recorded contact. Those durations fail the current two-minute queue
+check and require review. The final result is recorded below.
+
+Fresh activity/visual evidence and the final physical Xbox Comma
+engagement/takeover check remain open. These passing tests do not close those
+release gates.
+
+### Completed neighborhood performance run; world qualification failed
+
+The same package/session completed 1,900.01 elapsed seconds and **1,878.04
+advancing simulation seconds**, covering 10,500.68 m with no pauses or player
+contacts. All rendering/inference checks pass for this workload:
+
+| Measurement | Recorded result |
+| --- | ---: |
+| Mean frame rate | 35.73 FPS |
+| Frame-time p95 / p99 | 46.53 / 55.34 ms |
+| Camera delivery | 19.95 Hz |
+| General detection | 6.20 Hz |
+| Sensor-to-warning p95 | 383.55 ms (779 samples) |
+| Sensor-to-observer p95 | 361.67 ms |
+| Fresh healthy Comma-command samples | 98.70% |
+| Camera transport / reorder drops | 0 / 0 |
+
+There are no sampled road-vehicle or rail overlaps and no sampled backward
+motion without a reverse request. The bus reaches five stops, the train 49,
+parking completes three returns, and a complete emergency cycle is observed.
+However, the longest bus wait is **359.68 s** and the active ambulance wait is
+**628.89 s**. The bus yields to the pedestrian stalled near `(-293.59, -8.31)`.
+A separate central junction queue has car 18 holding a reservation while its
+exit is blocked by truck 4; the truck waits for that reservation. Their recorded
+poses, headings and blockers are retained in
+`neighborhood-crossing-endpoint-repro/world-activities-late.json`.
+This is a **failed world qualification**, despite the performance pass.
+
+The complete report is the package's
+`outputs/qualification/run-review-a5a7f130c2d34a46add57c5ad9748e6f.json`.
+The system-pressure log is `realism-neighborhood-v2-system.jsonl`.
+The application and owned helper processes exit; its IPC cleanup reports 37
+owned files / 194,584,576 bytes released. No unrelated WSL shutdown was used.
+
+`neighborhood-performance-comparison/` contains PNG/SVG charts, source hashes
+and the plotting script comparing this run with the earlier 9.3-simulated-minute
+28.57 FPS screening. The runs differ in build, route history and duration, so
+the chart is aggregate evidence, not a controlled component benchmark. Neither
+run measures Comma autonomy or real-road perception accuracy.
+
+The new arrival regressions first fail against the previous code
+(`realism-arrival-before.xml`, 0/2): a person stops 0.221 m short of an
+unobstructed destination, and the recorded Davis endpoint remains in Crossing.
+The final approach now maintains a slow walking request until the physical body
+is within 0.04 m, then brakes with the existing bounded forces. It does not warp
+the body or suppress contacts. `realism-arrival-after.xml` passes all **six**
+focused cases in 56.64 seconds: person/dog/cat arrival, the three recorded Davis
+endpoints, displaced-walker recovery, the opposed-pedestrian fixture, and Cedar
+curb/pole recoveries. This change postdates the measured package.
+
+The junction history reveals that truck 4's path error grows from about 0.3 m
+to over 3 m during a prolonged zero-speed request. Its body slowly drifts and
+rotates into the opposing lane while braked. Stationary tire/brake integration
+is being reproduced separately before changing junction priority.

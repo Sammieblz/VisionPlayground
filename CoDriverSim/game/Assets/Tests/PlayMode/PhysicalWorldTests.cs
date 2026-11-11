@@ -371,6 +371,155 @@ namespace CoDriver.Tests
         }
 
         [UnityTest]
+        public IEnumerator PhysicalWalkersReachClearDestinationsUnderContactFriction()
+        {
+            var ground = Own("Walking arrival course");
+            ground.transform.position = Vector3.down * .5f;
+            ground.AddComponent<BoxCollider>().size = new Vector3(30, 1, 30);
+            var settings = NavMesh.GetSettingsByID(0);
+            settings.agentRadius = .28f;
+            var data = NavMeshBuilder.BuildNavMeshData(
+                settings,
+                new List<NavMeshBuildSource>
+                {
+                    new NavMeshBuildSource
+                    {
+                        shape = NavMeshBuildSourceShape.Box,
+                        transform = Matrix4x4.TRS(
+                            Vector3.down * .05f,
+                            Quaternion.identity,
+                            Vector3.one
+                        ),
+                        size = new Vector3(12, .1f, 20),
+                        area = 0,
+                    },
+                },
+                new Bounds(Vector3.zero, new Vector3(16, 5, 24)),
+                Vector3.zero,
+                Quaternion.identity
+            );
+            var navigation = NavMesh.AddNavMeshData(data);
+            try
+            {
+                var species = new[] { "Person", "Dog", "Cat" };
+                for (int i = 0; i < species.Length; i++)
+                {
+                    var actor = Own("Physical arrival " + species[i]);
+                    actor.layer = TrafficClearance.WalkerLayer;
+                    actor.transform.position = new Vector3(-3 + i * 3, .05f, 3.7f);
+                    float height =
+                        i == 0 ? 1.8f
+                        : i == 1 ? .65f
+                        : .4f;
+                    var shape = actor.AddComponent<CapsuleCollider>();
+                    shape.center = Vector3.up * height * .5f;
+                    shape.height = height;
+                    shape.radius = i == 0 ? .25f : .16f;
+                    var body = actor.AddComponent<Rigidbody>();
+                    var agent = actor.AddComponent<NavMeshAgent>();
+                    agent.speed = 1.25f;
+                    var locomotion = actor.AddComponent<ActorLocomotion>();
+                    locomotion.Initialize(species[i]);
+                    var goal = new Vector3(actor.transform.position.x, 0, 4);
+                    Assert.IsTrue(agent.SetDestination(goal));
+                    float until = Time.time + 8;
+                    var previous = body.position;
+                    while (Time.time < until)
+                    {
+                        yield return new WaitForFixedUpdate();
+                        Assert.Less(
+                            Vector3.Distance(previous, body.position),
+                            .09f,
+                            "Arrival must use finite physical movement"
+                        );
+                        previous = body.position;
+                    }
+                    Assert.Less(
+                        Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude,
+                        .10f,
+                        species[i] + " must reach its clear destination: " + locomotion.Diagnostic
+                    );
+                    Assert.Less(locomotion.Speed, .1f, "Arrival must settle rather than oscillate");
+                    Assert.IsFalse(body.isKinematic);
+                }
+            }
+            finally
+            {
+                navigation.Remove();
+                UnityEngine.Object.Destroy(data);
+            }
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedDavisCrossingEndpointsClearTheWalkingArea()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis crossing endpoint stall").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            foreach (var car in town.Traffic)
+                car.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            var walker = town.Walkers[9];
+            foreach (var other in town.Walkers)
+                if (other != walker)
+                    other.gameObject.SetActive(false);
+            var starts = new[]
+            {
+                new Vector3(-293.5925f, .1f, -8.3089f),
+                new Vector3(-340.68f, .1f, 88.27f),
+                new Vector3(-344.30f, .1f, 120.06f),
+            };
+            var goals = new[]
+            {
+                new Vector3(-293.4f, .1f, -8.2f),
+                new Vector3(-340.8f, .1f, 88.1f),
+                new Vector3(-344.5f, .1f, 120f),
+            };
+            var flags =
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            for (int i = 0; i < starts.Length; i++)
+            {
+                walker.PrepareCrossing(starts[i], goals[i]);
+                walker.BeginCrossing();
+                // Reproduce ordinary crossing completion, which requires the
+                // physical body on the sidewalk, not the scenario's .4 m radius.
+                typeof(Walker).GetField("scriptedCrossing", flags).SetValue(walker, false);
+                typeof(Walker).GetField("destination", flags).SetValue(walker, goals[i]);
+                typeof(Walker).GetField("nextAction", flags).SetValue(walker, 0f);
+                var body = walker.GetComponent<Rigidbody>();
+                var previous = body.position;
+                float until = Time.time + 8;
+                while (walker.Crossing && Time.time < until)
+                {
+                    yield return new WaitForFixedUpdate();
+                    Assert.Less(
+                        Vector3.Distance(previous, body.position),
+                        .09f,
+                        "Clearing a crossing cannot reposition the body"
+                    );
+                    previous = body.position;
+                }
+                Assert.IsFalse(
+                    walker.Crossing,
+                    walker.NavigationDetail
+                        + " "
+                        + walker.GetComponent<ActorLocomotion>().Diagnostic
+                );
+                Assert.IsTrue(
+                    NavMesh.SamplePosition(
+                        body.position,
+                        out _,
+                        .12f,
+                        PedestrianNavigation.WalkingMask
+                    ),
+                    "Completion must put the body on the sidewalk"
+                );
+            }
+        }
+
+        [UnityTest]
         public IEnumerator DisplacedWalkerReturnsToSidewalkWithFiniteMotion()
         {
             var ground = Own("Navigation recovery course");
