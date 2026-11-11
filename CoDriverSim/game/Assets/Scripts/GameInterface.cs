@@ -26,6 +26,7 @@ namespace CoDriver
             mapStreet;
         MapGraphic mini,
             fullMap;
+        Text startReadiness;
         Text north;
         Text speedUnit;
         string shownPage = "";
@@ -195,6 +196,8 @@ namespace CoDriver
             hud.gameObject.SetActive(drive && app.ViewMode != 3);
             fullComma.gameObject.SetActive(drive && app.ViewMode == 3);
             menu.gameObject.SetActive(!drive);
+            if (startReadiness)
+                startReadiness.text = app.SelfDrivingAvailability;
             mini.Map = app.Town.Map;
             speed.text = (app.Vehicle.Speed * 2.236936f).ToString("F0");
             speed.gameObject.SetActive(app.ViewMode != 1);
@@ -211,16 +214,12 @@ namespace CoDriver
                 205 + Mathf.Cos(northAngle) * 111
             );
             driveStatus.text =
-                (app.ActivityCameraActive ? "ACTIVITY VIEW · AI uses the vehicle camera\n" : "")
-                + (
-                    app.Mode == "qualification_driver" ? "SIMULATION TEST DRIVER"
-                    : app.AutomationActive ? "COMMA ACTIVE"
-                    : "HUMAN DRIVING"
-                )
+                (app.ActivityCameraActive ? "Watching town activity\n" : "")
+                + (app.Mode == "qualification_driver" ? "TEST DRIVE" : app.ControlStatus)
                 + (app.Vehicle.Reverse ? "    ·    R" : "    ·    D")
                 + "    ·    "
                 + app.ScenarioStatus
-                + (app.Arbiter.Notice.Length > 0 ? "\n" + app.Arbiter.Notice : "")
+                + (app.ControlNotice.Length > 0 ? "\n" + app.ControlNotice : "")
                 + (app.GearNotice.Length > 0 ? "\n" + app.GearNotice : "");
             if (shownPage != app.Page)
             {
@@ -229,7 +228,7 @@ namespace CoDriver
             }
             if (pageStatus)
                 pageStatus.text =
-                    app.Town.Map.name
+                    app.MapDisplayName
                     + "    ·    "
                     + (Gamepad.current != null ? "Xbox connected" : "Keyboard controls");
             if (diagnostics)
@@ -244,7 +243,7 @@ namespace CoDriver
                     ? app.CommaStatus
                     : "No fresh control messages\n" + app.CommaStatus;
                 diagnostics.text =
-                    $"RENDERING     {app.FramesPerSecond:F1} FPS\n{cameraMetrics}\n\nOBSERVER\n{observerState}\n\nCOMMA\n{commaState}\n\nCONTROL AUTHORITY\n{app.Arbiter.Reason}\n\n{app.ScenarioSummary}";
+                    $"DISTRICT\n{app.Town.Map.name}\n{app.Town.Map.attribution}\n\nRENDERING     {app.FramesPerSecond:F1} FPS\n{cameraMetrics}\n\nOBSERVER\n{observerState}\n\nCOMMA\n{commaState}\n\nCONTROL AUTHORITY\n{app.Arbiter.Reason}\n\n{app.ScenarioSummary}";
             }
             if (app.Page == "Map" && fullMap)
             {
@@ -297,6 +296,7 @@ namespace CoDriver
                 Destroy(child.gameObject);
             }
             pageStatus = diagnostics = mapStreet = null;
+            startReadiness = null;
             replayImage = null;
             replaySlider = null;
             fullMap = null;
@@ -325,7 +325,8 @@ namespace CoDriver
             {
                 string[] names =
                 {
-                    page == "Pause" ? "Resume drive" : "Play",
+                    page == "Pause" ? "Resume drive" : "Manual driving",
+                    "Self-driving",
                     "Scenario tests",
                     "Recordings",
                     "Settings",
@@ -338,7 +339,7 @@ namespace CoDriver
                     var button = AddButton(
                         names[i],
                         80,
-                        260 + i * 108,
+                        230 + i * 100,
                         420,
                         () =>
                         {
@@ -347,14 +348,17 @@ namespace CoDriver
                                 if (page == "Pause")
                                     app.ResumeDrive();
                                 else
-                                    app.StartDriving("Free drive");
+                                    app.StartDriving("Free drive", false);
                             }
-                            else if (item == 5)
+                            else if (item == 1)
+                                app.StartDriving("Free drive", true);
+                            else if (item == 6)
                                 Application.Quit();
                             else
                                 app.OpenPage(
                                     new[]
                                     {
+                                        "",
                                         "",
                                         "Scenarios",
                                         "Recordings",
@@ -384,7 +388,7 @@ namespace CoDriver
                     new Vector2(960, 230)
                 );
                 UiDrawing.Label(
-                    "A camera companion for the road ahead.\nDrive the district, practise road rules, and compare\nthe same scenario with stock Comma.",
+                    "Explore the district and practise road rules.\nDrive yourself or choose self-driving.\nYour co-driver stays with you either way.",
                     menu,
                     32,
                     new Vector2(0, 1),
@@ -402,60 +406,79 @@ namespace CoDriver
             }
             else if (page == "Scenarios")
             {
-                string[] modes = { "Human · muted", "Human + co-driver", "Stock Comma" };
-                for (int i = 0; i < 3; i++)
+                string[] modes = { "Manual driving", "Self-driving" };
+                for (int i = 0; i < modes.Length; i++)
                 {
-                    int mode = i;
+                    bool selfDriving = i == 1;
                     var b = AddButton(
-                        modes[i],
-                        80 + i * 580,
-                        240,
-                        540,
+                        ((app.Mode == "comma") == selfDriving ? "Selected: " : "") + modes[i],
+                        80 + i * 870,
+                        225,
+                        820,
                         () =>
                         {
-                            app.Mode = new[] { "human_muted", "human_ai", "comma" }[mode];
+                            app.Mode = selfDriving ? "comma" : "human_ai";
                             shownPage = "";
                         }
                     );
                     if (first == null)
                         first = b;
                 }
-                string[] names =
-                {
-                    "Normal driving",
-                    "Sudden braking",
-                    "Cut-in",
-                    "Lane drift",
-                    "Signal compliance",
-                    "Stop compliance",
-                    "Speed compliance",
-                    "Occluded pedestrian crossing",
-                    "Animal crossing",
-                    "Bus departure",
-                    "Parking conflict",
-                    "Construction closure",
-                    "Railway crossing",
-                    "Emergency yielding",
-                };
+                string[] names = ScenarioRules.Names;
                 for (int i = 0; i < names.Length; i++)
                 {
                     string name = names[i];
                     AddButton(
                         name,
-                        80 + i % 3 * 580,
-                        350 + i / 3 * 100,
-                        540,
-                        () => app.StartDriving(name)
+                        80 + i % 4 * 440,
+                        330 + i / 4 * 105,
+                        410,
+                        () => app.StartDriving(name, app.Mode == "comma")
                     );
                 }
                 UiDrawing.Label(
-                    "Comparison: " + app.Mode + "    ·    " + app.ScenarioSummary,
+                    "Your co-driver stays on in both driving modes.",
                     menu,
                     25,
                     new Vector2(0, 0),
                     new Vector2(1050, 175),
                     new Vector2(1550, 120)
                 );
+            }
+            else if (page == "Start drive")
+            {
+                Title(app.Scenario, 80, 235, 40);
+                UiDrawing.Label(
+                    app.StartMessage,
+                    menu,
+                    32,
+                    new Vector2(0, 1),
+                    new Vector2(920, -355),
+                    new Vector2(1680, 160)
+                );
+                first = AddButton(
+                    "Retry self-driving",
+                    80,
+                    510,
+                    700,
+                    () => app.StartDriving(app.Scenario, true)
+                );
+                AddButton(
+                    "Drive manually",
+                    850,
+                    510,
+                    700,
+                    () => app.StartDriving(app.Scenario, false)
+                );
+                startReadiness = UiDrawing.Label(
+                    "",
+                    menu,
+                    28,
+                    new Vector2(0, 1),
+                    new Vector2(920, -680),
+                    new Vector2(1680, 100)
+                );
+                diagnostics = null;
             }
             else if (page == "Settings")
             {
@@ -467,25 +490,42 @@ namespace CoDriver
                     550,
                     () => app.SwitchMap("davis-downtown")
                 );
+                AddButton("Cedar Grove", 690, 325, 650, () => app.SwitchMap("cedar-grove"));
                 AddButton(
-                    "Cedar Grove · regression town",
-                    690,
-                    325,
-                    650,
-                    () => app.SwitchMap("cedar-grove")
+                    (app.Town.Density == TrafficDensity.Normal ? "Selected: " : "")
+                        + "Normal traffic",
+                    80,
+                    420,
+                    550,
+                    () =>
+                    {
+                        app.Town.SetDensity(TrafficDensity.Normal);
+                        shownPage = "";
+                    }
                 );
-                Title("Controls", 80, 435, 32);
+                AddButton(
+                    (app.Town.Density == TrafficDensity.RushHour ? "Selected: " : "") + "Rush hour",
+                    690,
+                    420,
+                    650,
+                    () =>
+                    {
+                        app.Town.SetDensity(TrafficDensity.RushHour);
+                        shownPage = "";
+                    }
+                );
+                Title("Controls", 80, 485, 32);
                 AddButton(
                     bindingDevice == 0 ? "Remap Xbox controls" : "Remap keyboard controls",
                     80,
-                    520,
+                    560,
                     550,
                     () => app.OpenPage("Controls")
                 );
                 AddButton(
                     "Input device: " + (bindingDevice == 0 ? "Xbox" : "keyboard"),
                     690,
-                    520,
+                    560,
                     650,
                     () =>
                     {
@@ -514,13 +554,7 @@ namespace CoDriver
                     app.Input.Deadzone = v;
                     PlayerPrefs.SetFloat("deadzone", v);
                 });
-                AddButton(
-                    "Services and performance",
-                    80,
-                    790,
-                    550,
-                    () => app.OpenPage("Diagnostics")
-                );
+                AddButton("Diagnostics", 80, 790, 550, () => app.OpenPage("Diagnostics"));
                 AddButton("Cockpit view", 690, 790, 650, () => app.OpenPage("Cockpit"));
             }
             else if (page == "Cockpit")
@@ -850,11 +884,7 @@ namespace CoDriver
                 UiDrawing.Label(
                     "Choose a destination\n\nClick a street, or move the cursor with\nthe left stick and select a destination.\n\nN ↑     North-up district view\n\n"
                         + app.Town.Map.attribution
-                        + (
-                            app.Town.Map.IsDavis
-                                ? "\n\nBridge Loop: fictional simulation addition."
-                                : ""
-                        ),
+                        + (app.Town.Map.IsDavis ? "\n\nBridge Loop" : ""),
                     menu,
                     28,
                     new Vector2(0, 1),

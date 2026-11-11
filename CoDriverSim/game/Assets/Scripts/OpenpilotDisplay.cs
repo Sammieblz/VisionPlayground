@@ -22,6 +22,7 @@ namespace CoDriver
             alert,
             frame;
         RectTransform alertRect;
+        CompanionFace companionFace;
         public bool HasMatchingGeometry => model && model.Geometry != null;
         public int GeometryVertexCount => model ? model.GeometryVertexCount : 0;
 
@@ -87,7 +88,7 @@ namespace CoDriver
                 TextAnchor.MiddleCenter
             );
             cruise = UiDrawing.Label(
-                "—",
+                "--",
                 max,
                 90,
                 new Vector2(.5f, 0),
@@ -152,7 +153,7 @@ namespace CoDriver
                 new Vector2(1550, 60),
                 TextAnchor.MiddleCenter
             );
-            CompanionFace.Create(
+            companionFace = CompanionFace.Create(
                 inner,
                 app ? app.Companion : null,
                 new Vector2(1, 0),
@@ -216,8 +217,10 @@ namespace CoDriver
                 app.Sensors.FrameTexture,
                 app.Companion.Message,
                 app.Companion.Severity,
-                app.Arbiter.Notice
+                app.ControlNotice
             );
+            if (app.StartPending && !app.Arbiter.Requested)
+                status.text = "PREPARING SELF-DRIVING";
         }
 
         // A pure presentation boundary also used by isolated fixed-state capture tests.
@@ -249,13 +252,13 @@ namespace CoDriver
                 && snapshot.cruise_speed_kph > 0
                 && snapshot.cruise_speed_kph < 250
                     ? (snapshot.cruise_speed_kph / 1.609344f).ToString("F0")
-                    : "—";
+                    : "--";
             status.text =
-                active ? "COMMA ACTIVE"
-                : requested ? "ENGAGING"
-                : fresh && snapshot.healthy && snapshot.engageable ? "READY · HUMAN"
-                : fresh ? "HUMAN DRIVING"
-                : "COMMA UNAVAILABLE";
+                active ? "SELF-DRIVING"
+                : requested ? "SELF-DRIVING REQUESTED"
+                : fresh && snapshot.healthy && snapshot.engageable ? "READY · MANUAL"
+                : fresh ? "MANUAL DRIVING"
+                : "SELF-DRIVING UNAVAILABLE";
             bool cruiseSet =
                 fresh
                 && snapshot.enabled
@@ -343,10 +346,12 @@ namespace CoDriver
                     snapshot.alert_status == "critical" ? new Color32(201, 34, 49, 255)
                     : snapshot.alert_status == "userPrompt" ? new Color32(218, 111, 37, 255)
                     : UiDrawing.Dark;
-                alertMain.text = snapshot.alert_text_1;
-                alertDetail.text = snapshot.alert_text_2;
+                alertMain.text = snapshot.alert_text_1?.Replace('\u2014', '-');
+                alertDetail.text = snapshot.alert_text_2?.Replace('\u2014', '-');
             }
-            observer.gameObject.SetActive(!controlAlert);
+            observer.gameObject.SetActive(true);
+            observer.transform.SetAsLastSibling();
+            companionFace.transform.SetAsLastSibling();
             controlNotice.gameObject.SetActive(!controlAlert && !active);
             controlNotice.text = requestNotice;
             observer.text = "CO-DRIVER  ·  " + observerMessage;

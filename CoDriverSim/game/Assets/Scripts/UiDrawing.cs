@@ -163,6 +163,26 @@ namespace CoDriver
         public override Texture mainTexture => raster ? raster : Texture2D.whiteTexture;
         readonly Dictionary<MapLane, Vector3[]> roadLines = new Dictionary<MapLane, Vector3[]>();
         float nextMesh;
+        MapOverlay overlay;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            if (!overlay)
+            {
+                var rect = UiDrawing.Rect(
+                    "Map markers",
+                    transform,
+                    Vector2.one * .5f,
+                    Vector2.zero,
+                    Vector2.zero
+                );
+                UiDrawing.Fill(rect);
+                overlay = rect.gameObject.AddComponent<MapOverlay>();
+                overlay.Map = this;
+                overlay.raycastTarget = false;
+            }
+        }
 
         public Vector2 Project(Vector3 point)
         {
@@ -196,15 +216,24 @@ namespace CoDriver
                 raster =
                     Map == null ? null : Resources.Load<Texture2D>("Maps/" + Map.id + "-minimap");
                 roadLines.Clear();
-                if (Map != null && !raster)
+                if (Map != null)
                     foreach (var lane in Map.lanes)
                     {
+                        if (
+                            raster
+                            && !Array.Exists(
+                                lane.points,
+                                p => Map.OutsideRaster(p) && Map.Contains(p)
+                            )
+                        )
+                            continue;
                         var simplified = new List<Vector3>();
                         LineUtility.Simplify(new List<Vector3>(lane.points), .12f, simplified);
                         roadLines[lane] = simplified.ToArray();
                     }
                 SetMaterialDirty();
                 SetVerticesDirty();
+                overlay?.SetVerticesDirty();
             }
             if (!Player || Map == null)
                 return;
@@ -235,6 +264,7 @@ namespace CoDriver
             {
                 nextMesh = Time.unscaledTime + .05f;
                 SetVerticesDirty();
+                overlay?.SetVerticesDirty();
             }
         }
 
@@ -254,8 +284,8 @@ namespace CoDriver
             float scale = rectTransform.rect.width / (Range * 2);
             if (raster)
             {
-                var lo = Map.boundsMin;
-                var hi = Map.boundsMax;
+                var lo = Map.RasterBoundsMin;
+                var hi = Map.RasterBoundsMax;
                 vh.AddVert(Project(lo), Color.white, new Vector2(0, 0));
                 vh.AddVert(Project(new Vector3(lo.x, 0, hi.z)), Color.white, new Vector2(0, 1));
                 vh.AddVert(Project(hi), Color.white, new Vector2(1, 1));
@@ -302,6 +332,31 @@ namespace CoDriver
                             );
                 }
             }
+        }
+
+        public void PopulateOverlay(VertexHelper vh)
+        {
+            vh.Clear();
+            if (Map == null)
+                return;
+            if (raster)
+                foreach (var entry in roadLines)
+                    for (int i = 1; i < entry.Value.Length; i++)
+                    {
+                        var a = entry.Value[i - 1];
+                        var b = entry.Value[i];
+                        if (ClipRasterExtension(Map, ref a, ref b) && Visible(a, b))
+                            UiDrawing.Line(
+                                vh,
+                                Project(a),
+                                Project(b),
+                                Mathf.Max(
+                                    1,
+                                    entry.Key.width * rectTransform.rect.width / (Range * 2)
+                                ),
+                                new Color32(169, 175, 175, 255)
+                            );
+                    }
             foreach (var closure in Map.Closures)
             {
                 Vector3 side = Vector3.Cross(Vector3.up, closure.forward) * closure.width * .5f;
@@ -327,7 +382,7 @@ namespace CoDriver
             if (Player)
             {
                 Vector2 centre = Project(Player.position);
-                float angle = Full ? (Player.eulerAngles.y - Heading) * Mathf.Deg2Rad : 0;
+                float angle = (Player.eulerAngles.y - Heading) * Mathf.Deg2Rad;
                 Vector2 forward = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle)),
                     right = new Vector2(forward.y, -forward.x);
                 int n = vh.currentVertCount;
@@ -364,6 +419,48 @@ namespace CoDriver
                 )
             )
                 Selected?.Invoke(Unproject(point));
+        }
+
+        public static bool ClipRasterExtension(MapDefinition map, ref Vector3 a, ref Vector3 b)
+        {
+            bool outsideA = map.OutsideRaster(a),
+                outsideB = map.OutsideRaster(b);
+            if (!outsideA && !outsideB)
+                return false;
+            if (outsideA && outsideB)
+                return true;
+            Vector3 inside = outsideA ? b : a,
+                outside = outsideA ? a : b;
+            Vector3 delta = outside - inside;
+            float t = 1;
+            if (delta.x > 0)
+                t = Mathf.Min(t, (map.RasterBoundsMax.x - inside.x) / delta.x);
+            if (delta.x < 0)
+                t = Mathf.Min(t, (map.RasterBoundsMin.x - inside.x) / delta.x);
+            if (delta.z > 0)
+                t = Mathf.Min(t, (map.RasterBoundsMax.z - inside.z) / delta.z);
+            if (delta.z < 0)
+                t = Mathf.Min(t, (map.RasterBoundsMin.z - inside.z) / delta.z);
+            Vector3 edge = Vector3.Lerp(inside, outside, t);
+            if (outsideA)
+                b = edge;
+            else
+                a = edge;
+            return true;
+        }
+    }
+
+    // Solid markers use the white UI texture independently of the map raster.
+    [RequireComponent(typeof(CanvasRenderer))]
+    public sealed class MapOverlay : MaskableGraphic
+    {
+        public MapGraphic Map;
+
+        protected override void OnPopulateMesh(VertexHelper vh)
+        {
+            vh.Clear();
+            if (Map)
+                Map.PopulateOverlay(vh);
         }
     }
 

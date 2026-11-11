@@ -97,6 +97,12 @@ namespace CoDriver.Editor
             {
                 var target = new RenderTexture(height * 16 / 9, height, 24);
                 camera.targetTexture = target;
+                foreach (var mirror in vehicle.GetComponentsInChildren<Camera>())
+                    if (mirror.name == "Limited mirror camera")
+                    {
+                        mirror.Render();
+                        mirror.Render();
+                    }
                 Save(camera, target, Path.Combine(folder, $"public-instruments-{height}.png"));
                 target.Release();
                 Object.DestroyImmediate(target);
@@ -240,18 +246,49 @@ namespace CoDriver.Editor
                 // Match the pinned Windows player's 2x MSAA in comparison captures.
                 var target = new RenderTexture(height * 16 / 9, height, 24) { antiAliasing = 2 };
                 camera.targetTexture = target;
+                foreach (var mirror in vehicle.GetComponentsInChildren<Camera>())
+                    if (mirror.name == "Limited mirror camera")
+                    {
+                        mirror.Render();
+                        mirror.Render();
+                    }
                 camera.cullingMask = ~((1 << 8) | (1 << 16));
                 camera.transform.SetPositionAndRotation(
                     vehicle.transform.TransformPoint(vehicle.Profile.driverEye),
                     vehicle.transform.rotation * Quaternion.Euler(6, 0, 0)
                 );
                 Save(camera, target, Path.Combine(folder, $"cockpit-{height}.png"));
+                if (vehicle.VisualDefinition?.mirrors != null)
+                    foreach (var mirror in vehicle.VisualDefinition.mirrors)
+                    {
+                        camera.fieldOfView = mirror.side == 0 ? 22 : 35;
+                        camera.transform.LookAt(vehicle.transform.TransformPoint(mirror.centre));
+                        Save(
+                            camera,
+                            target,
+                            Path.Combine(folder, $"mirror-{mirror.side}-{height}.png")
+                        );
+                    }
+                camera.fieldOfView = 70;
                 camera.cullingMask = ~((1 << 9) | (1 << 16));
                 camera.transform.position = vehicle.transform.TransformPoint(
                     new Vector3(-5, 2.6f, 6)
                 );
                 camera.transform.LookAt(vehicle.transform.TransformPoint(Vector3.up));
                 Save(camera, target, Path.Combine(folder, $"exterior-{height}.png"));
+                var pickup = Object.Instantiate(
+                    Resources.Load<GameObject>("Realism/Prepared/Pickup")
+                );
+                pickup.transform.SetPositionAndRotation(
+                    vehicle.transform.TransformPoint(new Vector3(0, -.2f, 7)),
+                    vehicle.transform.rotation
+                );
+                camera.transform.position = pickup.transform.TransformPoint(
+                    new Vector3(-4, 2.1f, 5)
+                );
+                camera.transform.LookAt(pickup.transform.TransformPoint(Vector3.up * .7f));
+                Save(camera, target, Path.Combine(folder, $"pickup-front-{height}.png"));
+                Object.DestroyImmediate(pickup);
                 var entry = map
                     .buildings.Select(b => MappedStorefront.Find(map, b))
                     .First(e => e != null);

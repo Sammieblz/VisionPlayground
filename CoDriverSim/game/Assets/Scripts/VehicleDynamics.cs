@@ -156,7 +156,6 @@ namespace CoDriver
         public bool TractionActive { get; private set; }
         public float LastSteering { get; private set; }
         public readonly float[] Rpm = new float[4];
-        readonly Vector3[] centres = new Vector3[4];
         readonly Quaternion[] rotations = new Quaternion[4];
         readonly float[] angles = new float[4],
             travel = new float[4],
@@ -188,8 +187,27 @@ namespace CoDriver
             body.angularDamping = .08f;
             body.solverIterations = 12;
             body.solverVelocityIterations = 4;
+            ResetForPlacement();
+        }
+
+        // Explicit scenario placement restores rest state without applying forces
+        // or advancing suspension. Ordinary WheelPose calls preserve step history.
+        public void ResetForPlacement()
+        {
+            EngineRpm = 900;
+            Gear = 1;
+            GroundedWheels = 0;
+            AbsActive = TractionActive = false;
+            LastSteering = 0;
+            shiftRemaining = shiftCooldown = 0;
             for (int i = 0; i < 4; i++)
-                travel[i] = profile.suspensionLength;
+            {
+                Rpm[i] = angles[i] = loads[i] = 0;
+                travel[i] = Profile.suspensionLength;
+                grounded[i] = false;
+                contact[i] = default;
+                rotations[i] = Quaternion.identity;
+            }
         }
 
         public Vector3 Mount(int i) =>
@@ -320,7 +338,6 @@ namespace CoDriver
                 }
                 else
                     travel[i] = Profile.suspensionLength;
-                centres[i] = origin - tr.up * travel[i];
                 rotations[i] = rotation;
             }
             // Anti-roll transfers normal load between the two supported tires.
@@ -433,7 +450,6 @@ namespace CoDriver
                 else
                     Rpm[i] *= Mathf.Exp(-dt * .5f);
                 angles[i] = Mathf.Repeat(angles[i] + Rpm[i] * 6 * dt, 360);
-                rotations[i] *= Quaternion.Euler(angles[i], 0, 90);
             }
             Body.AddForce(
                 -Body.linearVelocity * Body.linearVelocity.magnitude * Profile.drag,
@@ -443,8 +459,25 @@ namespace CoDriver
 
         public void WheelPose(int index, out Vector3 position, out Quaternion rotation)
         {
-            position = centres[index];
-            rotation = rotations[index];
+            // Suspension travel and wheel angles belong to the last physics step;
+            // their world pose belongs to the current (possibly teleported or
+            // interpolated) chassis. This also supplies a valid resting pose
+            // before the first step without advancing physics while paused.
+            var chassis = Body.transform;
+            position = chassis.TransformPoint(Mount(index)) - chassis.up * travel[index];
+            float steer =
+                index < 2
+                    ? Ackermann(
+                        LastSteering,
+                        Profile.wheelbase,
+                        Profile.TrackAt(index),
+                        index % 2 == 1
+                    )
+                    : 0;
+            rotation =
+                chassis.rotation
+                * Quaternion.Euler(0, steer, 0)
+                * Quaternion.AngleAxis(angles[index], Vector3.right);
         }
     }
 }

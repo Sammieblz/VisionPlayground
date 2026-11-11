@@ -98,7 +98,7 @@ namespace CoDriver
                 string kind = parsed.purpose == "scenario" ? "scenario capture" : "event clip";
                 Status = parsed.complete
                     ? "Complete " + kind
-                    : "Partial " + kind + " — see recorded coverage";
+                    : "Partial " + kind + " : see recorded coverage";
                 texture = new Texture2D(2, 2, TextureFormat.RGB24, false);
             }
             catch (Exception e)

@@ -180,6 +180,8 @@ class Track:
     distance_uncertainty_m: float | None = None
     signal_state: str = "unknown"
     speed_limit_mph: int | None = None
+    source: str = "camera"
+    provenance: str = ""
 
 
 @dataclass(frozen=True)
@@ -190,6 +192,9 @@ class RiskEvent:
     message: str
     evidence: tuple[int, ...] = ()
     record: bool = False
+    source: str = "camera"
+    provenance: str = ""
+    frame_id: int = -1
 
 
 @dataclass(frozen=True)

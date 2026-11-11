@@ -50,6 +50,35 @@ This uses the Honda comparison vehicle when the local Mercedes prefab is absent.
 The packaging command rejects a Unity build marked `local-prototype`. Both build
 types remain development builds until the combined acceptance checks pass.
 
+## Current menus and driving controls
+
+The home menu offers **Manual driving** and **Self-driving** for free drive. On
+**Scenario tests**, select either driving mode before choosing an exercise. The
+independent co-driver observes the forward camera and presents warnings in both
+modes, including the Comma display. There is no playable muted mode; older
+recordings and comparison labels remain readable.
+
+Self-driving prepares the scene with the vehicle held still while the camera and
+observer continue running. It requires fresh model and control messages from
+after placement, then accepted Comma engagement before releasing the scene and
+starting scenario timing, scoring and capture. Preparation does not count as
+manual driving. A timeout or cancelled start offers **Retry self-driving** and
+**Drive manually**. Selecting self-driving is not evidence that Comma has taken
+control; the HUD distinguishes preparation, request and accepted driving.
+
+Xbox triggers accelerate/brake, the left stick steers, Y changes view, X requests
+or cancels Comma, View opens the map and Menu pauses. Keyboard equivalents are
+W/A/S/D, C for view, X for Comma, Tab for map and Esc for pause. Deliberate driving
+input cancels a pending self-driving start; during accepted driving it retains
+the existing takeover behavior. Settings contains input remapping and dead zones;
+Diagnostics contains service status and restart controls.
+
+Settings also offers **Normal traffic** and **Rush hour**: 20 or 32 ordinary
+vehicles, plus the dedicated bus, emergency vehicle and parking car. The selected
+density persists across map changes and is shared by free drive and scenarios.
+These menu and behavior descriptions are implementation notes, not additional
+qualification results. Historical measurements below retain their original scope.
+
 ## Earlier input/bridge repair (November 10, 2026)
 
 The build-16 Xbox Comma attempt failed: all nine X presses reached the app, but
@@ -573,7 +602,7 @@ these throughput measurements qualifies unfinished world behavior or scenario co
 
 ## Scenarios, replay, and evaluation
 
-Scenario selection resets activity actors while the menu covers the scene and records the seed,
+Scenario selection resets activity actors before the drive begins and records the seed,
 initial vehicle position, comparison mode, actions, criterion events and scorecard in a separate
 scenario directory. Scripted braking, cut-in, wind, crossings and activity dispatch are isolated
 from perception. Scoring uses stop-line transitions, measured stop duration, clearance, speed,
@@ -635,10 +664,10 @@ remain unavailable. No model-quality results are inferred from unit-test success
 
 The optional `-qualification-driver` command-line flag enables a labelled simulation test
 driver for physics/performance measurements. It is never a Comma fallback and cannot produce
-a human/Comma comparison scorecard. Any deliberate manual input cancels it. Normal Play and
+a human/Comma comparison scorecard. Any deliberate manual input cancels it. The driving menu and
 Scenario Tests do not enable it.
 
-Scenario Tests also contains **Town activity checks**. With the vehicle stopped, select traffic,
+Diagnostics contains **World activity checks**. With the vehicle stopped, select traffic,
 pedestrians, animals, buildings, parking, construction, bus, streetcar, railway or emergency.
 The view follows that activity while the driver vehicle stays parked. C / Y returns to driving;
 the observer continues to receive only the independent forward camera. Activity views close any

@@ -892,7 +892,10 @@ namespace CoDriver
                 target = Mathf.Min(target, Mathf.Sqrt(Mathf.Max(0, ahead - 15) * 4));
                 State = "Signal queue";
             }
-            if (ahead > 9 && ahead < 45 && signal.Green(north) && !town.MayEnter(this, signal))
+            // Renew the arrival request during red as well. Registering only
+            // on green discarded every queue's order between signal cycles.
+            bool mayEnter = ahead <= 9 || ahead >= 45 || town.MayEnter(this, signal);
+            if (ahead > 9 && ahead < 45 && signal.Green(north) && !mayEnter)
             {
                 target = Mathf.Min(target, Mathf.Sqrt(Mathf.Max(0, ahead - 17) * 6));
                 State = "Yield intersection";
@@ -3241,7 +3244,8 @@ namespace CoDriver
                     target = Mathf.Min(target, Mathf.Sqrt(Mathf.Max(0, ahead - 20) * 3));
                     State = "Signal queue";
                 }
-                if (ahead > 8 && ahead < 45 && green && !sig.Reserve(this))
+                bool reserved = ahead <= 8 || ahead >= 45 || sig.Reserve(this, requireGreen: true);
+                if (ahead > 8 && ahead < 45 && green && !reserved)
                 {
                     target = Mathf.Min(target, Mathf.Sqrt(Mathf.Max(0, ahead - 20) * 3));
                     State = "Yield intersection";
@@ -3448,27 +3452,7 @@ namespace CoDriver
         public void Build()
         {
             for (int i = 0; i < 15; i++)
-            {
-                var cone = Realism.Spawn("Cone", transform, new Vector3(-1.3f, 0, -20 + i * 3));
-                if (cone)
-                {
-                    var collider = cone.AddComponent<BoxCollider>();
-                    collider.center = Vector3.up * .4f;
-                    collider.size = new Vector3(.37f, .8f, .37f);
-                    MovableProp.Add(cone, 3.5f);
-                    continue;
-                }
-                cone = Art.Shape(
-                    "Cone",
-                    transform,
-                    new Vector3(-1.3f, .35f, -20 + i * 3),
-                    new Vector3(.35f, .35f, .35f),
-                    Art.Material("Construction orange", new Color(1, .3f, .03f)),
-                    PrimitiveType.Cylinder,
-                    true
-                );
-                MovableProp.Add(cone, 3.5f);
-            }
+                ConstructionCone.Create(transform, new Vector3(-1.3f, 0, -20 + i * 3));
             var prefab = Resources.Load<GameObject>("WorldArt/Construction/Excavator");
             if (prefab)
             {

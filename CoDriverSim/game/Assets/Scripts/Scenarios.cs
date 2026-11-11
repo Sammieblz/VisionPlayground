@@ -19,6 +19,94 @@ namespace CoDriver
 
     public static class ScenarioRules
     {
+        public static readonly string[] Names =
+        {
+            "Normal driving",
+            "Sudden braking",
+            "Late braking",
+            "Cut-in",
+            "Lane drift",
+            "Rapid acceleration",
+            "Wrong-way driving",
+            "Signal compliance",
+            "Stop compliance",
+            "Speed compliance",
+            "Occluded pedestrian crossing",
+            "Animal crossing",
+            "Animal recognition",
+            "Bus departure",
+            "Parking conflict",
+            "Construction closure",
+            "Construction recognition",
+            "Railway crossing",
+            "Emergency yielding",
+        };
+
+        public static string CourseName(string scenario) =>
+            scenario == "Late braking" ? "Sudden braking"
+            : scenario == "Animal recognition" ? "Animal crossing"
+            : scenario == "Construction recognition" ? "Construction closure"
+            : scenario;
+
+        public static bool ComfortableAcceleration(float acceleration, float sustainedSeconds) =>
+            acceleration <= 3 || sustainedSeconds < .5f;
+
+        public static bool TimelyBrake(float gap, float speed, float deceleration) =>
+            speed < .5f || gap >= speed * speed / 7f + 2 || deceleration >= 3.5f;
+
+        public static bool TravellingWrongWay(Vector3 velocity, Vector3 roadForward) =>
+            Vector3.Dot(velocity, roadForward.normalized) < -1;
+
+        public static bool RecognizesAnimal(ObserverResult result, string expected = null) =>
+            result?.tracks != null
+            && result.tracks.Any(t =>
+                t != null
+                && t.score >= .5f
+                && t.source == "camera"
+                && !string.IsNullOrEmpty(t.provenance)
+                && (
+                    expected == null
+                    || string.Equals(t.label, expected, StringComparison.OrdinalIgnoreCase)
+                )
+                && new[]
+                {
+                    "dog",
+                    "cat",
+                    "bird",
+                    "horse",
+                    "sheep",
+                    "cow",
+                    "elephant",
+                    "bear",
+                    "zebra",
+                    "giraffe",
+                }.Contains(t.label)
+            );
+
+        public static bool RecognizesWorkzone(ObserverResult result) =>
+            result?.risks != null
+            && result.risks.Any(r =>
+                r != null
+                && r.kind == "workzone"
+                && r.frame_id == result.frame_id
+                && r.source == "camera"
+                && !string.IsNullOrEmpty(r.provenance)
+            );
+
+        public static bool CameraEvidenceCurrent(
+            ObserverResult result,
+            bool fresh,
+            string session,
+            double windowStart,
+            long lastFrame
+        ) =>
+            fresh
+            && result != null
+            && result.session_id == session
+            && result.frame_id > lastFrame
+            && double.IsFinite(result.timestamp)
+            && result.timestamp >= windowStart;
+
         public static float Percentage(IEnumerable<DrivingCriterion> criteria)
         {
             var relevant = criteria.Where(c => c.applicable && !c.unavoidable).ToArray();
@@ -72,6 +160,47 @@ namespace CoDriver
                     && comma_seconds == 0;
     }
 
+    // Eligibility is recorded when the camera renders, not when delayed inference
+    // arrives. Keeping 128 captures exceeds the one-second observer freshness limit.
+    public sealed class CameraExposureHistory
+    {
+        readonly Dictionary<long, double> eligible = new Dictionary<long, double>();
+        readonly Queue<long> frames = new Queue<long>();
+        long lastFrame = -1;
+        double lastTimestamp = -1;
+
+        public void Clear()
+        {
+            eligible.Clear();
+            frames.Clear();
+            lastFrame = -1;
+            lastTimestamp = -1;
+        }
+
+        public void Record(long frame, double timestamp, bool exposed)
+        {
+            if (
+                frame <= lastFrame
+                || !double.IsFinite(timestamp)
+                || timestamp < 0
+                || timestamp <= lastTimestamp
+            )
+                return;
+            lastFrame = frame;
+            lastTimestamp = timestamp;
+            frames.Enqueue(frame);
+            if (exposed)
+                eligible[frame] = timestamp;
+            while (frames.Count > 128)
+                eligible.Remove(frames.Dequeue());
+        }
+
+        public bool Contains(long frame, double timestamp) =>
+            double.IsFinite(timestamp)
+            && eligible.TryGetValue(frame, out double captured)
+            && Math.Abs(captured - timestamp) < .000001;
+    }
+
     // This director and evaluator are simulation-only. Neither is reachable through
     // SensorLink, ObserverResult, or the portable Python observer.
     public sealed class ScenarioEvaluator
@@ -91,6 +220,7 @@ namespace CoDriver
         Walker crossing;
         Signal signal;
         string name,
+            courseName,
             mode,
             directory;
         float started,
@@ -111,6 +241,14 @@ namespace CoDriver
         MappedScenarioCourse mappedCourse;
         string speedCriterion;
         float speedLimit = 30 * .44704f;
+        float previousSpeed,
+            accelerationSeconds,
+            wrongWaySeconds,
+            recoverySeconds;
+        long cameraFrame = -1;
+        double cameraWindowStart;
+        bool cameraObserved;
+        readonly CameraExposureHistory cameraExposure = new CameraExposureHistory();
 
         Vector3 World(Vector3 local) => mappedCourse == null ? local : mappedCourse.World(local);
 
@@ -131,11 +269,14 @@ namespace CoDriver
                 : signal.IsYellowFor(vehicle.transform.position, vehicle.transform.forward);
         bool triggered,
             running,
+            prepared,
             exposed,
             completed,
             stopped;
         public string Summary = "Select a scenario to view its measured criteria.";
         public string Status { get; private set; } = "Free drive";
+        public bool IsRunning => running;
+        public ComparisonControlEvidence ControlEvidence => controls;
 
         public ScenarioEvaluator(
             string root,
@@ -185,11 +326,13 @@ namespace CoDriver
             string comparison,
             int scenarioSeed,
             Vehicle car,
-            Town world
+            Town world,
+            bool deferBegin = false
         )
         {
             Close();
             name = scenario;
+            courseName = ScenarioRules.CourseName(scenario);
             mode = comparison;
             seed = scenarioSeed;
             vehicle = car;
@@ -203,6 +346,11 @@ namespace CoDriver
             started = Time.time;
             lastSample = -1;
             stopSeconds = speedingSeconds = travelled = 0;
+            previousSpeed = accelerationSeconds = wrongWaySeconds = recoverySeconds = 0;
+            cameraFrame = -1;
+            cameraObserved = false;
+            cameraExposure.Clear();
+            cameraWindowStart = double.PositiveInfinity;
             triggered = exposed = completed = stopped = false;
             baselineCollisions = vehicle.Collisions;
             startZ = -85;
@@ -214,7 +362,7 @@ namespace CoDriver
                 finishZ = -170;
                 routeX = -197.7f;
             }
-            if (name == "Construction closure")
+            if (courseName == "Construction closure")
             {
                 startZ = -160;
                 finishZ = -45;
@@ -241,21 +389,23 @@ namespace CoDriver
 
             mappedCourse =
                 world.Map != null && world.Map.IsDavis && name != "Free drive"
-                    ? new MappedScenarioCourse(world, name, routeX)
+                    ? new MappedScenarioCourse(world, courseName, routeX)
                     : null;
+            mappedCourse?.Validate(startZ, finishZ);
 
             vehicle.Body.linearVelocity = vehicle.Body.angularVelocity = Vector3.zero;
             vehicle.Body.position = World(new Vector3(routeX, .2f, startZ));
             vehicle.Body.rotation =
                 mappedCourse == null ? Quaternion.identity : mappedCourse.Rotation(startZ);
+            if (name == "Wrong-way driving")
+                vehicle.Body.rotation *= Quaternion.Euler(0, 180, 0);
             if (town.Map != null && town.Map.IsDavis && name == "Free drive")
             {
                 vehicle.Body.position = town.Map.Spawn;
                 vehicle.Body.rotation = town.Map.SpawnRotation;
             }
             vehicle.transform.SetPositionAndRotation(vehicle.Body.position, vehicle.Body.rotation);
-            vehicle.Throttle = vehicle.Brake = vehicle.Steer = 0;
-            vehicle.Handbrake = vehicle.Reverse = false;
+            vehicle.ResetForPlacement();
             previousPosition = vehicle.transform.position;
             signal = town.ClosestSignal(vehicle.transform.position);
             // Choose the intersection ahead, even when the nearest is behind the start.
@@ -290,6 +440,19 @@ namespace CoDriver
                 Add("Stop for one second before the line", false);
             if (name == "Lane drift")
                 Add("Keep vehicle inside the lane");
+            if (name == "Late braking")
+                Add("Brake before the stopping gap runs out");
+            if (name == "Rapid acceleration")
+                Add("Accelerate smoothly");
+            if (name == "Wrong-way driving")
+            {
+                Add("Avoid travelling against traffic");
+                Add("Recover the correct direction", false);
+            }
+            if (name == "Animal recognition")
+                Add("Co-driver notices the animal", false);
+            if (name == "Construction recognition")
+                Add("Co-driver notices roadwork cues", false);
             if (name == "Railway crossing")
             {
                 Add("Wait outside an active railway crossing");
@@ -302,14 +465,16 @@ namespace CoDriver
                 );
                 town.Train.HoldForScenario = true;
             }
-            if (name == "Construction closure")
+            if (courseName == "Construction closure")
                 Add("Pass closure at 15 mph or less");
             if (name == "Emergency yielding")
                 Add("Slow and pull right for the emergency vehicle", false);
-            if (name == "Sudden braking" || name == "Cut-in")
+            if (courseName == "Sudden braking" || name == "Cut-in")
             {
                 Add("Maintain clearance from the lead vehicle");
-                hazard = town.Traffic.First(a => a.Kind == "Car");
+                hazard =
+                    town.Traffic.FirstOrDefault(a => a.Kind == "Car")
+                    ?? throw new InvalidOperationException("No scenario lead vehicle is available");
                 if (name == "Cut-in")
                     hazard.ScenarioLateral = -3.5f;
                 hazard.PlaceForScenario(
@@ -318,17 +483,22 @@ namespace CoDriver
                 );
                 hazard.ScenarioSpeed = 0;
             }
-            if (name == "Animal crossing" || name == "Occluded pedestrian crossing")
+            if (courseName == "Animal crossing" || name == "Occluded pedestrian crossing")
             {
                 Add("Yield to the crossing actor");
-                crossing = town.Walkers[name == "Animal crossing" ? 16 : 2];
+                crossing =
+                    town.Walkers.FirstOrDefault(w =>
+                        w && (courseName == "Animal crossing" ? w.IsAnimal : !w.IsAnimal)
+                    ) ?? throw new InvalidOperationException("No crossing actor is available");
                 crossing.PrepareCrossing(
                     World(new Vector3(-6, 0, -10)),
                     World(new Vector3(6, 0, -10))
                 );
                 if (name == "Occluded pedestrian crossing")
                 {
-                    var occluder = town.Traffic.First(a => a.Kind == "Truck");
+                    var occluder =
+                        town.Traffic.FirstOrDefault(a => a.Kind == "Truck")
+                        ?? throw new InvalidOperationException("No crossing occluder is available");
                     occluder.ScenarioLateral = -4;
                     occluder.PlaceForScenario(
                         mappedCourse?.Path ?? new TrackPath(-200, -200, 0, 0),
@@ -349,6 +519,24 @@ namespace CoDriver
                 town.ParkingCar.PrepareParkingConflict();
             }
             Physics.SyncTransforms();
+            prepared = true;
+            Status = "Preparing " + name;
+            if (!deferBegin)
+                Begin();
+        }
+
+        // Placement is complete before engagement. Starting the clock never moves the car.
+        public void Begin()
+        {
+            if (!prepared || running)
+                return;
+            prepared = false;
+            started = Time.time;
+            lastSample = -1;
+            previousPosition = vehicle.transform.position;
+            previousSpeed = vehicle.Speed;
+            baselineCollisions = vehicle.Collisions;
+            previousAhead = SignalLineZ - Local(vehicle.transform.position).z - 2.2f;
             running = true;
             captureId = name == "Free drive" ? "" : Guid.NewGuid().ToString("N");
             captureStart = Time.realtimeSinceStartupAsDouble;
@@ -370,13 +558,7 @@ namespace CoDriver
             {
                 Debug.LogWarning("Scenario recording unavailable: " + e.Message);
             }
-            Status =
-                name
-                + (
-                    mappedCourse == null
-                        ? " — drive north; the remaining distance is shown above"
-                        : " — follow the mapped course"
-                );
+            Status = name + (mappedCourse == null ? ": drive north" : ": follow the course");
             Save(false);
         }
 
@@ -394,6 +576,71 @@ namespace CoDriver
             );
         }
 
+        public void RecordCameraExposure(long frame, double timestamp)
+        {
+            if (!running)
+                return;
+            bool eligible = false;
+            if (name == "Animal recognition")
+                eligible =
+                    crossing
+                    && crossing.Crossing
+                    && Vector3.Distance(vehicle.transform.position, crossing.transform.position)
+                        < 45
+                    && Vector3.Dot(
+                        vehicle.transform.forward,
+                        crossing.transform.position - vehicle.transform.position
+                    ) > 0;
+            else if (name == "Construction recognition")
+            {
+                float progress = Local(vehicle.transform.position).z;
+                eligible = progress > -120 && progress < -65;
+            }
+            cameraExposure.Record(frame, timestamp, eligible);
+            if (eligible)
+                cameraWindowStart = Math.Min(cameraWindowStart, timestamp);
+        }
+
+        public void ObserveCamera(ObserverResult observation, bool fresh)
+        {
+            if (
+                !running
+                || !ScenarioRules.CameraEvidenceCurrent(
+                    observation,
+                    fresh,
+                    session,
+                    cameraWindowStart,
+                    cameraFrame
+                )
+            )
+                return;
+            cameraFrame = observation.frame_id;
+            if (!cameraExposure.Contains(observation.frame_id, observation.timestamp))
+                return;
+            if (
+                name == "Animal recognition"
+                && crossing
+                && ScenarioRules.RecognizesAnimal(observation, crossing.Species)
+            )
+            {
+                cameraObserved = true;
+                Result(
+                    "Co-driver notices the animal",
+                    true,
+                    "Animal seen by the forward camera during the crossing"
+                );
+            }
+            if (name == "Construction recognition" && ScenarioRules.RecognizesWorkzone(observation))
+            {
+                cameraObserved = true;
+                Result(
+                    "Co-driver notices roadwork cues",
+                    true,
+                    "Roadwork cue seen by the forward camera"
+                );
+            }
+        }
+
         public void Observe(Vehicle car, float time, bool commaApplied, string controlReason)
         {
             if (!running || time - lastSample < .1f)
@@ -401,6 +648,8 @@ namespace CoDriver
             float dt = lastSample < 0 ? .1f : time - lastSample;
             lastSample = time;
             var p = Local(car.transform.position);
+            float acceleration = (car.Speed - previousSpeed) / dt;
+            previousSpeed = car.Speed;
             controls.Record(dt, car.Body.linearVelocity, commaApplied);
             string authority = commaApplied ? "comma" : "human";
             if (authority != lastAuthority)
@@ -416,11 +665,7 @@ namespace CoDriver
                 lastAuthority = authority;
             }
             if (name != "Free drive" && !ScenarioRules.InsideCourse(p, routeX))
-                Result(
-                    "Stay on the scenario course",
-                    false,
-                    "Vehicle left the twelve-metre scenario corridor"
-                );
+                Result("Stay on the scenario course", false, "Vehicle left the course");
             travelled += Vector3.Distance(car.transform.position, previousPosition);
             previousPosition = car.transform.position;
             int collisions = car.Collisions - baselineCollisions;
@@ -468,7 +713,7 @@ namespace CoDriver
                         "Measured stop duration: " + stopSeconds.ToString("F2") + " seconds"
                     );
             }
-            if (name == "Sudden braking" || name == "Cut-in")
+            if (courseName == "Sudden braking" || name == "Cut-in")
             {
                 if (!triggered && car.Speed > 1)
                     hazard.ScenarioSpeed = 5;
@@ -495,6 +740,18 @@ namespace CoDriver
                     );
                 if (triggered && time - eventAt > 6)
                     hazard.ScenarioSpeed = 8;
+                if (
+                    name == "Late braking"
+                    && triggered
+                    && time - eventAt > .5f
+                    && gap > 0
+                    && !ScenarioRules.TimelyBrake(gap, car.Speed, -acceleration)
+                )
+                    Result(
+                        "Brake before the stopping gap runs out",
+                        false,
+                        "Braking began after the stopping gap was used up"
+                    );
             }
             if (name == "Lane drift")
             {
@@ -548,7 +805,7 @@ namespace CoDriver
                         "Vehicle entered protected railway area while active"
                     );
             }
-            if (name == "Construction closure" && p.z > -120 && p.z < -65)
+            if (courseName == "Construction closure" && p.z > -120 && p.z < -65)
             {
                 exposed = true;
                 if (car.Speed > 15 * .44704f)
@@ -619,6 +876,45 @@ namespace CoDriver
             }
             if (name == "Normal driving" || name == "Speed compliance" || name == "Free drive")
                 exposed = travelled >= 100;
+            if (name == "Rapid acceleration")
+            {
+                accelerationSeconds = acceleration > 3 ? accelerationSeconds + dt : 0;
+                exposed |= car.Speed >= 3 && travelled >= 20;
+                if (!ScenarioRules.ComfortableAcceleration(acceleration, accelerationSeconds))
+                    Result(
+                        "Accelerate smoothly",
+                        false,
+                        "Acceleration exceeded 3 m/s² for half a second"
+                    );
+            }
+            if (name == "Wrong-way driving")
+            {
+                exposed = true;
+                Vector3 forward =
+                    mappedCourse == null
+                        ? Vector3.forward
+                        : mappedCourse.Path.Direction(mappedCourse.Anchor + p.z);
+                wrongWaySeconds = ScenarioRules.TravellingWrongWay(car.Body.linearVelocity, forward)
+                    ? wrongWaySeconds + dt
+                    : 0;
+                if (wrongWaySeconds >= .5f)
+                    Result(
+                        "Avoid travelling against traffic",
+                        false,
+                        "Travelled against traffic for half a second"
+                    );
+                recoverySeconds =
+                    Vector3.Dot(car.transform.forward, forward) > .7f
+                    && Vector3.Dot(car.Body.linearVelocity, forward) > 1
+                        ? recoverySeconds + dt
+                        : 0;
+                if (recoverySeconds >= 3)
+                    Result(
+                        "Recover the correct direction",
+                        true,
+                        "Drove in the correct direction for three seconds"
+                    );
+            }
             previousAhead = ahead;
             Status =
                 name
@@ -678,6 +974,9 @@ namespace CoDriver
 
         public void Close()
         {
+            prepared = false;
+            if (town && town.Train)
+                town.Train.HoldForScenario = false;
             if (!running)
                 return;
             running = false;
@@ -700,20 +999,16 @@ namespace CoDriver
                 + ScenarioRules.Percentage(criteria).ToString("F0")
                 + "% · "
                 + (
-                    ScenarioRules.CriticalFailure(criteria) ? "FAIL — critical collision"
+                    ScenarioRules.CriticalFailure(criteria) ? "Collision recorded"
                     : completed ? "Finished"
-                    : "INCOMPLETE"
+                    : "Not finished"
                 )
                 + "\n"
-                + (
-                    controls.Matches(mode)
-                        ? ""
-                        : "Control mode changed or Comma did not drive; exclude from mode comparison.\n"
-                )
+                + (controls.Matches(mode) ? "" : "Driving mode changed during this attempt.\n")
                 + string.Join(
                     "\n",
                     criteria.Select(c =>
-                        (c.passed ? "PASS " : "NOT PASSED ") + c.name + " — " + c.evidence
+                        (c.passed ? "PASS " : "NOT PASSED ") + c.name + ": " + c.evidence
                     )
                 );
             Status = Summary.Split('\n')[0];
@@ -745,6 +1040,7 @@ namespace CoDriver
                             finish_z = finishZ,
                             control_evidence = controls,
                             comparison_mode_valid = controls.Matches(mode),
+                            camera_event_observed = cameraObserved,
                             sensor_capture_id = captureId,
                             capture_start_realtime = captureStart,
                         },
@@ -798,6 +1094,7 @@ namespace CoDriver
                 critical_failure,
                 physics_replay_deterministic = false;
             public bool comparison_mode_valid;
+            public bool camera_event_observed;
             public ComparisonControlEvidence control_evidence;
             public float score,
                 finish_z;

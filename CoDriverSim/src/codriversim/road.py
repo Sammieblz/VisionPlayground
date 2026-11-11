@@ -63,20 +63,27 @@ def road_risks(road: dict | None, frame: CameraFrame) -> list[RiskEvent]:
             if road["lane_probabilities"][idx] > 0.7 and lane["y"] and abs(lane["y"][0]) < 0.6:
                 risks.append(
                     RiskEvent(
-                        frame.timestamp,
+                        road["timestamp"],
                         "caution",
                         "lane_departure",
                         "Approaching a visible lane boundary",
+                        source="comma_camera_model",
+                        provenance=road["model"]
+                        + ";independent-lane-boundary-heuristic-not-stock-ldw",
+                        frame_id=road["frame_id"],
                     )
                 )
     for lead in road["leads"]:
         if lead["prob"] > 0.7 and lead["x"] and 0 < lead["x"][0] < frame.ego.speed_mps * 1.5:
             risks.append(
                 RiskEvent(
-                    frame.timestamp,
+                    road["timestamp"],
                     "caution",
                     "following",
                     "Comma camera model suggests a short following gap",
+                    source="comma_camera_model",
+                    provenance=road["model"] + ";independent-headway-heuristic-not-stock-fcw",
+                    frame_id=road["frame_id"],
                 )
             )
             break

@@ -1295,6 +1295,70 @@ namespace CoDriver.Tests
                 Assert.Greater(Vector3.Distance(starts[i], walkers[i].transform.position), 3);
         }
 
+        [UnityTest, Timeout(180000)]
+        public IEnumerator RecordedDavisSidewalkCornerCompletesWithoutOscillation()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis sidewalk corner").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var walker = town.Walkers[27];
+            walker.enabled = false;
+            var agent = walker.GetComponent<NavMeshAgent>();
+            var body = walker.GetComponent<Rigidbody>();
+            var locomotion = walker.GetComponent<ActorLocomotion>();
+            Vector3 start = new Vector3(-82.94f, .1f, -112.94f);
+            Vector3 goal = new Vector3(-89.40f, .15f, -119.87f);
+            agent.areaMask = PedestrianNavigation.WalkingMask;
+            Assert.IsTrue(NavMesh.SamplePosition(start, out var source, .5f, agent.areaMask));
+            Assert.IsTrue(agent.Warp(source.position));
+            body.position = start;
+            body.linearVelocity = body.angularVelocity = Vector3.zero;
+            walker.transform.position = start;
+            var route = new NavMeshPath();
+            Assert.IsTrue(NavMesh.CalculatePath(source.position, goal, agent.areaMask, route));
+            Assert.AreEqual(NavMeshPathStatus.PathComplete, route.status);
+            agent.isStopped = false;
+            Assert.IsTrue(agent.SetPath(route));
+            Debug.Log(
+                "CODRIVER_RECORDED_SIDEWALK_CORNERS "
+                    + string.Join(";", route.corners.Select(p => p.ToString("F2")))
+            );
+            float deadline = Time.time + 80;
+            Vector3 previous = body.position;
+            float sampledAt = Time.time;
+            while (
+                Time.time < deadline
+                && Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude >= .8f
+            )
+            {
+                yield return new WaitForSeconds(.25f);
+                float elapsed = Time.time - sampledAt;
+                Assert.Less(
+                    Vector3.Distance(previous, body.position) / elapsed,
+                    3,
+                    "Corner recovery must use bounded physical locomotion, not a position snap."
+                );
+                Assert.IsTrue(
+                    NavMesh.SamplePosition(
+                        body.position,
+                        out _,
+                        .4f,
+                        PedestrianNavigation.WalkingMask
+                    ),
+                    "The route must stay alongside its permitted walking surface."
+                );
+                previous = body.position;
+                sampledAt = Time.time;
+            }
+            Assert.Less(
+                Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude,
+                .8f,
+                walker.NavigationDetail + " " + locomotion.Diagnostic
+            );
+            Assert.Greater(Vector3.Distance(start, body.position), 3);
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator CedarBusCompletesCornersWithoutFurnitureDeadlock()
         {

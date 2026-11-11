@@ -78,7 +78,7 @@ namespace CoDriver
                 part.gameObject.layer = 9;
         }
 
-        public string Message = "Connecting the forward camera",
+        public string Message = "Co-driver is connecting",
             Severity = "unknown";
 
         public void Initialize()
@@ -114,9 +114,9 @@ namespace CoDriver
                 : fresh ? "attentive"
                 : "disconnected";
             Message =
-                muted ? "Warnings muted for this comparison"
-                : fresh ? "Watching the forward camera"
-                : "Camera observations unavailable";
+                muted ? "Drive paused"
+                : fresh ? "Watching the road ahead"
+                : "Co-driver is reconnecting";
             if (muted || !fresh || result.risks == null || result.risks.Length == 0)
             {
                 kind = "";
@@ -128,7 +128,7 @@ namespace CoDriver
                     risk = candidate;
             Severity = risk.severity;
             State = Severity;
-            Message = risk.message;
+            Message = risk.message?.Replace('\u2014', '-');
             if (
                 (Severity == "urgent" || Severity == "caution")
                 && (kind != risk.kind || Time.unscaledTime - lastSound > 6)

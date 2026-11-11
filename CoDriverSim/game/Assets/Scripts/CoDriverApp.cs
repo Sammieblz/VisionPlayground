@@ -64,6 +64,66 @@ namespace CoDriver
         public string ScenarioSummary => evaluator?.Summary ?? "";
         public string ServiceStatus => services?.Status ?? "Starting";
         public string CommaStatus => comma?.Status ?? "Starting";
+        public string MapDisplayName =>
+            Town.Map.IsDavis ? "Downtown Davis + Bridge Loop" : Town.Map.name;
+        bool SelfDrivingConnectionAvailable =>
+            commaShutdown == null && comma?.Running == true && CommandFresh;
+        public string SelfDrivingAvailability =>
+            !SelfDrivingConnectionAvailable ? "Self-driving is unavailable."
+            : SelfDrivingReady ? "Self-driving is ready."
+            : Command.healthy ? "Self-driving is preparing."
+            : "Self-driving is not ready.";
+        public bool SelfDrivingReady =>
+            CanStartSelfDriving(Command, Session, Time.realtimeSinceStartupAsDouble - CommandAt);
+
+        public static bool CanStartSelfDriving(CommaCommand command, string session, double age) =>
+            ServiceMeasurements.CommandFresh(command, session, age)
+            && command.healthy
+            && command.engageable
+            && float.IsFinite(command.steering_deg)
+            && float.IsFinite(command.acceleration_mps2);
+
+        public static bool StartViewReady(
+            CommaCommand command,
+            OpenpilotUiSnapshot snapshot,
+            string session,
+            double commandAge,
+            double commandReceivedAt,
+            long placementFrame,
+            double placementAt,
+            double now
+        ) =>
+            CanStartSelfDriving(command, session, commandAge)
+            && commandReceivedAt > placementAt
+            && command.frame_id > placementFrame
+            && snapshot?.road != null
+            && snapshot.GeometryFresh(session, snapshot.road.frame_id, now)
+            && snapshot.road.frame_id > placementFrame
+            && snapshot.road.timestamp > placementAt;
+
+        public string StartMessage { get; private set; } =
+            "Choose how to drive. Your co-driver stays with you.";
+        public string ControlStatus =>
+            AutomationActive ? "SELF-DRIVING"
+            : Arbiter.Requested ? "SELF-DRIVING REQUESTED"
+            : awaitingStart ? "PREPARING SELF-DRIVING"
+            : "MANUAL DRIVING";
+        public string ControlNotice =>
+            AutomationActive ? ""
+            : Arbiter.Requested ? "Waiting for self-driving to engage."
+            : awaitingStart && startSubmitLatch.WaitingForRelease
+                ? "Release the select button to start."
+            : awaitingStart ? "Checking the road ahead. The car will stay stopped until ready."
+            : Mode == "comma" && !AutomationActive
+                ? "You are driving. Press X to request self-driving."
+            : "";
+        readonly SubmitReleaseLatch startSubmitLatch = new SubmitReleaseLatch();
+        bool awaitingStart;
+        public bool StartPending => awaitingStart;
+        bool startInterrupted;
+        double startPlacementAt,
+            startRequestAt;
+        long startPlacementFrame;
         public ObserverResult Observation => services?.Link?.Result;
         public float CameraDeliveryHz =>
             serviceMeasurements.CameraHz(Time.realtimeSinceStartupAsDouble);
@@ -175,7 +235,9 @@ namespace CoDriver
             Town.Map = definition;
             Town.Build(Vehicle.transform);
             navigation.Map = definition;
-            navigation.Instruction = "Explore " + definition.name;
+            navigation.Instruction = definition.IsDavis
+                ? "Explore Downtown Davis"
+                : "Explore Cedar Grove";
             view = new GameObject("Driver view").AddComponent<Camera>();
             view.gameObject.AddComponent<AudioListener>();
             view.nearClipPlane = .05f;
@@ -304,13 +366,14 @@ namespace CoDriver
 
         void PauseForControllerLoss()
         {
+            CancelPendingStart();
             Paused = true;
             CancelQualification();
             FullMapOpen = false;
             Page = "Pause";
             Time.timeScale = 0;
             automationAccepted = false;
-            Arbiter.Cancel("Controller unavailable — simulation paused");
+            Arbiter.Cancel("Controller unavailable : simulation paused");
             CommaRequest?.Invoke(false);
             if (Vehicle)
             {
@@ -404,7 +467,9 @@ namespace CoDriver
             var observation = services.Link?.Result;
             serviceMeasurements.Observe(observation, services.Generation);
             bool observationFresh = ObserverFresh;
-            companion.Observe(observation, observationFresh, Mode == "human_muted" || Paused);
+            companion.Observe(observation, observationFresh, Paused);
+            if (!Paused)
+                evaluator.ObserveCamera(observation, observationFresh);
             if (observationFresh && observation.frame_id != lastObservation)
             {
                 lastObservation = observation.frame_id;
@@ -449,6 +514,21 @@ namespace CoDriver
             if (Input.Pause.WasPressedThisFrame() && !rebinding)
             {
                 CancelQualification();
+                if (awaitingStart)
+                {
+                    OpenPage("Pause");
+                    return;
+                }
+                if (startInterrupted && Paused)
+                {
+                    OpenPage("Start drive");
+                    return;
+                }
+                if (Page == "Start drive")
+                {
+                    OpenPage("Home");
+                    return;
+                }
                 Paused = !Paused;
                 Page = Paused ? "Pause" : "Drive";
                 Time.timeScale = Paused ? 0 : 1;
@@ -460,6 +540,7 @@ namespace CoDriver
                 FullMapOpen = !FullMapOpen;
                 if (FullMapOpen)
                 {
+                    CancelPendingStart();
                     CancelQualification();
                     Paused = true;
                     Page = "Map";
@@ -476,6 +557,8 @@ namespace CoDriver
                 return;
             }
             AudioListener.pause = false;
+            if (awaitingStart && UpdatePendingStart())
+                return;
             if (Input.Camera.WasPressedThisFrame())
             {
                 if (activityView)
@@ -582,6 +665,95 @@ namespace CoDriver
             evaluator.Observe(Vehicle, Time.time, automated, Arbiter.Reason);
             navigation.Update(Vehicle.transform.position, Vehicle.transform.forward);
             Sensors.RouteInstruction = navigation.Instruction;
+        }
+
+        void CancelPendingStart()
+        {
+            if (!awaitingStart)
+                return;
+            awaitingStart = false;
+            startSubmitLatch.Clear();
+            startInterrupted = true;
+            automationAccepted = false;
+            evaluator.Close();
+            Arbiter.Cancel("Self-driving start cancelled");
+            CommaRequest?.Invoke(false);
+        }
+
+        bool UpdatePendingStart()
+        {
+            double now = Time.realtimeSinceStartupAsDouble;
+            Vehicle.Throttle = Vehicle.Steer = 0;
+            Vehicle.Brake = 1;
+            Vehicle.CommandedRoadAngle = float.NaN;
+            Vehicle.Body.linearVelocity = Vehicle.Body.angularVelocity = Vector3.zero;
+            if (Input.Camera.WasPressedThisFrame())
+                viewMode = (viewMode + 1) % 4;
+            if (startSubmitLatch.ShouldCancel(Input))
+            {
+                StartMessage = "Self-driving start cancelled. Choose Retry or drive manually.";
+                OpenPage("Start drive");
+                return true;
+            }
+            if (now - startPlacementAt >= 10)
+            {
+                StartMessage = SelfDrivingConnectionAvailable
+                    ? "Self-driving could not start. Retry or drive manually."
+                    : "Self-driving is unavailable. Retry or drive manually.";
+                OpenPage("Start drive");
+                return true;
+            }
+            // A menu Submit can share the handbrake binding. Consume only that
+            // launch-time hold, without postponing other takeovers or the timeout.
+            if (startSubmitLatch.WaitingForRelease)
+                return true;
+            bool currentView = StartViewReady(
+                Command,
+                CommaUi,
+                Session,
+                now - CommandAt,
+                CommandAt,
+                startPlacementFrame,
+                startPlacementAt,
+                now
+            );
+            if (startRequestAt < 0)
+            {
+                if (currentView && Arbiter.TryRequest(Command, Session, now - CommandAt, now))
+                {
+                    startRequestAt = now;
+                    CommaRequest?.Invoke(true);
+                }
+                return true;
+            }
+            // Require a response after the request as well as post-placement model evidence.
+            if (!currentView || CommandAt <= startRequestAt)
+                return true;
+            bool accepted = Arbiter.Accept(
+                Command,
+                Session,
+                now - CommandAt,
+                0,
+                0,
+                false,
+                false,
+                now: now
+            );
+            if (accepted)
+            {
+                awaitingStart = false;
+                automationAccepted = true;
+                Vehicle.Brake = 0;
+                Time.timeScale = 1;
+                evaluator.Begin();
+                return false;
+            }
+            if (!Arbiter.Requested)
+            {
+                StartMessage = "Self-driving did not engage. Retry or drive manually.";
+                OpenPage("Start drive");
+            }
+            return true;
         }
 
         void ToggleComma()
@@ -694,23 +866,70 @@ namespace CoDriver
 
         public void StartDriving(string scenario)
         {
+            CancelPendingStart();
+            startInterrupted = false;
+            if (Mode == "human_muted")
+                Mode = "human_ai";
+            Scenario = scenario;
             activityView = null;
             Scenario = scenario;
             Paused = true;
             Time.timeScale = 0;
             evaluator.Close();
             Town.ResetActivities();
-            evaluator.Start(scenario, Mode, Town.Seed, Vehicle, Town);
+            Arbiter.Cancel("Manual driving");
+            automationAccepted = false;
+            CommaRequest?.Invoke(false);
+            try
+            {
+                evaluator.Start(
+                    scenario,
+                    Mode,
+                    Town.Seed,
+                    Vehicle,
+                    Town,
+                    deferBegin: Mode == "comma"
+                );
+                Sensors.ResetMotion();
+                Sensors.FrameCaptured = evaluator.RecordCameraExposure;
+            }
+            catch (InvalidOperationException e)
+            {
+                Debug.LogWarning("Scenario setup: " + e.Message);
+                StartMessage =
+                    "This scenario could not be prepared here. Try again or choose another district.";
+                Page = "Start drive";
+                return;
+            }
             Page = "Drive";
             Paused = false;
-            Time.timeScale = 1;
+            Time.timeScale = Mode == "comma" ? 0 : 1;
             Arbiter.Cancel("Human driving");
             if (Mode == "comma")
-                ToggleComma();
+            {
+                startPlacementAt = Time.realtimeSinceStartupAsDouble;
+                startPlacementFrame = Sensors.LatestFrame;
+                startRequestAt = -1;
+                startSubmitLatch.Capture(Input.Handbrake);
+                awaitingStart = true;
+            }
+        }
+
+        public void StartDriving(string scenario, bool selfDriving)
+        {
+            CancelQualification();
+            Mode = selfDriving ? "comma" : "human_ai";
+            StartDriving(scenario);
         }
 
         public void ResumeDrive()
         {
+            if (startInterrupted)
+            {
+                StartMessage = "Choose how to start this drive.";
+                OpenPage("Start drive");
+                return;
+            }
             CancelQualification();
             FullMapOpen = false;
             Page = "Drive";
@@ -722,6 +941,7 @@ namespace CoDriver
 
         public void OpenPage(string page)
         {
+            CancelPendingStart();
             CancelQualification();
             Page = page;
             Paused = true;
@@ -776,7 +996,7 @@ namespace CoDriver
             Sensors.Map = map;
             navigation.Map = map;
             navigation.Route.Clear();
-            navigation.Instruction = "Explore " + map.name;
+            navigation.Instruction = map.IsDavis ? "Explore Downtown Davis" : "Explore Cedar Grove";
             PlayerPrefs.SetString("map", mapId);
             Scenario = "Free drive";
             Page = "Home";
@@ -834,21 +1054,14 @@ namespace CoDriver
             Panel(new Rect(0, 0, 1280, 720), new Color(.025f, .055f, .07f, .94f));
             Panel(new Rect(48, 46, 5, 84), new Color(.2f, .8f, .68f));
             GUI.Label(new Rect(72, 42, 700, 65), "CoDriverSim", title);
-            GUI.Label(
-                new Rect(76, 107, 700, 35),
-                "CEDAR GROVE  /  DRIVE · OBSERVE · EVALUATE",
-                small
-            );
-            GUI.Label(
-                new Rect(850, 54, 380, 55),
-                "LOCAL DEVELOPMENT BUILD\nCamera perception · virtual controls only",
-                small
-            );
+            GUI.Label(new Rect(76, 107, 700, 35), MapDisplayName, small);
+            GUI.Label(new Rect(850, 54, 380, 55), "Your drive. Your co-driver.", small);
             if (Page == "Home" || Page == "Pause")
             {
                 string[] items =
                 {
-                    Page == "Pause" ? "Resume drive" : "Play",
+                    Page == "Pause" ? "Resume drive" : "Manual driving",
+                    "Self-driving",
                     "Scenario Tests",
                     "Recordings",
                     "Settings",
@@ -860,29 +1073,25 @@ namespace CoDriver
                         if (i == 0)
                         {
                             if (Page == "Pause")
-                            {
-                                Page = "Drive";
-                                Paused = false;
-                                Time.timeScale = 1;
-                                Arbiter.Cancel("Resumed in human mode");
-                                CommaRequest?.Invoke(false);
-                            }
+                                ResumeDrive();
                             else
-                                StartDriving(Scenario);
+                                StartDriving("Free drive", false);
                         }
                         if (i == 1)
-                            Page = "Scenarios";
+                            StartDriving("Free drive", true);
                         if (i == 2)
-                            Page = "Recordings";
+                            Page = "Scenarios";
                         if (i == 3)
-                            Page = "Settings";
+                            Page = "Recordings";
                         if (i == 4)
+                            Page = "Settings";
+                        if (i == 5)
                             Application.Quit();
                     }
                 GUI.Label(new Rect(500, 192, 650, 50), "Your drive. Your co-driver.", heading);
                 GUI.Label(
                     new Rect(500, 255, 630, 150),
-                    "Explore the town, practise road rules, and compare camera-based warnings with the same drive under Comma.\n\nHuman control is the default. The dashcam observes and records.",
+                    "Explore the district and practise road rules.\n\nDrive yourself or choose self-driving. Your co-driver stays with you either way.",
                     label
                 );
                 GUI.Label(
@@ -913,47 +1122,40 @@ namespace CoDriver
                     look = Vector2.zero;
                 }
             }
+            else if (Page == "Start drive")
+            {
+                GUI.Label(new Rect(76, 190, 1100, 120), StartMessage, label);
+                if (MenuButton(new Rect(76, 340, 350, 55), "Retry self-driving"))
+                    StartDriving(Scenario, true);
+                if (MenuButton(new Rect(470, 340, 350, 55), "Drive manually"))
+                    StartDriving(Scenario, false);
+            }
             else if (Page == "Scenarios")
             {
-                string[] names =
-                {
-                    "Normal driving",
-                    "Sudden braking",
-                    "Cut-in",
-                    "Lane drift",
-                    "Signal compliance",
-                    "Stop compliance",
-                    "Speed compliance",
-                    "Occluded pedestrian crossing",
-                    "Animal crossing",
-                    "Bus departure",
-                    "Parking conflict",
-                    "Construction closure",
-                    "Railway crossing",
-                    "Emergency yielding",
-                };
+                string[] names = ScenarioRules.Names;
                 GUI.Label(
                     new Rect(76, 160, 700, 35),
-                    "Choose a scenario and comparison mode",
+                    "Choose how to drive, then choose a scenario",
                     heading
                 );
-                string[] modes = { "Human · muted", "Human + AI", "Stock Comma" };
-                for (int i = 0; i < 3; i++)
+                string[] modes = { "Manual driving", "Self-driving" };
+                for (int i = 0; i < modes.Length; i++)
                     if (MenuButton(new Rect(76 + i * 300, 210, 280, 42), modes[i]))
-                        Mode =
-                            i == 0 ? "human_muted"
-                            : i == 1 ? "human_ai"
-                            : "comma";
-                GUI.Label(new Rect(980, 215, 220, 30), "Mode: " + Mode, small);
+                        Mode = i == 0 ? "human_ai" : "comma";
+                GUI.Label(
+                    new Rect(980, 215, 220, 30),
+                    Mode == "comma" ? "Self-driving" : "Manual driving",
+                    small
+                );
                 for (int i = 0; i < names.Length; i++)
                     if (
                         MenuButton(
-                            new Rect(76 + (i % 3) * 390, 280 + i / 3 * 62, 370, 48),
+                            new Rect(76 + (i % 4) * 300, 280 + i / 4 * 62, 285, 48),
                             names[i]
                         )
                     )
-                        StartDriving(names[i]);
-                if (MenuButton(new Rect(856, 528, 370, 48), "Town activity checks"))
+                        StartDriving(names[i], Mode == "comma");
+                if (MenuButton(new Rect(976, 590, 285, 48), "Town activity checks"))
                     Page = "Activities";
             }
             else if (Page == "Activities")
@@ -961,7 +1163,7 @@ namespace CoDriver
                 GUI.Label(new Rect(76, 160, 1100, 40), "Town activity checks", heading);
                 GUI.Label(
                     new Rect(76, 205, 1100, 70),
-                    "Watch complete activity cycles. The vehicle stays parked and its forward camera remains independent. C / Y returns to driving.\nStop the vehicle before opening an activity view.",
+                    "Watch the town at work. C / Y returns to driving.\nStop the vehicle before opening an activity view.",
                     label
                 );
                 string[] systems =
@@ -1171,21 +1373,6 @@ namespace CoDriver
             if (Page != "Home" && Page != "Pause")
                 if (MenuButton(new Rect(76, 650, 160, 40), "Back"))
                     Page = "Pause";
-            GUI.Label(
-                new Rect(500, 644, 730, 32),
-                "Camera: " + (services.Link != null ? services.Link.Status : services.Status),
-                small
-            );
-            GUI.Label(
-                new Rect(500, 681, 730, 36),
-                "Comma: "
-                    + (
-                        commaShutdown != null
-                            ? "Restarting; waiting for previous instance to close"
-                            : comma.Status
-                    ),
-                small
-            );
             menuCount = menuIndex;
         }
 
@@ -1257,10 +1444,7 @@ namespace CoDriver
                         Vehicle.Indicator == -1 ? "←"
                         : Vehicle.Indicator == 1 ? "→"
                         : ""
-                    )
-                    + "   "
-                    + fps.ToString("0")
-                    + " FPS",
+                    ),
                 small
             );
             Panel(new Rect(870, 20, 390, 142), new Color(.025f, .055f, .07f, .9f));
@@ -1268,19 +1452,13 @@ namespace CoDriver
             companion.Draw(new Rect(1200, 28, 44, 44));
             var result = services.Link?.Result;
             if (!string.IsNullOrEmpty(result?.recording_error))
-                GUI.Label(
-                    new Rect(870, 170, 390, 70),
-                    "Recording unavailable: " + result.recording_error,
-                    small
-                );
+                GUI.Label(new Rect(870, 170, 390, 70), "Recording unavailable", small);
             bool fresh =
                 result != null
                 && result.session_id == Session
                 && Time.realtimeSinceStartupAsDouble - result.timestamp < 1;
-            string warning = fresh
-                ? "Watching the forward camera"
-                : "Camera observations unavailable";
-            if (fresh && result.risks != null && result.risks.Length > 0 && Mode != "human_muted")
+            string warning = fresh ? "Watching the road ahead" : "Co-driver is reconnecting";
+            if (fresh && result.risks != null && result.risks.Length > 0 && !Paused)
             {
                 var risk = result.risks[0];
                 foreach (var r in result.risks)
@@ -1296,13 +1474,13 @@ namespace CoDriver
                 new Rect(20, 650, 830, 56),
                 Scenario
                     + "  ·  "
-                    + Arbiter.Reason
+                    + ControlStatus
                     + "\nEsc menu   X Comma   C camera   "
-                    + (fresh ? result.latency_ms.ToString("0") + " ms detection" : services.Status),
+                    + ControlNotice,
                 small
             );
             GUI.Label(new Rect(300, 24, 550, 36), navigation.Instruction, small);
-            GUI.Label(new Rect(300, 62, 550, 60), comma.Status, small);
+            GUI.Label(new Rect(300, 62, 550, 60), ControlNotice, small);
             GUI.Label(
                 new Rect(300, 135, 550, 65),
                 activityView
@@ -1311,43 +1489,43 @@ namespace CoDriver
                 small
             );
             Panel(new Rect(1070, 510, 190, 190), new Color(.025f, .055f, .07f, .9f));
-            foreach (float x in Town.Grid)
+            var map = Town.Map;
+            var centre = (map.boundsMin + map.boundsMax) * .5f;
+            float scale =
+                160
+                / Mathf.Max(map.boundsMax.x - map.boundsMin.x, map.boundsMax.z - map.boundsMin.z);
+            Vector2 Project(Vector3 world) =>
+                new Vector2(
+                    1165 + (world.x - centre.x) * scale,
+                    605 - (world.z - centre.z) * scale
+                );
+            void Line(Vector3 a, Vector3 b, Color color, float width)
             {
-                Panel(
-                    new Rect(1085 + (x + 440) / 880 * 160, 525, 2, 160),
-                    new Color(.35f, .46f, .5f)
+                var from = Project(a);
+                var to = Project(b);
+                var matrix = GUI.matrix;
+                GUIUtility.RotateAroundPivot(
+                    Mathf.Atan2(to.y - from.y, to.x - from.x) * Mathf.Rad2Deg,
+                    from
                 );
                 Panel(
-                    new Rect(1085, 525 + (x + 440) / 880 * 160, 160, 2),
-                    new Color(.35f, .46f, .5f)
+                    new Rect(from.x, from.y - width * .5f, Vector2.Distance(from, to), width),
+                    color
                 );
+                GUI.matrix = matrix;
             }
+            foreach (var lane in map.lanes)
+                for (int i = 1; i < lane.points.Length; i++)
+                    Line(lane.points[i - 1], lane.points[i], new Color(.35f, .46f, .5f), 1);
             for (int i = 1; i < navigation.Route.Count; i++)
-            {
-                var a = navigation.Route[i - 1];
-                var b = navigation.Route[i];
-                float x1 = 1085 + (a.x + 440) / 880 * 160;
-                float x2 = 1085 + (b.x + 440) / 880 * 160;
-                float y1 = 525 + (440 - a.z) / 880 * 160;
-                float y2 = 525 + (440 - b.z) / 880 * 160;
-                Panel(
-                    new Rect(
-                        Mathf.Min(x1, x2) - 1,
-                        Mathf.Min(y1, y2) - 1,
-                        Mathf.Max(3, Mathf.Abs(x2 - x1)),
-                        Mathf.Max(3, Mathf.Abs(y2 - y1))
-                    ),
-                    new Color(.9f, .75f, .2f)
-                );
-            }
-            Panel(
-                new Rect(
-                    1085 + (Vehicle.transform.position.x + 440) / 880 * 160,
-                    525 + (440 - Vehicle.transform.position.z) / 880 * 160,
-                    6,
-                    6
-                ),
-                new Color(.2f, 1, .7f)
+                Line(navigation.Route[i - 1], navigation.Route[i], new Color(.9f, .75f, .2f), 2);
+            var position = Project(Vehicle.transform.position);
+            Panel(new Rect(position.x - 3, position.y - 3, 6, 6), Color.white);
+            Line(
+                Vehicle.transform.position,
+                Vehicle.transform.position + Vehicle.transform.forward * (10 / scale),
+                Color.white,
+                2
             );
         }
 

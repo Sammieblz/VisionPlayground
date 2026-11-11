@@ -66,7 +66,8 @@ namespace CoDriver
                 lod.RecalculateBounds();
                 // Same approximately 140 m detail range as the individual
                 // buildings; small cells retain useful per-street culling.
-                lod.size = 10;
+                // Match that range under the active quality setting's LOD bias.
+                lod.size = 10 / Mathf.Max(.01f, QualitySettings.lodBias);
             }
             pending.Clear();
         }

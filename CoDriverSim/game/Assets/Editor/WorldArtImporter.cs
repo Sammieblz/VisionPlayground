@@ -60,6 +60,10 @@ namespace CoDriver.Editor
             definition.leftMirrorEuler = new Vector3(0, -12, 0);
             definition.rightMirrorEuler = new Vector3(0, 12, 0);
             definition.rearMirrorCentre = new Vector3(0, 1.497f, .526f);
+            definition.mirrors = MirrorArtImporter.Prepare(
+                root,
+                "Assets/External/Resources/WorldArt/Local"
+            );
             definition.deviceCentre = new Vector3(.14f, 1.38f, .71f);
             PrefabUtility.SaveAsPrefabAsset(
                 root,
