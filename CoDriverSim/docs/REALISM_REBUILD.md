@@ -28,11 +28,12 @@ Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
 revised Davis streets are integrated. The latest completed packaged session,
 `7f74123cc75744cd9e6f60ccbdb42de0`, meets rendering/inference throughput targets
 over 1,878 advancing simulation seconds but fails world qualification: two
-unfinished pedestrian crossings create prolonged queues. The recorded corner
-and truck-nose fixes pass their focused physical reproductions; the complete
-Editor suite also passes 145/145. The combined populated-world suite is still
-being reviewed and has exposed a different truck/crossing blockage. No new
-packaged performance pass is claimed for those source changes.
+unfinished pedestrian crossings create prolonged queues. The corrected source,
+`0ba3f72`, passes **145/145 Editor and 35/35 PhysicalWorld checks**, including all
+ten ambulance dispatch/return seeds without recorded contact. The additional
+Davis transit blockage is reproduced and corrected; its retest completes 2.51 km,
+three stops, boarding and alighting. No new packaged performance pass is claimed
+for these source changes until the rebuilt workload is measured.
 
 Current work is correcting those failures, measuring the combined workload,
 reviewing fresh activity/visual captures and preparing the eligible public
@@ -1426,3 +1427,18 @@ treatment. A shared per-track mesh keeps grain along the timber at the source's
 for cleanup when the town is destroyed. Sleeper geometry and collision behavior
 are unchanged. Python regression remains **112 passed / two skipped**, with Ruff
 and formatting checks passing. A new combined package/run is still required.
+
+### Corrected combined suite
+
+For `0ba3f72`, `realism-corner-final-transit.xml` passes the populated transit
+reproduction in 193.37 seconds. The bus travels 2,510.4 m and visits three stops,
+with both boarding and alighting observed. Its retained late population sample is
+`transit-corner-final-qualified.json`.
+
+The subsequent complete suites pass **145/145 Editor checks** in 85.48 seconds
+and **35/35 PhysicalWorld checks** in 1,686.83 seconds. All ten ambulance seeds,
+21–30, complete without recorded contact; the preserved report is
+`overhaul/ambulance-corner-final-qualified.json`. Python CI `42976155693` also
+passes. The pipeline now proceeds to build/package verification and a new
+controller-off, 1,900-second combined workload. Test passes do not establish its
+future performance result or visual/activity acceptance.
