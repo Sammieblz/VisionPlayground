@@ -32,7 +32,7 @@ prolonged queues. The arrival and tire-load corrections pass the full 32-test
 physical-world suite, including ten ambulance seeds, in
 `realism-static-hold-v1-world.xml`. A separate late gate-pedestal obstruction
 found in its traffic logs is also corrected; the subsequent complete Editor
-suite passes 145/145. Its affected populated-world checks are running.
+suite passes 145/145. All five affected populated-world checks also pass.
 
 Current work is correcting those failures, measuring the combined workload,
 reviewing fresh activity/visual captures and preparing the eligible public
@@ -1285,5 +1285,9 @@ simulation furniture parameters. It refuses a placement with no clear candidate;
 it does not remove the collider or make traffic ignore the gate. Only the
 obstructing gate needs to move, approximately 3 m along the roadside.
 The complete corrected Editor suite passes **145/145** in 55.91 seconds
-(`realism-gate-final-editor.xml`). Affected Davis traffic, bus and railway tests,
-a rebuilt package and the sustained combined run remain separate gates.
+(`realism-gate-final-editor.xml`). All **five affected PlayMode checks pass**
+in 335.49 seconds (`realism-gate-final-world.xml`): Davis traffic flow, the
+2.51 km / three-stop bus route with boarding and alighting, initial rail/body
+clearance, and Honda/GLS stopping before a closed rail arm without contact.
+Python CI run `42963134168` passes for `45fe242`. The Windows rebuild and new
+sustained combined run remain separate gates.
