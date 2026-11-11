@@ -9,6 +9,17 @@ namespace CoDriver.Editor
     // Actual world/cabin rendering, without starting external services or claiming a drive test.
     public static class RealismCaptures
     {
+        static string OutputFolder()
+        {
+            var args = System.Environment.GetCommandLineArgs();
+            int at = System.Array.IndexOf(args, "-visual-output");
+            if (at >= 0 && at + 1 >= args.Length)
+                throw new System.ArgumentException("-visual-output requires a folder");
+            return Path.GetFullPath(
+                at >= 0 ? args[at + 1] : "../outputs/qualification/realism/visual"
+            );
+        }
+
         public static void CaptureConstruction()
         {
             ConstructionArtImporter.Prepare();
@@ -44,7 +55,7 @@ namespace CoDriver.Editor
             camera.transform.LookAt(new Vector3(0, 1.1f, .7f));
             var target = new RenderTexture(1280, 720, 24);
             camera.targetTexture = target;
-            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            var folder = OutputFolder();
             Directory.CreateDirectory(folder);
             foreach (int time in new[] { 0, 5, 9, 12, 14, 16 })
             {
@@ -80,7 +91,7 @@ namespace CoDriver.Editor
                 vehicle.transform.TransformPoint(vehicle.Profile.driverEye),
                 vehicle.transform.rotation * Quaternion.Euler(6, 0, 0)
             );
-            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            var folder = OutputFolder();
             Directory.CreateDirectory(folder);
             foreach (int height in new[] { 720, 1080 })
             {
@@ -116,7 +127,7 @@ namespace CoDriver.Editor
             camera.fieldOfView = 60;
             var target = new RenderTexture(1280, 720, 24);
             camera.targetTexture = target;
-            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            var folder = OutputFolder();
             Directory.CreateDirectory(folder);
             foreach (int distance in new[] { 24, 65 })
             {
@@ -222,7 +233,7 @@ namespace CoDriver.Editor
             camera.farClipPlane = 900;
             camera.fieldOfView = 70;
             camera.clearFlags = CameraClearFlags.Skybox;
-            var folder = Path.GetFullPath("../outputs/qualification/realism/visual");
+            var folder = OutputFolder();
             Directory.CreateDirectory(folder);
             foreach (int height in new[] { 720, 1080 })
             {

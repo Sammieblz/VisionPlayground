@@ -929,3 +929,35 @@ built into `outputs/profile-game`, is clearly labelled diagnostic-only and is
 not used by the distribution packager. Its explicit `-profile-window` option
 records ten seconds after startup; the capture component is excluded from
 ordinary release builds.
+
+### Recorded parking queue and measured navigation work
+
+The more detailed ten-second development trace, session
+`63f01720e4084b1e9369a2d909edd950`, contains 152 frames. Traffic planning costs
+14.43 ms per profiled frame, including 7.32 ms in repeated nearest-lane queries.
+These are diagnostic timings, not release performance measurements.
+
+The recorded parking/queue poses from the ten-minute failure now reproduce in
+`realism-parking-queued-before.xml`: the car stayed 2.66 metres short of the
+fixed reversing endpoint, already aligned with 2nd Street. The revised exit
+allows a stopped parking car to finish reversing only when its complete body
+fits inside the intended lane, near the planned endpoint. It then uses the
+ordinary forward clearance rules. The same fixture passes in
+`realism-parking-queued-after.xml`, with continuous movement, no contact, and no
+displacement of the waiting car.
+
+Nearest-lane candidate sets are now prepared once per map instead of allocated
+on every query. Hinted path projections use the cumulative-distance index to
+visit only relevant segments, preserving the original projection filter,
+fallback and tie order. The full Editor suite passes 135 tests in
+`realism-map-search-editor.xml`, including exhaustive projection comparisons
+and whole-body parking-envelope rejection cases. Vehicle forces, the 100 Hz
+physics step, actor population and model/controller behavior are unchanged.
+`realism-map-search-parking.xml` passes both the recorded queue fixture and the
+populated parking/boarding/return cycle (115.39 seconds total test time). The
+parking vehicle records no contact. The populated scene did log a bird landing
+contact with the moving ambulance (5.86 m/s relative speed, zero recorded
+impulse); this is retained for activity review and is not a contact-free town
+claim. Fresh release performance and visual/activity review remain pending.
+Visual capture commands now accept `-visual-output` so fresh captures can be
+stored beside previous evidence without replacing it.

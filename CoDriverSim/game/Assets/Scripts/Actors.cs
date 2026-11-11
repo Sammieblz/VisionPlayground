@@ -151,7 +151,51 @@ namespace CoDriver
             using var measurement = nearestMarker.Auto();
             float best = 0,
                 error = float.PositiveInfinity;
-            for (int i = 1; i < points.Count; i++)
+            if (!float.IsFinite(hint) || (loop && Length <= 90))
+                SearchRange(point, hint, 0, Length, ref best, ref error);
+            else if (!loop)
+                SearchRange(point, hint, hint - 45, hint + 45, ref best, ref error);
+            else
+            {
+                float normalized = Mathf.Repeat(hint, Length);
+                float low = normalized - 45,
+                    high = normalized + 45;
+                // Visit wrapped windows in the original segment order so equal
+                // distances at crossings retain the same tie-breaking behavior.
+                if (low < 0)
+                {
+                    SearchRange(point, hint, 0, high, ref best, ref error);
+                    SearchRange(point, hint, Length + low, Length, ref best, ref error);
+                }
+                else if (high > Length)
+                {
+                    SearchRange(point, hint, 0, high - Length, ref best, ref error);
+                    SearchRange(point, hint, low, Length, ref best, ref error);
+                }
+                else
+                    SearchRange(point, hint, low, high, ref best, ref error);
+            }
+            return float.IsPositiveInfinity(error) && float.IsFinite(hint)
+                ? NearestDistance(point)
+                : best;
+        }
+
+        void SearchRange(
+            Vector3 point,
+            float hint,
+            float low,
+            float high,
+            ref float best,
+            ref float error
+        )
+        {
+            if (high < 0 || low > Length || points.Count < 2)
+                return;
+            int first = distances.BinarySearch(Mathf.Max(0, low));
+            first = Mathf.Max(1, first < 0 ? ~first : first);
+            int last = distances.BinarySearch(Mathf.Min(Length, high));
+            last = Mathf.Min(points.Count - 1, last < 0 ? ~last : last + 1);
+            for (int i = first; i <= last; i++)
             {
                 Vector3 segment = points[i] - points[i - 1];
                 float t = Mathf.Clamp01(
@@ -174,9 +218,6 @@ namespace CoDriver
                     best = Mathf.Lerp(distances[i - 1], distances[i], t);
                 }
             }
-            return float.IsPositiveInfinity(error) && float.IsFinite(hint)
-                ? NearestDistance(point)
-                : best;
         }
     }
 
@@ -1484,8 +1525,22 @@ namespace CoDriver
             float remaining = accessPath.Length - accessPath.NearestDistance(body.position);
             float error = Vector3.ProjectOnPlane(goal - body.position, Vector3.up).magnitude;
             accessBlock = "";
-            if (error < .8f && Speed < .25f)
+            bool mergedParkingExit =
+                Kind == "Parking"
+                && town.Map.IsDavis
+                && reverse
+                && Speed < .25f
+                && error < driver.Dynamics.Profile.collisionSize.z
+                && TrafficClearance.AlignedInsideLane(
+                    GetComponent<BoxCollider>(),
+                    town.Map.Nearest(goal, facing, false)
+                );
+            if ((error < .8f || mergedParkingExit) && Speed < .25f)
             {
+                // A queue behind the car can prevent reaching an exact reverse
+                // endpoint. Once its whole body is aligned inside the intended
+                // lane, it can stop reversing and join the normal forward driver.
+                // Forward clearance still applies; neither vehicle is repositioned.
                 driver.Hold();
                 accessPath = null;
                 return true;
@@ -1516,6 +1571,7 @@ namespace CoDriver
             }
             driver.Follow(accessPath, target, 0, reverse);
             RequestedSpeed = target;
+            Clearance = accessBlock;
             return false;
         }
 

@@ -1407,6 +1407,64 @@ namespace CoDriver.Tests
             );
         }
 
+        [UnityTest, Timeout(180000)]
+        public IEnumerator DavisParkingFinishesAlignedReverseWithTrafficQueuedBehind()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis parking queue").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var parking = town.ParkingCar;
+            var queued = town.Traffic[5];
+            foreach (var actor in town.Traffic)
+                if (actor != parking && actor != queued)
+                    actor.gameObject.SetActive(false);
+            foreach (var actor in town.Walkers)
+                actor.gameObject.SetActive(false);
+            parking.PrepareParkingConflict();
+            parking.HoldActivity = false;
+            parking.DriverReady = true;
+            queued.ScenarioSpeed = 0;
+            PlaceFixture(
+                parking,
+                new Vector3(11.48556f, -.01240f, -233.42502f),
+                new Vector3(-.99403f, -.01515f, -.10803f)
+            );
+            PlaceFixture(
+                queued,
+                new Vector3(18.59096f, -.01240f, -232.05316f),
+                new Vector3(-.97445f, -.01515f, -.22411f)
+            );
+            Vector3 start = parking.Body.position,
+                queueStart = queued.Body.position;
+            Vector3 previous = start;
+            float began = Time.time;
+            while (Time.time - began < 22)
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.Less(
+                    Vector3.Distance(previous, parking.Body.position),
+                    .25f,
+                    "Parking recovery must use continuous physical movement"
+                );
+                previous = parking.Body.position;
+                Assert.Less(
+                    Vector3.Distance(queueStart, queued.Body.position),
+                    .15f,
+                    "The parking car must not push the waiting car out of its way"
+                );
+                Assert.IsEmpty(parking.Contact, "No contact is allowed to clear the manoeuvre");
+            }
+            Debug.Log("CODRIVER_RECORDED_PARKING_QUEUE " + parking.NavigationDetail);
+            Assert.Greater(
+                Vector3.Dot(parking.Body.position - start, new Vector3(-.97445f, 0, -.22411f)),
+                5,
+                "An aligned vehicle must finish reversing and drive forward without waiting forever: "
+                    + parking.NavigationDetail
+            );
+            Assert.IsFalse(parking.ReverseRequested);
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator DavisParkingOccupantAndVehicleCompleteOnePhysicalCycle()
         {

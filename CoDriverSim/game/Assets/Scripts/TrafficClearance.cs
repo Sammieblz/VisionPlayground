@@ -21,6 +21,38 @@ namespace CoDriver
             | (1 << ParkedLayer)
             | (1 << RailLayer);
 
+        public static bool AlignedInsideLane(BoxCollider body, MapLane lane)
+        {
+            if (!body || lane == null || lane.internalLane || lane.boundary)
+                return false;
+            var car = body.transform;
+            float at = lane.Path.NearestDistance(car.position);
+            Vector3 centre = lane.Path.Position(at);
+            if (
+                Mathf.Abs(car.position.y - centre.y) > .5f
+                || Vector3.Dot(car.forward, lane.Path.Direction(at)) < .98f
+                || at < body.size.z * .5f + .2f
+                || lane.Path.Length - at < body.size.z * .5f + .2f
+            )
+                return false;
+            // Check the full envelope, including yaw and collider offset. A
+            // centre point on the road is insufficient to finish a bay exit.
+            for (int x = -1; x <= 1; x += 2)
+            for (int z = -1; z <= 1; z += 2)
+            {
+                var corner = car.TransformPoint(
+                    body.center + new Vector3(x * body.size.x * .5f, 0, z * body.size.z * .5f)
+                );
+                var nearest = lane.Path.Position(lane.Path.NearestDistance(corner));
+                if (
+                    Vector3.ProjectOnPlane(corner - nearest, Vector3.up).magnitude
+                    > lane.width * .5f - .1f
+                )
+                    return false;
+            }
+            return true;
+        }
+
         public static bool CrossingPathClear(Vector3 start, Vector3 end)
         {
             var delta = end - start;

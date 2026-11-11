@@ -204,6 +204,8 @@ namespace CoDriver
         public Dictionary<string, MapSignal> SignalById;
         readonly Dictionary<Vector2Int, List<MapLane>> cells =
             new Dictionary<Vector2Int, List<MapLane>>();
+        readonly Dictionary<Vector2Int, MapLane[]> nearbyCells =
+            new Dictionary<Vector2Int, MapLane[]>();
         public bool IsDavis => id == "davis-downtown";
         readonly HashSet<string> carExcluded = new HashSet<string>(),
             busExcluded = new HashSet<string>();
@@ -249,6 +251,7 @@ namespace CoDriver
         void Index()
         {
             cells.Clear();
+            nearbyCells.Clear();
             LaneById = lanes.ToDictionary(l => l.id);
             SignalById = signals.ToDictionary(s => s.id);
             foreach (var lane in lanes)
@@ -269,6 +272,25 @@ namespace CoDriver
                     if (!list.Contains(lane))
                         list.Add(lane);
                 }
+            }
+            // Lane geometry is immutable between Index calls. Build each cell's
+            // neighbourhood once instead of allocating a HashSet for every NPC
+            // and every junction query. Preserve the original candidate order.
+            var queryCells = new HashSet<Vector2Int>();
+            foreach (var cell in cells.Keys)
+                for (int x = -1; x <= 1; x++)
+                for (int z = -1; z <= 1; z++)
+                    queryCells.Add(cell + new Vector2Int(x, z));
+            var candidates = new HashSet<MapLane>();
+            foreach (var cell in queryCells)
+            {
+                candidates.Clear();
+                for (int x = -1; x <= 1; x++)
+                for (int z = -1; z <= 1; z++)
+                    if (cells.TryGetValue(cell + new Vector2Int(x, z), out var nearby))
+                        foreach (var lane in nearby)
+                            candidates.Add(lane);
+                nearbyCells[cell] = candidates.ToArray();
             }
             // Close outgoing district roads shortly beyond their final usable
             // junction. That junction remains available for a three-point turn;
@@ -366,13 +388,8 @@ namespace CoDriver
                 Mathf.FloorToInt(point.x / 24),
                 Mathf.FloorToInt(point.z / 24)
             );
-            var candidates = new HashSet<MapLane>();
-            for (int x = -1; x <= 1; x++)
-            for (int z = -1; z <= 1; z++)
-                if (cells.TryGetValue(cell + new Vector2Int(x, z), out var nearby))
-                    foreach (var lane in nearby)
-                        candidates.Add(lane);
-            foreach (var lane in candidates.Count > 0 ? (IEnumerable<MapLane>)candidates : lanes)
+            var candidates = nearbyCells.TryGetValue(cell, out var nearby) ? nearby : lanes;
+            foreach (var lane in candidates)
             {
                 if (routable && (lane.boundary || lane.next.Length == 0))
                     continue;
