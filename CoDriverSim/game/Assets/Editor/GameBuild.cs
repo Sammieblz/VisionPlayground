@@ -117,6 +117,24 @@ namespace CoDriver.Editor
                             )
                         ),
                         art_sha256 = AssetFingerprint(),
+                        render_settings_sha256 = Hash(
+                            Encoding.UTF8.GetBytes(
+                                string.Join(
+                                    "\n",
+                                    Directory
+                                        .GetFiles(
+                                            "Assets/Settings",
+                                            "*",
+                                            SearchOption.AllDirectories
+                                        )
+                                        .Where(p => !p.EndsWith(".meta"))
+                                        .OrderBy(p => p)
+                                        .Select(p =>
+                                            p.Replace('\\', '/') + ":" + Hash(File.ReadAllBytes(p))
+                                        )
+                                )
+                            )
+                        ),
                     },
                     true
                 )

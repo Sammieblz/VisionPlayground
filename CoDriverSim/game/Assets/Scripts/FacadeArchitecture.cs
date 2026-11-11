@@ -102,8 +102,16 @@ namespace CoDriver
             }
             else
             {
-                material.color = new Color(.82f, .92f, 1);
-                material.SetFloat("_Smoothness", .86f);
+                // The source's black, weathered metal atlas read as boarded
+                // windows. Keep its modeled panes but use clean dielectric glass.
+                material.SetTexture("_BaseMap", null);
+                material.SetTexture("_MetallicGlossMap", null);
+                material.SetTexture("_BumpMap", null);
+                material.DisableKeyword("_METALLICSPECGLOSSMAP");
+                material.DisableKeyword("_NORMALMAP");
+                material.color = new Color(.31f, .40f, .46f);
+                material.SetFloat("_Metallic", 0);
+                material.SetFloat("_Smoothness", .78f);
             }
             material.enableInstancing = true;
             finishes[(original, style)] = material;

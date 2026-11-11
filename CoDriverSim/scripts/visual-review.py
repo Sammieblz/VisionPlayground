@@ -98,9 +98,23 @@ def main():
         "--run", action="append", nargs=3, default=[], metavar=("PACKAGE", "SESSION", "LABEL")
     )
     parser.add_argument("--video", action="append", nargs=2, default=[], metavar=("FILE", "LABEL"))
+    parser.add_argument(
+        "--before", type=Path, help="Retained capture folder below the review folder"
+    )
+    parser.add_argument(
+        "--after",
+        type=Path,
+        default=Path("visual"),
+        help="Current capture folder below the review folder",
+    )
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     folder = root / "outputs/qualification/realism"
+    for selected in (args.before, args.after):
+        if selected is not None:
+            candidate = (folder / selected).resolve(strict=True)
+            if not candidate.is_dir() or not candidate.is_relative_to(folder.resolve()):
+                parser.error("Capture folders must be inside outputs/qualification/realism")
     panels = [
         ("Cockpit", "cockpit-720.png", "cockpit-720.png"),
         ("Public instrument placement", "public-instruments-720.png", "public-instruments-720.png"),
@@ -161,14 +175,14 @@ def main():
         )
     for title, before, after in panels:
         images = []
-        before_folder = (
+        before_folder = args.before or (
             "visual-before-architecture-pass"
             if title in {"Storefront", "Modeled low-rise"}
             else "visual-before-material-pass"
         )
         for label, relative in (
             ("Earlier capture", Path(before_folder) / before),
-            ("Scene asset inspection", Path("visual") / after),
+            ("Scene asset inspection", args.after / after),
         ):
             path = folder / relative
             if not path.is_file():

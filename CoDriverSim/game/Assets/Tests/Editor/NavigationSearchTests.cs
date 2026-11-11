@@ -138,5 +138,34 @@ namespace CoDriver.Tests
                         : 0
                 );
         }
+
+        [Test]
+        public void NeighborhoodTripsRemainConnectedAndNearTheDavisStartingArea()
+        {
+            var map = MapDefinition.Load("davis-downtown");
+            foreach (int seed in new[] { 21, 22, 30 })
+            foreach (int index in new[] { 8, 9, 10, 11, 15, 16, 17, 18, 19, 20, 21, 22 })
+            {
+                var path = map.NeighborhoodCircuit(seed, index, map.Spawn);
+                Assert.IsTrue(path.Closed);
+                Assert.That(path.Length, Is.GreaterThan(200));
+                for (float at = 0; at < path.Length; at += 3)
+                {
+                    var point = path.Position(at);
+                    Assert.LessOrEqual(
+                        Vector3.ProjectOnPlane(point - map.Spawn, Vector3.up).magnitude,
+                        195.1f,
+                        $"seed={seed}, actor={index}"
+                    );
+                    var lane = map.Nearest(point, routable: false);
+                    var near = lane.Path.Position(lane.Path.NearestDistance(point));
+                    Assert.Less(
+                        Vector3.Distance(point, near),
+                        .5f,
+                        "A joined trip must not cut across a junction or leave a lane."
+                    );
+                }
+            }
+        }
     }
 }

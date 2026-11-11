@@ -10,6 +10,28 @@ namespace CoDriver.Editor
     // smoothness=A. Conversion is an offline preparation step only.
     public static class WorldMaterialMaps
     {
+        public static Texture2D SavePacked(Texture2D pixels, string path)
+        {
+            // Windows/D3D11 supports BC7. Keep the linear channel data and mip
+            // chain, but discard the CPU copy after offline compression.
+            EditorUtility.CompressTexture(
+                pixels,
+                TextureFormat.BC7,
+                TextureCompressionQuality.Normal
+            );
+            pixels.Apply(false, true);
+            var previous = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (previous)
+            {
+                EditorUtility.CopySerialized(pixels, previous);
+                UnityEngine.Object.DestroyImmediate(pixels);
+                EditorUtility.SetDirty(previous);
+                return previous;
+            }
+            AssetDatabase.CreateAsset(pixels, path);
+            return pixels;
+        }
+
         public static void Copy(Material source, Material target, string directory, string name)
         {
             Texture Map(string property) =>
@@ -45,16 +67,7 @@ namespace CoDriver.Editor
                 pixels.SetPixels(colors);
                 pixels.Apply(true, false);
                 string path = directory + "/" + name + "-metal-smooth.asset";
-                var previous = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-                if (previous)
-                {
-                    EditorUtility.CopySerialized(pixels, previous);
-                    UnityEngine.Object.DestroyImmediate(pixels);
-                    pixels = previous;
-                }
-                else
-                    AssetDatabase.CreateAsset(pixels, path);
-                target.SetTexture("_MetallicGlossMap", pixels);
+                target.SetTexture("_MetallicGlossMap", SavePacked(pixels, path));
                 target.SetFloat("_Smoothness", 1);
                 target.EnableKeyword("_METALLICSPECGLOSSMAP");
             }
@@ -70,16 +83,7 @@ namespace CoDriver.Editor
                 pixels.SetPixels(colors);
                 pixels.Apply(true, false);
                 string path = directory + "/" + name + "-occlusion.asset";
-                var previous = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-                if (previous)
-                {
-                    EditorUtility.CopySerialized(pixels, previous);
-                    UnityEngine.Object.DestroyImmediate(pixels);
-                    pixels = previous;
-                }
-                else
-                    AssetDatabase.CreateAsset(pixels, path);
-                target.SetTexture("_OcclusionMap", pixels);
+                target.SetTexture("_OcclusionMap", SavePacked(pixels, path));
                 target.SetFloat("_OcclusionStrength", Factor("occlusionTexture_strength", 1));
                 target.EnableKeyword("_OCCLUSIONMAP");
             }

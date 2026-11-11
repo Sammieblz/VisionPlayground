@@ -46,6 +46,48 @@ namespace CoDriver.Tests
         }
 
         [Test]
+        public void CrosswalkAndCommittedTurnCannotBeGrantedTogether()
+        {
+            var town = new GameObject("crosswalk town").AddComponent<Town>();
+            var signal = new GameObject("crosswalk junction").AddComponent<Signal>();
+            var car = new GameObject("waiting car").AddComponent<TrafficActor>();
+            var walker = new GameObject("crossing person").AddComponent<Walker>();
+            try
+            {
+                signal.Town = town;
+                town.Traffic.Add(car);
+                town.Walkers.Add(walker);
+                car.transform.position = new Vector3(0, 0, -20);
+                walker.transform.position = new Vector3(-10, 0, -2);
+                walker.Crossing = true;
+                Assert.IsFalse(
+                    signal.Reserve(car),
+                    "A green approach must still yield to a crossing"
+                );
+                walker.Crossing = false;
+                Assert.IsTrue(signal.Reserve(car));
+                car.transform.position = new Vector3(0, 0, -6);
+                signal.HoldPhase(33, 100);
+                Assert.IsFalse(
+                    signal.PedestrianGreen,
+                    "A committed turn must finish before walkers enter"
+                );
+                car.transform.position = new Vector3(0, 0, 26);
+                Assert.IsTrue(
+                    signal.PedestrianGreen,
+                    "A stale reservation beyond the junction cannot block walking"
+                );
+            }
+            finally
+            {
+                Object.DestroyImmediate(walker.gameObject);
+                Object.DestroyImmediate(car.gameObject);
+                Object.DestroyImmediate(signal.gameObject);
+                Object.DestroyImmediate(town.gameObject);
+            }
+        }
+
+        [Test]
         public void QualificationVehicleSharesJunctionWithTrafficAndQueueLeader()
         {
             var town = new GameObject("qualification town").AddComponent<Town>();

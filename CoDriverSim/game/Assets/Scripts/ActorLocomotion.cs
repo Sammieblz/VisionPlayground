@@ -38,6 +38,7 @@ namespace CoDriver
             body ? Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up).magnitude : 0;
         public bool Reacting => Time.time < recoverUntil;
         Vector3 lastDesired;
+        string vehicleBlocker = "";
         float stepRise = float.NaN,
             stepLedge = float.NaN;
         public string Diagnostic =>
@@ -53,6 +54,8 @@ namespace CoDriver
             + stepLedge.ToString("F2")
             + " contact="
             + (Time.time < sideContactUntil ? sideContact : "None")
+            + " avoidance="
+            + vehicleBlocker
             + " rail_wait="
             + waitingForRail;
 
@@ -169,7 +172,11 @@ namespace CoDriver
                             1 << TrafficClearance.WalkerLayer,
                             QueryTriggerInteraction.Ignore
                         );
-                    desired = personAhead ? Vector3.zero : toGoal.normalized * speed;
+                    // Retain NavMesh's avoidance velocity when another person
+                    // occupies the final segment; zeroing it makes both agents
+                    // wait indefinitely instead of passing one another.
+                    if (!personAhead)
+                        desired = toGoal.normalized * speed;
                 }
             }
             // A physical contact or rounded corner can leave the body beyond the
@@ -180,19 +187,33 @@ namespace CoDriver
                 !flying
                 && agent
                 && agent.enabled
-                && !NavMesh.SamplePosition(body.position, out _, .25f, agent.areaMask)
                 && NavMesh.SamplePosition(body.position, out var refuge, 4, agent.areaMask)
+                && Vector3.ProjectOnPlane(refuge.position - body.position, Vector3.up).sqrMagnitude
+                    > .08f * .08f
             )
+            {
+                var correction = Vector3.ProjectOnPlane(
+                    refuge.position - body.position,
+                    Vector3.up
+                );
+                // Preserve progress along the boundary while steering back onto
+                // it. A tiny correction-only velocity could not overcome static
+                // friction and stranded actors just eight centimetres outside.
+                float outward = Vector3.Dot(desired, correction.normalized);
+                if (outward < 0)
+                    desired -= correction.normalized * outward;
                 desired = Vector3.ClampMagnitude(
-                    Vector3.ProjectOnPlane(refuge.position - body.position, Vector3.up) * 2,
+                    desired + correction * 6,
                     Mathf.Min(1, agent.speed)
                 );
+            }
             StepVelocity(desired, Time.fixedDeltaTime);
         }
 
         public void StepVelocity(Vector3 desired, float dt)
         {
             lastDesired = desired;
+            vehicleBlocker = "";
             if (!body || body.isKinematic || Reacting)
                 return;
             if (!flying)
@@ -244,7 +265,10 @@ namespace CoDriver
                 if (blocked && !detourVehicle && hit.collider is BoxCollider vehicle)
                     PlanVehicleDetour(vehicle);
                 if (blocked || Time.time < blockedUntil)
+                {
+                    vehicleBlocker = blocked ? hit.collider.name : "Impact pause";
                     desired = Vector3.zero;
+                }
             }
             if (Time.time < vehicleContactUntil)
             {
@@ -273,6 +297,7 @@ namespace CoDriver
             }
             else
                 waitingForRail = false;
+            lastDesired = desired;
             Vector3 current = flying
                 ? body.linearVelocity
                 : Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
@@ -378,7 +403,7 @@ namespace CoDriver
                     foot + Vector3.up * .12f,
                     Vector3.down,
                     out var support,
-                    .4f,
+                    .55f,
                     groundMask,
                     QueryTriggerInteraction.Ignore
                 ) || support.rigidbody
@@ -386,10 +411,10 @@ namespace CoDriver
                 return;
             if (
                 physics.Raycast(
-                    foot + forward * .45f + Vector3.up * .32f,
+                    foot + forward * .45f + Vector3.up * .42f,
                     Vector3.down,
                     out var step,
-                    .34f,
+                    .44f,
                     groundMask,
                     QueryTriggerInteraction.Ignore
                 )
@@ -401,7 +426,10 @@ namespace CoDriver
                 float ledge = step.point.y - support.point.y;
                 stepRise = rise;
                 stepLedge = ledge;
-                if (ledge > .03f && ledge < .29f && rise > -.04f && rise < .29f)
+                // The back of Cedar's raised sidewalk is 33 cm above the
+                // landscaped ground. A displaced walker must also recover from
+                // that side, using the same bounded leg force as the road curb.
+                if (ledge > .03f && ledge < .38f && rise > -.04f && rise < .38f)
                 {
                     float lift = Mathf.Max(
                         0,

@@ -66,8 +66,8 @@ namespace CoDriver
             Roof = Surface("Roof", new Color(.3f, .32f, .34f), 1);
             White = Material("Road paint", new Color(.9f, .88f, .8f));
             Yellow = Material("Yellow", new Color(.95f, .65f, .05f));
-            Glass = Material("Window glass", new Color(.12f, .22f, .29f));
-            Glass.SetFloat("_Smoothness", .85f);
+            Glass = Material("Window glass", new Color(.28f, .38f, .43f));
+            Glass.SetFloat("_Smoothness", .78f);
             Rubber = Material("Rubber", new Color(.035f, .04f, .045f));
             Metal = Material("Steel", new Color(.36f, .39f, .42f));
             Metal.SetFloat("_Metallic", .65f);

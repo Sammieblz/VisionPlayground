@@ -204,7 +204,10 @@ namespace CoDriver
                 if (path.sqrMagnitude < .01f)
                     return;
                 var centre = (from + to) * .5f;
-                centre.y = Mathf.Max(Centre.y, SidewalkPoint.y) - .04f;
+                // Meet the mapped sidewalk just below its surface rather than
+                // laying a raised pair of slabs over it. This removes the dark
+                // polygon edge at the join without coplanar surface flicker.
+                centre.y = SidewalkPoint.y - .061f;
                 var floor = Art.Box(
                     "Connected shop threshold",
                     town.transform,
@@ -225,6 +228,7 @@ namespace CoDriver
                             return new Vector2(world.x, world.z) * .2f;
                         })
                         .ToArray();
+                    mesh.RecalculateTangents();
                     RuntimeResources.Register(floor, mesh);
                 }
                 town.WalkSurfaces.Add(

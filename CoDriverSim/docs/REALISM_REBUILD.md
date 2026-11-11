@@ -986,3 +986,133 @@ skipped). WSL passes all **10 IPC tests**, including real supervisor/subreaper
 checks for normal bridge exit and a SIGKILL bridge crash with an orphan worker.
 This fixes a verified resource leak. It does not establish the cause of the
 earlier transport stall or qualify current performance; a fresh probe is next.
+
+### Packaged parking/navigation/IPC screening result
+
+Package `Realism-local-20261110-201915`, session
+`dbb89ed8da7041e5838b38718c60c7a9`, completed 600.01 elapsed seconds / 559.30
+advancing simulation seconds. Code identity is
+`c0e4e3520e0d28ce65854b2182e7d5bf080f710d01f461c214301864cc46de7f`;
+the package also includes the IPC lifetime correction from `e17ce9b`.
+Integrity and isolated CLI checks pass. All four Windows/Linux Python CI jobs
+pass for that commit.
+
+Mean **28.57 FPS** still fails the rendering target; p95/p99 are
+**54.78/67.44 ms**. Whole-session camera **19.63 Hz** meets the documented
+near-20-Hz tolerance, and detection is **6.07 Hz**. Warning p95 is **401.83 ms**
+(263 samples). This is another ten-minute screening run, not the required
+30-minute qualification and not Comma autonomy.
+
+No player contact, pause, sampled vehicle/rail overlap, or two-minute ordinary
+traffic/active-emergency block was observed. Parking returned and departed
+again, the previously blocked car moved, and the emergency cycle completed.
+The Comma healthy-sample fraction was 97.45%. On exit the new supervisor receipt
+confirms 37 IPC files / 123,990,016 allocated bytes were released, returning
+`/dev/shm` to its unchanged legacy baseline of 285 MB. System samples still
+show pressure (median 899 MB available Windows memory and 86.20% CPU).
+Fresh graphics/activity review and further measured rendering work follow.
+
+### Recorded activity and rendering correction
+
+Unmodified 220-second foreground recordings are retained as
+`activity-davis-ipc.mp4` (session `89ad3a35cf934766aa9e6683afbc971e`) and
+`activity-cedar-ipc.mp4` (`264b7db8b0914a09811371ce56a464f3`). Both completed
+at approximately 15 captured frames/second; capture overhead excludes them
+from performance qualification. Davis's sampled 60–180 second window had
+34–35 outdoor people within 200 m of the stationary player, but only **3.79
+moving vehicles on average**, meeting six in one third of samples. Cedar had
+25.22 outdoor people and **1.66 moving vehicles** on average. Three complete
+shop returns were sampled across the Davis recording; four transit trips were
+sampled in Cedar. State records do not establish animation quality, line of
+sight, or complete activity coverage. The spectator camera follows different
+actors while the population count remains centred on the player.
+
+Visual review exposed excessive dry-ground glints, dark facade glazing and a
+spectator camera passing through walls. The next candidate makes rough dry
+surfaces matte, gives the modeled window panes a clean dielectric finish,
+recalculates tangents after threshold UV changes, and checks static obstructions
+for chase/activity cameras. The independent AI camera is unchanged.
+
+Converted linear metallic/smoothness and occlusion maps now use offline BC7
+compression and discard their CPU pixel copies. A GPU readback regression saves,
+unloads, reloads and replaces the asset; all four sampled channels stay within
+0.035 of their source values, and the mip chain survives. Classic Forward is
+being measured for the one-directional-light scene; render settings now have a
+separate build fingerprint. Nearest-lane searches also skip heading work for
+candidates that cannot improve positional error, and full-path projections
+skip unnecessary endpoint binary searches.
+
+`realism-render-memory-editor.xml`: **137/137 Editor tests passed**, including
+GPU texture persistence, camera obstruction, exhaustive navigation comparisons
+and the existing vehicle/contact calibration cases. Fresh player captures and
+sustained performance must establish whether these changes improve the application.
+
+The first neighborhood-routing check passes **138/138 Editor tests**. Twelve
+ordinary cars/trucks use nearby legal circuits; eight retain district trips.
+The Davis geometry check covers all twelve local actors over seeds 21, 22 and
+30, including continuous lane alignment and the 195 m neighborhood bound. This
+does not by itself establish six moving vehicles or congestion-free behavior.
+
+The subsequent full populated run was stopped after Cedar exposed a rail/contact
+regression. Its retained log is `realism-neighborhood-world.log`; diagnostic
+snapshots were copied into `neighborhood-first-failure/`. The bus stopped after
+4.8 m, with the junction blocked behind a car/streetcar collision. A focused
+pre-fix test then proves **Car 19 overlaps the streetcar by 1.125 m before the
+first physics step** (`realism-initial-rail-before.xml`, failed as expected).
+The initial-placement search previously ran before rail vehicles existed.
+
+Rail bodies are now created and synchronized first. Initial ordinary-traffic
+placement checks their complete collision volumes plus a departure gap, and
+also leaves space around the player. The bounded search fails explicitly if
+no clear position exists. These placements occur during town loading/reset;
+active actors still move through physics. Focused Cedar bus/traffic and initial
+rail-clearance checks are being rerun before packaging.
+
+### Denser traffic and pedestrian clearance follow-up
+
+Initial rail clearance now passes for both maps. The Cedar bus then exposed a
+turning deadlock: its opposing car's straight nose cast intersected the waiting
+bus, although the steered body could pass. Cedar now uses the existing three-metre
+swept-body check to allow at most 1 m/s continuation. Signals, crossing priority,
+and the remaining physical clearance limits still apply. The bus completed two
+stops and 299 m in `realism-cedar-turn-clearance.xml`; that run still failed the
+ordinary-traffic wait criterion, so it was not accepted as a populated-world pass.
+
+The denser run also exposed a walker stuck behind Cedar's raised sidewalk.
+`realism-cedar-sidewalk-recovery.xml` reproduces it from the recorded position.
+Both the height probe and the supporting-ground probe now cover the 33 cm rise;
+locomotion continues to use bounded mass-scaled forces without pose correction.
+`realism-cedar-step-support.xml` passes the recorded person/cat recovery case,
+including a per-step displacement bound. Its traffic case still fails because
+cars and pedestrians can mutually block a crossing after a phase change.
+
+The next candidate prevents a fresh Cedar junction reservation while a crossing
+is in progress, and lets a committed turn clear before granting a pedestrian
+start. Walking endpoints vary within the crosswalk width; agents have distinct
+avoidance priorities and leave the landing after physically reaching the far
+sidewalk. The source changes and their focused checks remain under review. No
+new package or 30-minute qualification result is claimed for them yet.
+
+`realism-cedar-boundary-motion.xml` subsequently passes all **four** focused
+cases: six simulated minutes of ordinary populated traffic, the recorded curb
+recovery for a person and cat, the recorded signal-pole recovery, and the
+existing displaced-walker recovery. The pole failure came from navigation's
+clamped position disagreeing with the solid body. Recovery now blends bounded
+movement along the boundary with movement back onto navigation; the previous
+tiny correction alone could not overcome contact friction. Diagnostics report
+the velocity after avoidance and identify the vehicle blocking it.
+
+Cedar's estimated signal cycle now includes 28 seconds of pedestrian clearance
+after the last walk start. Its previous six seconds were shorter than the
+22-metre crossing time and repeatedly consumed the following vehicle green.
+Davis retains its mapped signal program. Crossing completions require the actor
+to be physically on the far sidewalk; no collision bodies are repositioned or
+disabled to clear traffic. Full world/Editor regressions and a new external
+package are the next gates. A small storefront join change also puts the access
+surface just below the existing sidewalk instead of visibly laying raised slabs
+over it; fresh captures still need to verify the appearance.
+
+The combined source passes **139/139 Editor tests** in
+`realism-neighborhood-final-editor.xml` (21.48 seconds), including the new
+crosswalk/committed-turn exclusion test. The full physical-world suite is running
+as `realism-neighborhood-final-world`; packaging is conditional on that result.

@@ -191,10 +191,18 @@ namespace CoDriver
         {
             if (high < 0 || low > Length || points.Count < 2)
                 return;
-            int first = distances.BinarySearch(Mathf.Max(0, low));
-            first = Mathf.Max(1, first < 0 ? ~first : first);
-            int last = distances.BinarySearch(Mathf.Min(Length, high));
-            last = Mathf.Min(points.Count - 1, last < 0 ? ~last : last + 1);
+            int first = 1,
+                last = points.Count - 1;
+            if (low > 0)
+            {
+                first = distances.BinarySearch(low);
+                first = Mathf.Max(1, first < 0 ? ~first : first);
+            }
+            if (high < Length)
+            {
+                last = distances.BinarySearch(high);
+                last = Mathf.Min(points.Count - 1, last < 0 ? ~last : last + 1);
+            }
             for (int i = first; i <= last; i++)
             {
                 Vector3 segment = points[i] - points[i - 1];
@@ -375,11 +383,19 @@ namespace CoDriver
                 Town.Grid[bx + 1],
                 Town.Grid[bz + 1]
             );
+            bool localTraffic = (kind == "Car" || kind == "Truck") && index >= 8;
+            var neighbourhood = t.Player ? t.Player.position : t.Map.Spawn;
             if (kind == "Car" || kind == "Truck")
-                Path = new TrackPath(t.TrafficGraph.Circuit(t.Seed + index * 103, index));
+                Path = new TrackPath(
+                    localTraffic
+                        ? t.TrafficGraph.NeighborhoodCircuit(index, neighbourhood)
+                        : t.TrafficGraph.Circuit(t.Seed + index * 103, index)
+                );
             if (t.Map.IsDavis)
             {
-                Path = t.Map.Circuit(t.Seed, index);
+                Path = localTraffic
+                    ? t.Map.NeighborhoodCircuit(t.Seed, index, neighbourhood)
+                    : t.Map.Circuit(t.Seed, index);
                 if (kind == "Emergency")
                 {
                     station = t.EmergencyBay;
@@ -831,6 +847,18 @@ namespace CoDriver
                 // body path below, rather than a tangent projected past the turn.
                 staticObstacles: false
             );
+            // As in mapped streets, a tangent can point at the opposing queue
+            // while the actual steered body clears it. Permit only checked,
+            // walking-speed continuation; all signal/path limits still follow.
+            if (Speed < 1.2f && forwardLimit < 1 && Mathf.Abs(driver.Dynamics.LastSteering) > 5)
+                forwardLimit = Mathf.Max(
+                    forwardLimit,
+                    TrafficClearance.TurningCreepLimit(
+                        GetComponent<BoxCollider>(),
+                        driver.Dynamics.Profile.wheelbase,
+                        driver.Dynamics.LastSteering
+                    )
+                );
             if (forwardLimit < target)
             {
                 target = forwardLimit;
@@ -2035,6 +2063,7 @@ namespace CoDriver
             agent = gameObject.AddComponent<NavMeshAgent>();
             agent.areaMask = PedestrianNavigation.WalkingMask;
             agent.radius = .28f;
+            agent.avoidancePriority = 25 + id % 50;
             agent.height = IsAnimal ? .6f : 1.8f;
             agent.speed = IsAnimal ? 1.8f : 1.25f;
             agent.angularSpeed = 180;
@@ -2161,7 +2190,8 @@ namespace CoDriver
                     town,
                     agent.nextPosition,
                     out destination,
-                    out var far
+                    out var far,
+                    (float)rng.NextDouble() * 1.6f - .8f
                 )
             )
             {
@@ -2321,11 +2351,11 @@ namespace CoDriver
                 RecoverCrossingProgress(destination);
                 if (
                     Vector3.ProjectOnPlane(transform.position - destination, Vector3.up).magnitude
-                        > .65f
+                        > 3.25f
                     || !NavMesh.SamplePosition(
                         transform.position,
                         out _,
-                        .6f,
+                        .12f,
                         PedestrianNavigation.WalkingMask
                     )
                 )
@@ -2335,6 +2365,12 @@ namespace CoDriver
                 }
                 Crossing = false;
                 agent.areaMask = PedestrianNavigation.WalkingMask;
+                // Once physically on the far sidewalk, clear the shared landing
+                // instead of idling in the exact point used by the next crosser.
+                // The tight walking-area check prevents ending in the roadway.
+                WalkAbout();
+                nextAction = Time.time + 6;
+                return;
             }
             if (IsAnimal)
                 agent.speed = 1.8f;

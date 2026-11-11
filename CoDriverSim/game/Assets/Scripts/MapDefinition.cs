@@ -389,13 +389,18 @@ namespace CoDriver
                 Mathf.FloorToInt(point.z / 24)
             );
             var candidates = nearbyCells.TryGetValue(cell, out var nearby) ? nearby : lanes;
+            bool oriented = forward.sqrMagnitude > .1f;
             foreach (var lane in candidates)
             {
                 if (routable && (lane.boundary || lane.next.Length == 0))
                     continue;
                 float d = lane.Path.NearestDistance(point);
                 float e = (lane.Path.Position(d) - point).sqrMagnitude;
-                if (forward.sqrMagnitude > .1f && Vector3.Dot(forward, lane.Path.Direction(d)) < 0)
+                // Heading can only add error; avoid its two path samples when
+                // the position already cannot improve the current result.
+                if (e >= error)
+                    continue;
+                if (oriented && Vector3.Dot(forward, lane.Path.Direction(d)) < 0)
                     e += 64;
                 if (e < error)
                 {
@@ -478,6 +483,48 @@ namespace CoDriver
                 return new TrackPath(outbound.SelectMany(l => l.points), true);
             }
             throw new InvalidOperationException("No connected legal traffic circuit for " + id);
+        }
+
+        public TrackPath NeighborhoodCircuit(int seed, int index, Vector3 centre)
+        {
+            const float radius = 195;
+            var blocked = new HashSet<string>(
+                lanes
+                    .Where(l =>
+                        l.points.Any(p =>
+                            Vector3.ProjectOnPlane(p - centre, Vector3.up).sqrMagnitude
+                            > radius * radius
+                        )
+                    )
+                    .Select(l => l.id)
+            );
+            var choices = lanes
+                .Where(l =>
+                    !l.internalLane
+                    && !l.boundary
+                    && l.next.Length > 0
+                    && l.Path.Length > 25
+                    && !blocked.Contains(l.id)
+                    && l.access != "destination"
+                    && l.access != "customers"
+                    && l.access != "delivery"
+                )
+                .ToArray();
+            var random = new System.Random(seed + index * 103);
+            for (int attempt = 0; attempt < 300 && choices.Length > 0; attempt++)
+            {
+                var a = choices[(index * 17 + attempt) % choices.Length];
+                var b = choices[random.Next(choices.Length)];
+                var outbound = Route(a, b, blocked: blocked);
+                var inbound = Route(b, a, blocked: blocked);
+                if (outbound.Count < 5 || inbound.Count < 5)
+                    continue;
+                outbound.AddRange(inbound.Skip(1).Take(inbound.Count - 2));
+                return new TrackPath(outbound.SelectMany(l => l.points), true);
+            }
+            // A sparse district may have no legal local loop. Keep its access
+            // rules and use a full-district trip rather than fabricating a turn.
+            return Circuit(seed, index);
         }
 
         public TrackPath RoundTrip(Vector3 first, Vector3 second, bool bus = false)

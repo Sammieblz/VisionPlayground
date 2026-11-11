@@ -12,7 +12,9 @@ namespace CoDriver
             routing_sha256,
             unity;
         public string asset_profile;
-        public string scenery_sha256, art_sha256;
+        public string scenery_sha256,
+            art_sha256,
+            render_settings_sha256;
         public float physics_step;
         public static BuildIdentity Current =>
             JsonUtility.FromJson<BuildIdentity>(

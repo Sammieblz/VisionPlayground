@@ -593,7 +593,7 @@ namespace CoDriver.Editor
                     packed.SetPixels(pixels);
                     packed.Apply();
                     string path = Prepared + name + "-smoothness.asset";
-                    Save(packed, path);
+                    WorldMaterialMaps.SavePacked(packed, path);
                     material.SetTexture(
                         "_MetallicGlossMap",
                         AssetDatabase.LoadAssetAtPath<Texture2D>(path)
@@ -606,9 +606,12 @@ namespace CoDriver.Editor
                     );
                     material.EnableKeyword("_METALLICSPECGLOSSMAP");
                 }
-                if (name == "Asphalt")
+                if (name is "Asphalt" or "Concrete" or "Grass" or "Ballast")
                 {
-                    material.SetFloat("_BumpScale", .3f);
+                    // These default dry, rough surfaces must not pick up the
+                    // sharp sky/sun glints used for vehicle paint and glass.
+                    material.SetFloat("_BumpScale", name == "Concrete" ? .25f : .3f);
+                    material.SetFloat("_Smoothness", .08f);
                     material.SetFloat("_SpecularHighlights", 0);
                     material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
                     material.SetFloat("_EnvironmentReflections", 0);

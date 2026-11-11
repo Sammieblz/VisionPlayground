@@ -67,6 +67,24 @@ namespace CoDriver
             return points;
         }
 
+        public List<Vector3> NeighborhoodCircuit(int index, Vector3 centre)
+        {
+            var anchor = Node(centre);
+            int x = Mathf.Clamp(anchor.x - (index % 2), 0, 3);
+            int z = Mathf.Clamp(anchor.y - ((index / 2) % 2), 0, 3);
+            var corners = new[]
+            {
+                new Vector2Int(x, z),
+                new Vector2Int(x + 1, z),
+                new Vector2Int(x + 1, z + 1),
+                new Vector2Int(x, z + 1),
+            };
+            var result = new List<Vector3>();
+            for (int i = 0; i < 4; i++)
+                result.Add(Position(corners[(index / 4 + (index % 2 == 0 ? i : 4 - i)) % 4]));
+            return result;
+        }
+
         bool FindCircuit(List<Vector2Int> route, System.Random random, ref int budget)
         {
             if (--budget < 0)

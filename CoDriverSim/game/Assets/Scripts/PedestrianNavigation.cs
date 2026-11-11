@@ -80,7 +80,8 @@ namespace CoDriver
             Town town,
             Vector3 position,
             out Vector3 start,
-            out Vector3 finish
+            out Vector3 finish,
+            float lateralOffset = 0
         )
         {
             var candidates = new List<(Vector3 centre, Vector3 right, float halfSpan)>();
@@ -126,15 +127,20 @@ namespace CoDriver
                 var direction = candidate.right;
                 if (Vector3.Dot(position - candidate.centre, direction) < 0)
                     direction = -direction;
+                // Use the crosswalk's width, not one shared point for every
+                // arrival and departure. The seeded caller varies each journey.
+                var centre =
+                    candidate.centre
+                    + Vector3.Cross(Vector3.up, direction) * Mathf.Clamp(lateralOffset, -.8f, .8f);
                 if (
                     !NavMesh.SamplePosition(
-                        candidate.centre + direction * candidate.halfSpan,
+                        centre + direction * candidate.halfSpan,
                         out var near,
                         2,
                         WalkingMask
                     )
                     || !NavMesh.SamplePosition(
-                        candidate.centre - direction * candidate.halfSpan,
+                        centre - direction * candidate.halfSpan,
                         out var far,
                         2,
                         WalkingMask

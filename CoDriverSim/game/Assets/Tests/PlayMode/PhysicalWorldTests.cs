@@ -47,6 +47,48 @@ namespace CoDriver.Tests
         }
 
         [UnityTest]
+        public IEnumerator InitialRoadVehiclesDoNotOverlapRailBodies()
+        {
+            Art.Initialize();
+            foreach (string map in new[] { "cedar-grove", "davis-downtown" })
+            {
+                var town = Own("Initial placement " + map).AddComponent<Town>();
+                town.Map = MapDefinition.Load(map);
+                town.Build(null);
+                var overlaps = new List<string>();
+                foreach (var road in town.Traffic)
+                foreach (var rail in new[] { town.Train, town.Tram })
+                {
+                    if (!rail.gameObject.activeInHierarchy)
+                        continue;
+                    var car = road.GetComponent<BoxCollider>();
+                    foreach (var coach in rail.CollisionBodies)
+                        if (
+                            Physics.ComputePenetration(
+                                car,
+                                car.transform.position,
+                                car.transform.rotation,
+                                coach,
+                                coach.transform.position,
+                                coach.transform.rotation,
+                                out _,
+                                out float depth
+                            )
+                        )
+                            overlaps.Add(
+                                $"{road.name} at {road.transform.position} / {rail.name} depth={depth:F3}"
+                            );
+                }
+                Assert.IsEmpty(
+                    overlaps,
+                    map + " starts with overlapping bodies: " + string.Join("; ", overlaps)
+                );
+                UnityEngine.Object.Destroy(town.gameObject);
+                yield return null;
+            }
+        }
+
+        [UnityTest]
         public IEnumerator CockpitPresentationIsExcludedFromIndependentCamera()
         {
             Art.Initialize();
@@ -609,6 +651,86 @@ namespace CoDriver.Tests
                 .65f,
                 details
             );
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedCedarWalkersRecoverFromBackOfSidewalk()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Cedar sidewalk recovery").AddComponent<Town>();
+            town.Build(null);
+            foreach (var car in town.Traffic)
+                car.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            foreach (var walker in town.Walkers)
+                walker.gameObject.SetActive(false);
+            foreach (int index in new[] { 31, 17 })
+            {
+                var walker = town.Walkers[index];
+                walker.gameObject.SetActive(true);
+                var goal = new Vector3(-10, .2f, -192.3f);
+                walker.PrepareCrossing(new Vector3(-11.72f, -.15f, -208.05f), goal);
+                walker.BeginCrossing();
+                var body = walker.GetComponent<Rigidbody>();
+                var previous = body.position;
+                float start = Time.time;
+                while (walker.Crossing && Time.time - start < 35)
+                {
+                    yield return new WaitForFixedUpdate();
+                    Assert.Less(
+                        Vector3.Distance(body.position, previous),
+                        .09f,
+                        "Recovering from the raised sidewalk must use finite motion"
+                    );
+                    previous = body.position;
+                }
+                Assert.IsFalse(
+                    walker.Crossing,
+                    walker.NavigationDetail
+                        + " "
+                        + walker.GetComponent<ActorLocomotion>().Diagnostic
+                );
+                Assert.Less(
+                    Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude,
+                    .65f
+                );
+                Assert.Greater(body.position.y, .1f);
+                walker.gameObject.SetActive(false);
+            }
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedCedarWalkerClearsSignalPole()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Cedar signal pole").AddComponent<Town>();
+            town.Build(null);
+            foreach (var car in town.Traffic)
+                car.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            var walker = town.Walkers[44];
+            foreach (var other in town.Walkers)
+                if (other != walker)
+                    other.gameObject.SetActive(false);
+            var goal = new Vector3(-189.64f, .2f, -11.1f);
+            walker.PrepareCrossing(new Vector3(-189.96f, 0, -4.67f), goal);
+            walker.BeginCrossing();
+            var body = walker.GetComponent<Rigidbody>();
+            var previous = body.position;
+            float start = Time.time;
+            while (walker.Crossing && Time.time - start < 25)
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.Less(Vector3.Distance(body.position, previous), .09f);
+                previous = body.position;
+            }
+            Assert.IsFalse(
+                walker.Crossing,
+                walker.NavigationDetail + " " + walker.GetComponent<ActorLocomotion>().Diagnostic
+            );
+            Assert.Less(Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude, .65f);
         }
 
         [UnityTest, Timeout(300000)]

@@ -618,7 +618,10 @@ namespace CoDriver
             if (activityView)
             {
                 view.cullingMask = ~0;
-                view.transform.position = activityView.position + new Vector3(-7, 3, -8);
+                view.transform.position = CameraObstruction.Resolve(
+                    activityView.position + Vector3.up,
+                    activityView.position + new Vector3(-7, 3, -8)
+                );
                 view.transform.LookAt(activityView.position + Vector3.up);
                 return;
             }
@@ -643,7 +646,10 @@ namespace CoDriver
                 int selection = (int)(Time.time / 20) % targets.Length;
                 var target = targets[selection];
                 view.cullingMask = ~0;
-                view.transform.position = target.position + new Vector3(-8, 4, -9);
+                view.transform.position = CameraObstruction.Resolve(
+                    target.position + Vector3.up,
+                    target.position + new Vector3(-8, 4, -9)
+                );
                 view.transform.LookAt(target.position + Vector3.up);
                 if ((int)Time.time % 20 == 15 && tourShot != (int)(Time.time / 20))
                 {
@@ -663,6 +669,11 @@ namespace CoDriver
                 : new Vector3(0, 3.8f, -7);
             view.fieldOfView = viewMode == 1 ? CockpitFieldOfView : 70;
             view.transform.position = Vehicle.transform.TransformPoint(offset);
+            if (viewMode == 2)
+                view.transform.position = CameraObstruction.Resolve(
+                    Vehicle.transform.position + Vector3.up * 1.2f,
+                    view.transform.position
+                );
             view.cullingMask =
                 viewMode == 2 ? ~(1 << 9)
                 : viewMode == 1 ? ~(1 << 8)

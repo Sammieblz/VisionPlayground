@@ -1228,7 +1228,10 @@ namespace CoDriver
             t.transform.SetParent(transform);
             t.Initialize(this, kind, index);
             if (kind != "Parking" && kind != "Emergency")
-                for (int attempt = 0; attempt < 30; attempt++)
+            {
+                bool placed = false;
+                var body = t.GetComponent<BoxCollider>();
+                for (int attempt = 0; attempt < 128; attempt++)
                 {
                     bool clear = true;
                     if (Map.IsDavis)
@@ -1244,10 +1247,33 @@ namespace CoDriver
                     foreach (var other in Traffic)
                         if ((other.transform.position - t.transform.position).sqrMagnitude < 196)
                             clear = false;
+                    if (Player && (Player.position - t.transform.position).sqrMagnitude < 196)
+                        clear = false;
+                    // Rail is placed first and synchronized before this search.
+                    // Include its full body and a departure gap, not just a point
+                    // on the track; ordinary routes can share the streetcar lane.
+                    if (
+                        Physics.CheckBox(
+                            t.transform.TransformPoint(body.center),
+                            body.size * .5f + new Vector3(.4f, .05f, 3),
+                            t.transform.rotation,
+                            1 << TrafficClearance.RailLayer,
+                            QueryTriggerInteraction.Ignore
+                        )
+                    )
+                        clear = false;
                     if (clear)
+                    {
+                        placed = true;
                         break;
+                    }
                     t.PlaceForScenario(t.Path, t.Path.Position(t.Distance + 31));
                 }
+                if (!placed)
+                    throw new System.InvalidOperationException(
+                        "No clear initial road placement for " + t.name
+                    );
+            }
             // Initial placement may have advanced to a clear lane. Begin service
             // at the next stop ahead, never skip stops to complete an empty lap.
             if (kind == "Bus")
@@ -1258,6 +1284,16 @@ namespace CoDriver
 
         void SpawnPopulation()
         {
+            Train = new GameObject("Train").AddComponent<RailVehicle>();
+            Train.transform.SetParent(transform);
+            Train.Initialize(this, false);
+            Tram = new GameObject("Streetcar").AddComponent<RailVehicle>();
+            Tram.transform.SetParent(transform);
+            Tram.Initialize(this, true);
+            // Davis has no source-mapped streetcar; Cedar retains that system.
+            if (Map.IsDavis)
+                Tram.gameObject.SetActive(false);
+            Physics.SyncTransforms();
             for (int i = 0; i < 12; i++)
                 AddTraffic(i % 4 == 0 ? "Truck" : "Car", i);
             Bus = AddTraffic("Bus", 12);
@@ -1274,17 +1310,6 @@ namespace CoDriver
                 w.transform.SetParent(transform);
                 w.Initialize(this, i);
                 Walkers.Add(w);
-            }
-            Train = new GameObject("Train").AddComponent<RailVehicle>();
-            Train.transform.SetParent(transform);
-            Train.Initialize(this, false);
-            Tram = new GameObject("Streetcar").AddComponent<RailVehicle>();
-            Tram.transform.SetParent(transform);
-            Tram.Initialize(this, true);
-            if (Map.IsDavis)
-            {
-                // Davis has no source-mapped streetcar. Cedar Grove retains that system.
-                Tram.gameObject.SetActive(false);
             }
         }
 
@@ -1643,6 +1668,22 @@ namespace CoDriver
             }
             if (occupant && occupant != actor)
                 return false;
+            if (Town.Map?.IsDavis != true)
+            {
+                var remaining = transform.position - actor.transform.position;
+                bool entering = Vector3.Dot(remaining, actor.transform.forward) > 14;
+                // A green phase does not let the next vehicle enter an occupied
+                // crosswalk. Let already committed vehicles clear the junction.
+                if (
+                    (!occupant || entering)
+                    && Town.Walkers.Any(w =>
+                        w.gameObject.activeInHierarchy
+                        && w.Crossing
+                        && (w.transform.position - transform.position).sqrMagnitude < 20 * 20
+                    )
+                )
+                    return false;
+            }
             if (!occupant)
             {
                 if (!AtFrontOfApproach(actor))
@@ -1677,10 +1718,33 @@ namespace CoDriver
         }
 
         public float Phase =>
-            Time.time < forcedUntil ? forcedPhase : (Time.time - Town.Epoch + Offset * 8) % 42;
-        public bool PedestrianGreen =>
-            Uncontrolled
-            || (Mapped != null ? Mapped.Walk(Time.time - Town.Epoch) : Phase >= 32 && Phase < 36);
+            // The widest Cedar crossing is 22 m. Keep 28 s of all-red clearance
+            // after the last walk start; the former six seconds repeatedly
+            // consumed the next north/south green before walkers could finish.
+            Time.time < forcedUntil
+                ? forcedPhase
+                : (Time.time - Town.Epoch + Offset * 8) % 64;
+        public bool PedestrianGreen
+        {
+            get
+            {
+                if (Mapped == null && occupant && occupant.gameObject.activeInHierarchy)
+                {
+                    var remaining = transform.position - occupant.transform.position;
+                    if (
+                        remaining.sqrMagnitude < 24 * 24
+                        && Vector3.Dot(remaining, occupant.transform.forward) < 14
+                    )
+                        return false;
+                }
+                return Uncontrolled
+                    || (
+                        Mapped != null
+                            ? Mapped.Walk(Time.time - Town.Epoch)
+                            : Phase >= 32 && Phase < 36
+                    );
+            }
+        }
 
         bool GreenFor(Component actor) => Allows(actor.transform.position, actor.transform.forward);
 
