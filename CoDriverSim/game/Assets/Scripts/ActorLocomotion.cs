@@ -8,6 +8,7 @@ namespace CoDriver
     [DefaultExecutionOrder(150)]
     public sealed class ActorLocomotion : MonoBehaviour
     {
+        static readonly float[] walkerDetourAngles = { 55f, -55f, 90f, -90f, 125f, -125f };
         BoxCollider detourVehicle;
         readonly Vector3[] detourCorners = new Vector3[2];
         int detourCorner;
@@ -247,6 +248,14 @@ namespace CoDriver
                                 .normalized * Mathf.Min(1.2f, requestedSpeed);
                 }
             }
+            if (
+                !flying
+                && agent
+                && agent.enabled
+                && agent.isOnNavMesh
+                && desired.sqrMagnitude > .01f
+            )
+                desired = AvoidPhysicalWalker(desired);
             float distance = Mathf.Max(.65f, desired.magnitude * .6f);
             if (desired.sqrMagnitude > .01f)
             {
@@ -324,6 +333,61 @@ namespace CoDriver
             && vehicle.attachedRigidbody
             && vehicle.attachedRigidbody.linearVelocity.sqrMagnitude < .09f
             && vehicle.attachedRigidbody.angularVelocity.sqrMagnitude < .04f;
+
+        Vector3 AvoidPhysicalWalker(Vector3 desired)
+        {
+            // NavMesh clamps agents to its surface. A real body displaced just
+            // off that surface can therefore be in front of another walker even
+            // when RVO sees its agent behind them. Check the solid bodies too.
+            var origin = shape.bounds.center;
+            float radius = Mathf.Clamp(
+                Mathf.Min(shape.bounds.extents.x, shape.bounds.extents.z) - .02f,
+                .1f,
+                .23f
+            );
+            if (
+                !physics.SphereCast(
+                    origin,
+                    radius,
+                    desired.normalized,
+                    out var hit,
+                    .7f,
+                    1 << TrafficClearance.WalkerLayer,
+                    QueryTriggerInteraction.Ignore
+                )
+                || hit.collider == shape
+            )
+                return desired;
+            foreach (float angle in walkerDetourAngles)
+            {
+                var direction = Quaternion.AngleAxis(angle, Vector3.up) * desired.normalized;
+                if (
+                    !NavMesh.SamplePosition(
+                        body.position + direction * .8f,
+                        out var point,
+                        .2f,
+                        agent.areaMask
+                    ) || NavMesh.Raycast(agent.nextPosition, point.position, out _, agent.areaMask)
+                )
+                    continue;
+                var travel = Vector3.ProjectOnPlane(point.position - body.position, Vector3.up);
+                if (
+                    travel.sqrMagnitude < .4f * .4f
+                    || physics.SphereCast(
+                        origin,
+                        radius,
+                        travel.normalized,
+                        out _,
+                        travel.magnitude,
+                        ~(1 << TrafficClearance.RoadLayer),
+                        QueryTriggerInteraction.Ignore
+                    )
+                )
+                    continue;
+                return travel.normalized * Mathf.Min(.8f, desired.magnitude);
+            }
+            return Vector3.zero;
+        }
 
         void PlanVehicleDetour(BoxCollider vehicle)
         {

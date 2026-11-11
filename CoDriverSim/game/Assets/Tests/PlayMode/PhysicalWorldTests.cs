@@ -799,6 +799,60 @@ namespace CoDriver.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedDavisCrosserPassesDisplacedWaitingPerson()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis opposing pedestrians").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            foreach (var car in town.Traffic)
+                car.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            var walker = town.Walkers[24];
+            var waiting = town.Walkers[34];
+            foreach (var other in town.Walkers)
+                if (other != walker && other != waiting)
+                    other.gameObject.SetActive(false);
+            waiting.PrepareCrossing(
+                new Vector3(28.38f, .1f, -88.70f),
+                new Vector3(28.99f, .1f, -89.98f)
+            );
+            waiting.GetComponent<NavMeshAgent>().areaMask = PedestrianNavigation.WalkingMask;
+            var goal = new Vector3(26.93f, .1f, -74.18f);
+            walker.PrepareCrossing(new Vector3(28.60f, .1f, -89.15f), goal);
+            walker.BeginCrossing();
+            var bodies = new[]
+            {
+                walker.GetComponent<Rigidbody>(),
+                waiting.GetComponent<Rigidbody>(),
+            };
+            var previous = bodies.Select(b => b.position).ToArray();
+            float start = Time.time;
+            while (walker.Crossing && Time.time - start < 35)
+            {
+                yield return new WaitForFixedUpdate();
+                for (int i = 0; i < bodies.Length; i++)
+                {
+                    Assert.Less(
+                        Vector3.Distance(previous[i], bodies[i].position),
+                        .09f,
+                        "Pedestrians must pass using physical movement without snapping"
+                    );
+                    previous[i] = bodies[i].position;
+                }
+            }
+            Assert.IsFalse(
+                walker.Crossing,
+                walker.NavigationDetail + " " + walker.GetComponent<ActorLocomotion>().Diagnostic
+            );
+            Assert.Less(
+                Vector3.ProjectOnPlane(bodies[0].position - goal, Vector3.up).magnitude,
+                .65f
+            );
+        }
+
+        [UnityTest, Timeout(300000)]
         public IEnumerator RecordedDavisCrossingDetoursToSameSideOfStoppedCar()
         {
             Art.Initialize();

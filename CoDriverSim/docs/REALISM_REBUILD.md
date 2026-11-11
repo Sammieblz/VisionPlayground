@@ -1116,3 +1116,23 @@ The combined source passes **139/139 Editor tests** in
 `realism-neighborhood-final-editor.xml` (21.48 seconds), including the new
 crosswalk/committed-turn exclusion test. The full physical-world suite is running
 as `realism-neighborhood-final-world`; packaging is conditional on that result.
+
+That full run was stopped after its Davis population snapshot showed an
+unresolved pedestrian/turning-vehicle queue at 346.67 simulated seconds.
+There is no final XML pass for that interrupted run, and its build/package
+stages did not execute. Retained evidence is in
+`neighborhood-davis-crosswalk-repro/`. Before stopping, the log recorded the
+Davis bus completing three stops / 2,511 m with boarding and alighting, and
+the recorded parking queue clearing; these are partial results only.
+
+The new Davis fixture uses the recorded crosser and waiting-person body poses.
+The waiting person's solid body was ahead of the crosser while navigation had
+clamped its agent behind them. A physical walker-clearance check now proposes a
+short, walkable detour around the actual body, preserving the same bounded
+locomotion, static-obstacle checks, and vehicle avoidance. Focused checks are
+running before another full qualification attempt.
+
+`realism-davis-walker-clearance.xml` now passes both the recorded physical
+pedestrian-pair fixture and the six-simulated-minute Davis ordinary-traffic
+check (149.17 seconds total). The complete suite is being restarted with this
+correction included; these two passes alone are not release qualification.
