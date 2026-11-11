@@ -1,0 +1,14 @@
+Ultimate Animated Character Pack by Quaternius
+https://quaternius.com/packs/ultimatedanimatedcharacter.html
+
+License: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The author's included License.txt was read from:
+https://drive.google.com/file/d/1eooYt7zHAMOPEU6d3QHMzR2p0gk9ZJF8/view
+
+Selected assets: Casual_Male.fbx, Casual_Female.fbx,
+Worker_Male.fbx, Worker_Female.fbx. Source file URLs and SHA-256 hashes
+are recorded in game/assets-manifest.json. Models are normalized for Unity,
+materials use URP, and animations are retargeted through humanoid avatars.
+The author welcomes optional support at https://www.patreon.com/quaternius.

@@ -1,0 +1,45 @@
+[
+  {
+    "name": "universal-animation-library",
+    "source": "https://quaternius.itch.io/universal-animation-library",
+    "sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724",
+    "license": "CC0-1.0 (retain archive license)",
+    "cache": "outputs\\assets\\universal-animation-library.zip"
+  },
+  {
+    "name": "universal-base-characters",
+    "source": "https://quaternius.itch.io/universal-base-characters",
+    "sha256": "fdbf1804c90dfc1ea03e992bff7da2dfd1a79318e13270a660180f9308455f40",
+    "license": "CC0-1.0 (retain archive license)",
+    "cache": "outputs\\assets\\universal-base-characters.zip"
+  },
+  {
+    "name": "lowpoly-animated-animals",
+    "source": "https://quaternius.itch.io/lowpoly-animated-animals",
+    "sha256": "b4bc5f209368cafc21962934e7d676cf1cfb1f746a363086cd9f45c4385db70e",
+    "license": "CC0-1.0 (retain archive license)",
+    "cache": "outputs\\assets\\lowpoly-animated-animals.zip"
+  },
+  {
+    "name": "textured-lowpoly-trees",
+    "source": "https://quaternius.itch.io/textured-lowpoly-trees",
+    "sha256": "91d0bc6d2177929124d65a81a6f4506f2c27d12f499ee9547c354e4c31d11bbe",
+    "license": "CC0-1.0 (retain archive license)",
+    "cache": "outputs\\assets\\textured-lowpoly-trees.zip"
+  },
+  {
+    "name": "lowpoly-cars",
+    "source": "https://quaternius.itch.io/lowpoly-cars",
+    "sha256": "af8f45d6e2135cc53870e5d0882cc41ca329bd87b9923b4773d471f161d2bdc7",
+    "license": "CC0-1.0 (retain archive license)",
+    "cache": "outputs\\assets\\lowpoly-cars.zip"
+  },
+  {
+    "name": "Quaternius Animal Pack Vol.2",
+    "source": "https://opengameart.org/content/animated-animales-low-poly",
+    "download": "https://opengameart.org/sites/default/files/Animal%20Pack%20Vol.2%20by%20%40Quaternius.zip",
+    "license": "CC0-1.0",
+    "author": "Quaternius",
+    "sha256": "6d8f6789d65dbdb352ebad98a4209f26b41b384e87d81bc05e9ca76139db1248"
+  }
+]

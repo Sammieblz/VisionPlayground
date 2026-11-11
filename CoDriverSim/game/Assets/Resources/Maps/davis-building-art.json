@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "basis": "Authored visual adaptation of mapped footprints, not a survey of the real buildings.",
+  "entries": [
+    {
+      "sourceId": "way/45208383",
+      "resource": "WorldArt/Buildings/Lowrise"
+    }
+  ]
+}

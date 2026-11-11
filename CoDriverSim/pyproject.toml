@@ -1,19 +1,21 @@
 [build-system]
-requires = ["setuptools>=75,<85"]
+requires = ["setuptools>=77,<85"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "visionplayground-codriversim"
 version = "0.1.0.dev0"
-description = "Observer-only co-driver experiments in a MetaDrive world."
+description = "Portable camera co-driver and driving simulation experiments."
 readme = "README.md"
+license = "MIT AND Apache-2.0"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "src/codriversim/licenses/*.txt"]
 requires-python = ">=3.11,<3.14"
 authors = [{name = "Samuel"}]
 dependencies = []
 
 [project.optional-dependencies]
 sim = ["metadrive-simulator @ git+https://github.com/metadriverse/metadrive.git@fe54b03327b14bcfc17a9a04b60c8abbee4d7ab1"]
-dev = ["pytest>=8,<10", "ruff>=0.11,<1", "setuptools>=75,<85"]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "setuptools>=77,<85"]
 
 [project.scripts]
 codriversim = "codriversim.cli:main"
@@ -22,7 +24,7 @@ codriversim = "codriversim.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-codriversim = ["examples/*.json"]
+codriversim = ["examples/*.json", "shaders/*.glsl", "licenses/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

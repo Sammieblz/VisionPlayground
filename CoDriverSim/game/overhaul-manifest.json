@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "rvp_revision": "192ba860c3c92a16363ffe87fb943dc282e62398",
+  "files": [
+    {
+      "name": "Inter-Bold.ttf",
+      "url": "https://raw.githubusercontent.com/commaai/openpilot/50dd024081496cc5f036a99c8f62d2887112dbb7/selfdrive/assets/fonts/Inter-Bold.ttf",
+      "local": "game/Assets/External/Resources/Comma/Inter-Bold.ttf",
+      "sha256": "d597e753e78d8bf9db34c13343146545fb3be5a1c99a175bc381fe3f6f787f31",
+      "license": "OFL-1.1",
+      "author": "Rasmus Andersson / Inter contributors",
+      "modifications": "Unmodified"
+    },
+    {
+      "name": "CarConcept cockpit components",
+      "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/7d4ba189827916452eeadc82d4b712dbc6280a6f/Models/CarConcept/glTF-Binary/CarConcept.glb",
+      "local": "game/Assets/External/Resources/Cockpit/Source/CarConcept.glb",
+      "sha256": "c272098089d78c5cd9fd9f24ff50ee8acf8d932c55f2d55fc10adb6c8998966b",
+      "license": "CC-BY-4.0",
+      "author": "Eric Chadwick / Darmstadt Graphics Group GmbH; original Unity Fan model",
+      "source": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/7d4ba189827916452eeadc82d4b712dbc6280a6f/Models/CarConcept",
+      "modifications": "Cabin components selected; exterior and logo/emblem meshes removed; proportions normalized; driver controls moved left; graphite interior variant; animated steering/pedals, instruments and limited-rate mirrors added."
+    },
+    {
+      "name": "Inter-Regular.ttf",
+      "url": "https://raw.githubusercontent.com/commaai/openpilot/50dd024081496cc5f036a99c8f62d2887112dbb7/selfdrive/assets/fonts/Inter-Regular.ttf",
+      "local": "game/Assets/External/Resources/Comma/Inter-Regular.ttf",
+      "sha256": "1041a8cf17dab7579acef0cc46b21f6497ec1ae01918ddc3495416efb81a4780",
+      "license": "OFL-1.1",
+      "author": "Rasmus Andersson / Inter contributors",
+      "modifications": "Unmodified"
+    },
+    {
+      "name": "Inter-SemiBold.ttf",
+      "url": "https://raw.githubusercontent.com/commaai/openpilot/50dd024081496cc5f036a99c8f62d2887112dbb7/selfdrive/assets/fonts/Inter-SemiBold.ttf",
+      "local": "game/Assets/External/Resources/Comma/Inter-SemiBold.ttf",
+      "sha256": "98542636e6c900d04e987ca7a37e160a407df344be073fb041fd88f2cd90085a",
+      "license": "OFL-1.1",
+      "author": "Rasmus Andersson / Inter contributors",
+      "modifications": "Unmodified"
+    },
+    {
+      "name": "engagement.png",
+      "url": "https://raw.githubusercontent.com/commaai/openpilot/50dd024081496cc5f036a99c8f62d2887112dbb7/selfdrive/assets/img_chffr_wheel.png",
+      "local": "game/Assets/External/Resources/Comma/engagement.png",
+      "sha256": "ed3225588c896efa7105778a5652962b18b2bc2d18e839b38a1753456671860d",
+      "license": "MIT",
+      "author": "comma.ai",
+      "modifications": "Unmodified"
+    }
+  ],
+  "tools": [
+    {
+      "name": "Eclipse SUMO netconvert",
+      "version": "1.28.0",
+      "url": "https://sumo.dlr.de/releases/1.28.0/sumo-win64-1.28.0.zip",
+      "sha256": "822aa9c57a07a895200d536fd2b3fe8785e36baa9b97ecbe75688e08a636fb8e",
+      "bundled": false
+    }
+  ]
+}

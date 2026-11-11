@@ -1,0 +1,6 @@
+{
+  "name": "CoDriver.Game",
+  "rootNamespace": "CoDriver",
+  "references": ["Unity.InputSystem", "Unity.Collections", "Unity.ugui", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
+  "autoReferenced": true
+}

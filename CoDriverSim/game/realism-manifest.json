@@ -1,0 +1,2504 @@
+{
+  "source_revision": "8163eb4b5e7e21985c6591d1c0bfb56468c0093f",
+  "files": [
+    {
+      "name": "ambulance/materials/textures/ambulance.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance/materials/textures/ambulance.png",
+      "sha256": "a62ff05d398e28e0a6cfcfcc56e77e8d6a4f815669af31ffc447a62514ae8ca1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance",
+      "local": "game/Assets/External/Resources/Realism/Source/ambulance/materials/textures/ambulance.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "ambulance/meshes/ambulance.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance/meshes/ambulance.mtl",
+      "sha256": "a4a650cde6787e4d5f5c5d874d32f17b73693b21c775b16b2f0dec87ad15853f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance",
+      "local": "game/Assets/External/Resources/Realism/Source/ambulance/meshes/ambulance.mtl",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "ambulance/meshes/ambulance.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance/meshes/ambulance.obj",
+      "sha256": "d5eea54ea1f8e3eb777e0f8380c792c2e828d75fff745b4e248b024c1e8297dd",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance",
+      "local": "game/Assets/External/Resources/Realism/Source/ambulance/meshes/ambulance.obj",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "ambulance/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance/model.config",
+      "sha256": "0b0e985979b76af7f03037f03f8de0f57777bc4bc643a6f700197afad8e98677",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance",
+      "local": "game/Assets/External/Resources/Realism/Source/ambulance/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "ambulance/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance/model.sdf",
+      "sha256": "9542a6f409a790c4a0cb278996d1243297358c664f57acf4932b0fb0631ec19a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/ambulance",
+      "local": "game/Assets/External/Resources/Realism/Source/ambulance/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "apartment/materials/textures/apartment_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment/materials/textures/apartment_diffuse.jpg",
+      "sha256": "a013d0272d7437d64a3466ada08a59618aaf875b54fa2b7b10d3be21cf7b3158",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment",
+      "local": "game/Assets/External/Resources/Realism/Source/apartment/materials/textures/apartment_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "apartment/materials/textures/apartment_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment/materials/textures/apartment_spec.jpg",
+      "sha256": "5dff7b507c86b6155b59e0477e34d2d8c86feb01cc114647c2bfa999d84168e1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment",
+      "local": "game/Assets/External/Resources/Realism/Source/apartment/materials/textures/apartment_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "apartment/meshes/apartment.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment/meshes/apartment.dae",
+      "sha256": "1bad8646026a29dcef112850278badbf60ade2b2dc479a054d78a72b4715e32b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment",
+      "local": "game/Assets/External/Resources/Realism/Source/apartment/meshes/apartment.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "apartment/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment/model.config",
+      "sha256": "67278bc623a0e133655acbbb7d8bf47d662d27d57425969cea71b9a9635f5cb5",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment",
+      "local": "game/Assets/External/Resources/Realism/Source/apartment/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "apartment/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment/model.sdf",
+      "sha256": "b85af2c0c6b143d6960e98821a8d9bff21c843bd1a3cad002747cd16d169d08b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/apartment",
+      "local": "game/Assets/External/Resources/Realism/Source/apartment/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "bus/materials/textures/bus.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus/materials/textures/bus.png",
+      "sha256": "c813adaf24a82e949a966e3ff4d328e913dffd036e1b44c0f061a55c1f4356bf",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus",
+      "local": "game/Assets/External/Resources/Realism/Source/bus/materials/textures/bus.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "bus/meshes/bus.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus/meshes/bus.mtl",
+      "sha256": "cad56d075f6ee3d9639754c8ca2a2b5cf67c7abcefd2182f8a7c134661666932",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus",
+      "local": "game/Assets/External/Resources/Realism/Source/bus/meshes/bus.mtl",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "bus/meshes/bus.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus/meshes/bus.obj",
+      "sha256": "2ed4adf097b10d0d7b43dec5f40ce8d3bf238c230429815dafaf19a85a726159",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus",
+      "local": "game/Assets/External/Resources/Realism/Source/bus/meshes/bus.obj",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "bus/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus/model.config",
+      "sha256": "1b845aae099b3b75ad79dae6625f84a1650f8f780debc8c516968f243bfd0c48",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus",
+      "local": "game/Assets/External/Resources/Realism/Source/bus/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "bus/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus/model.sdf",
+      "sha256": "f59ab80948d2fdcdb2b65e6843bdde800020406569e9b0e7b4af48c6c485c9d2",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus",
+      "local": "game/Assets/External/Resources/Realism/Source/bus/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "bus_stop/materials/scripts/bus_stop.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/materials/scripts/bus_stop.material",
+      "sha256": "1c915b09ea03bf3ebbe22cd930928d74a12453f6fddad0ebeb2ce2ac0b873c86",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/materials/scripts/bus_stop.material",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/materials/textures/bus.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/materials/textures/bus.png",
+      "sha256": "79738b59ee841020b90b3cc10fff3355b0151ebcd4358f461abec6eb6fde014e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/materials/textures/bus.png",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/materials/textures/pic.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/materials/textures/pic.png",
+      "sha256": "294bb0e6109d484e50241523a637554acb2acb2ce22d8db1bd854f31dda34851",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/materials/textures/pic.png",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/Glass_Frosted_001_basecolor.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/Glass_Frosted_001_basecolor.jpg",
+      "sha256": "2dcc8cae77b56ef9fb78ccf70f9808d6e4ab45f20423dde6103095b7459b9a07",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/Glass_Frosted_001_basecolor.jpg",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/Metal046A_4K_Color.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/Metal046A_4K_Color.png",
+      "sha256": "cd432f3f4201942b01834f5ce0f96aaac3b14e28a4c8bf20769394983fb09b4d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/Metal046A_4K_Color.png",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/Wood066_4K_Color.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/Wood066_4K_Color.png",
+      "sha256": "822820c3b38fa92a923cc26f20fd70239bf47f27860507889599eef52f134b73",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/Wood066_4K_Color.png",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/base_link.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/base_link.dae",
+      "sha256": "9407abdbee7b53ee8756a4d391bfbd06d5a8381605b204b36a0b71534b5847b8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/base_link.dae",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/bench.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/bench.dae",
+      "sha256": "7bf88240f4413364cdb64720b943da3121f8157ad5bf7aabcd71d5fcf465b3f2",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/bench.dae",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/glass.STL",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/glass.STL",
+      "sha256": "f423596c042899fcb299249c3d4696fd763fce3f31eab9d80de6610ace931848",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/glass.STL",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/head.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/head.dae",
+      "sha256": "2a301c7695794e54f7354cf4999bef01a2a86904cacbb79a02f8c6f967291376",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/head.dae",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/meshes/round.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/meshes/round.dae",
+      "sha256": "e3aa0fad643e274f8f523689ff5f08b1aaca911cd5d9213855b56fcf10dddafe",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/meshes/round.dae",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/model.config",
+      "sha256": "6fef36f0c6afc1ac0152bbc238e39c4a7b438fa8c127d12a7408d588c20ac1e1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/model.config",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "bus_stop/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop/model.sdf",
+      "sha256": "b843ab4c49954221d4b2a779f63b357273129a4a9372a8f5734ea44733a0968a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/bus_stop",
+      "local": "game/Assets/External/Resources/Realism/Source/bus_stop/model.sdf",
+      "authors": [
+        "Hossein Rezaeifar"
+      ]
+    },
+    {
+      "name": "construction_barrel/materials/textures/Construction_Barrel_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/materials/textures/Construction_Barrel_Diffuse.png",
+      "sha256": "2d1a70d5b26afdc4f5a6d8b87cb4bd580160f3587fd6b55201a9e4e316d37549",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/materials/textures/Construction_Barrel_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_barrel/materials/textures/Construction_Barrel_Spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/materials/textures/Construction_Barrel_Spec.png",
+      "sha256": "19e48b317b86e67dce94ead2ee0844b0e908eca2cea8a4ebf96742f31ca3d925",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/materials/textures/Construction_Barrel_Spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_barrel/meshes/construction_barrel.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/meshes/construction_barrel.dae",
+      "sha256": "c27bd4d4964b8c896f9a1810f9fbfc91eb13d2077df464fa5b7238ffaf770c97",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/meshes/construction_barrel.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_barrel/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/model-1_3.sdf",
+      "sha256": "e88ad3238dc67d7fc7fbe7a244d20c67ae2f8da17da5deab7aa4223e2627f6c4",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_barrel/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/model-1_4.sdf",
+      "sha256": "d332065536ac40ab022be188ed477dbdfd92dd173817c78f31f0b31f45c4114b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_barrel/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/model.config",
+      "sha256": "b39eadbd4de66895df1bcb5861db36a727e56c137325f649625cdadc17b1d343",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_barrel/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel/model.sdf",
+      "sha256": "2e04ba938c29345c13f81472ccdc9d2c7e6490823c80ad5ef32e0cc24688331b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_barrel",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_barrel/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_cone/materials/textures/Construction_Cone_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone/materials/textures/Construction_Cone_Diffuse.png",
+      "sha256": "21d556892a0002a68f944c14b6c789c24967a5e987efaf872e21e3edbeb5e8d9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_cone/materials/textures/Construction_Cone_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_cone/meshes/construction_cone.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone/meshes/construction_cone.dae",
+      "sha256": "faebf94980808e3d36ce5bb4a7bd0f39b7f634d1c63fb16ec6c11c37fb65e6ca",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_cone/meshes/construction_cone.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_cone/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone/model-1_3.sdf",
+      "sha256": "1c44732d8770693bf75064721b21c452772212aecf0770cd3cd6b00d0c37a072",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_cone/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_cone/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone/model-1_4.sdf",
+      "sha256": "f00e897fd53ef6e0dbafccf768b4bc85ed39c1c6328cd1fc2d57afcd790fcec1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_cone/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_cone/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone/model.config",
+      "sha256": "fd84139563ed43a946bc5af44e2bd115f7bb389feea43e394841c73dc39b36c7",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_cone/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "construction_cone/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone/model.sdf",
+      "sha256": "c212e83e8fb1a34fd3a90b8a0c8bd77c2c6476f1049713bdec7f25d7b5272d21",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/construction_cone",
+      "local": "game/Assets/External/Resources/Realism/Source/construction_cone/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/materials/scripts/dumpster.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/materials/scripts/dumpster.material",
+      "sha256": "e6a07bfd7cb29d2a15b03d4ecb1f08033ac30f008d7675fb57899a250e05cffe",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/materials/scripts/dumpster.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/materials/textures/Dumpster_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/materials/textures/Dumpster_Diffuse.png",
+      "sha256": "981d38cf2503bac69a491adbd1f1989a41fdc43948800f08de2ba798e490a781",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/materials/textures/Dumpster_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/materials/textures/Dumpster_Spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/materials/textures/Dumpster_Spec.png",
+      "sha256": "994a5f72d9d9e691b29ef59bd103b36325e0164ead92bbd53242968bbdff4316",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/materials/textures/Dumpster_Spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/meshes/dumpster.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/meshes/dumpster.dae",
+      "sha256": "4e30960e97c80b3a9df5c697f876d91d213d27c1c0ddae887cd340ba245b6ff7",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/meshes/dumpster.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/model-1_3.sdf",
+      "sha256": "7962fc6783993de8f5432b25ebaf431462b79e853a43fb0ffaa86ad93c39195e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/model-1_4.sdf",
+      "sha256": "a09bb36c4a9f2f7c4d9ad78d826e8479dbee4020c7e81096b04d520b5b012b48",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/model.config",
+      "sha256": "260133f70ef6875afefb34d1cf890cd824886a8b820772145530c6edfb5b8bf9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "dumpster/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster/model.sdf",
+      "sha256": "28b86d41bef8a349e28b461e5cc66d123659b94d3afaf871b9e63d52252f3199",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/dumpster",
+      "local": "game/Assets/External/Resources/Realism/Source/dumpster/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/materials/scripts/fast_food.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/materials/scripts/fast_food.material",
+      "sha256": "159cc0df8456dece3b36645c5926f6674def3ea2e52c06edefc9fff70148f599",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/materials/scripts/fast_food.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/materials/textures/FastFood_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/materials/textures/FastFood_Diffuse.png",
+      "sha256": "a3d7466ff487aa3b7f296b5639ca873e5fd359ba49c440146c0072427c3aaf49",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/materials/textures/FastFood_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/materials/textures/FastFood_Normal.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/materials/textures/FastFood_Normal.png",
+      "sha256": "102c69cfffcd043b07a19f9749942bf646690ffeebfd8097057a9dab1f1e3918",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/materials/textures/FastFood_Normal.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/materials/textures/FastFood_Spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/materials/textures/FastFood_Spec.png",
+      "sha256": "916d13587a9ae1a6abf87a2b1d6589251a6513e0c9ea7e1848459cdf668a729b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/materials/textures/FastFood_Spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/meshes/fast_food.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/meshes/fast_food.dae",
+      "sha256": "cc4d93dc8c6909c1cb158c9e1150eabf1d579e1854aa58308f8fcbee7684465e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/meshes/fast_food.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/model-1_3.sdf",
+      "sha256": "e4ab2c1f75e475af301679bfccd01c06c0634db11be3bb78ac90e04d9a51b61e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/model-1_4.sdf",
+      "sha256": "4219618e9c9604e714b5cf585ba1961d920a7f2511e70a4ae42a3c49821c8986",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/model.config",
+      "sha256": "ef9b4afeb3f6496952e22a3bea2a19279975558d3299ec84739a7b160d873fd8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fast_food/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food/model.sdf",
+      "sha256": "85ecc75970133b3548ee26a8270257eb5192ceadb1ac6e42e7e103699c2fa318",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fast_food",
+      "local": "game/Assets/External/Resources/Realism/Source/fast_food/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_hydrant/materials/textures/fire_hydrant_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant/materials/textures/fire_hydrant_diffuse.png",
+      "sha256": "b089dc88690961c9aaaca7637517333635ee3d83def47b752902c8a9a5b4b2e5",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_hydrant/materials/textures/fire_hydrant_diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_hydrant/materials/textures/fire_hydrant_spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant/materials/textures/fire_hydrant_spec.png",
+      "sha256": "cc1dc313cb9e9b905edd83d317f290335060fe0d98cc9cbabf56363597373395",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_hydrant/materials/textures/fire_hydrant_spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_hydrant/meshes/fire_hydrant.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant/meshes/fire_hydrant.dae",
+      "sha256": "62619b63da14653e245f7bba88c7417774518962f4ebc57def210ed8e57a937c",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_hydrant/meshes/fire_hydrant.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_hydrant/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant/model-1_4.sdf",
+      "sha256": "4a690cfac7ee5b9f3eb1f6b3730a0918bbd0978f405a1ea466691904c6fd7cf3",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_hydrant/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_hydrant/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant/model.config",
+      "sha256": "44d474a31261ddc27c8d25ad6fc4aba4ae1225a1195cbf42810ffae889f43a20",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_hydrant/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_hydrant/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant/model.sdf",
+      "sha256": "661b5ceb48ec1fa49e294116979c38166a035cc70fdddc84c6ae35ccea18ae33",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_hydrant",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_hydrant/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_station/materials/scripts/fire_station.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station/materials/scripts/fire_station.material",
+      "sha256": "01909e2fd2f6f17d44729ca92a9ddbcb4b751b358f5cf1d6aaec8fa6ace0a42f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_station/materials/scripts/fire_station.material",
+      "authors": [
+        "Louise Poubel",
+        "Cole Biesemeyer"
+      ]
+    },
+    {
+      "name": "fire_station/materials/textures/fire_station_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station/materials/textures/fire_station_diffuse.png",
+      "sha256": "0a6a78d1f7f62a8d977517af9c41b5ff4efac5146a65478e1762ca0aab23fc0e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_station/materials/textures/fire_station_diffuse.png",
+      "authors": [
+        "Louise Poubel",
+        "Cole Biesemeyer"
+      ]
+    },
+    {
+      "name": "fire_station/materials/textures/fire_station_spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station/materials/textures/fire_station_spec.png",
+      "sha256": "661da8a3c250419b8ca52bd99d790376c38450cedd02c58eeb378ed2fd2bd31a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_station/materials/textures/fire_station_spec.png",
+      "authors": [
+        "Louise Poubel",
+        "Cole Biesemeyer"
+      ]
+    },
+    {
+      "name": "fire_station/meshes/fire_station.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station/meshes/fire_station.dae",
+      "sha256": "445849938bad2a5dd9ada05799bbaf3e5e33a5fac44529193eb0d3d9e34fa85c",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_station/meshes/fire_station.dae",
+      "authors": [
+        "Louise Poubel",
+        "Cole Biesemeyer"
+      ]
+    },
+    {
+      "name": "fire_station/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station/model.config",
+      "sha256": "b26cf9aff5a7357c80b2c8c354900281e0fca0c32b8b652d827af4ec592b09eb",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_station/model.config",
+      "authors": [
+        "Louise Poubel",
+        "Cole Biesemeyer"
+      ]
+    },
+    {
+      "name": "fire_station/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station/model.sdf",
+      "sha256": "1af64b55dc7501a32b3798077fdf16b8cff85feb2db66760784a4039f6ad3eac",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_station",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_station/model.sdf",
+      "authors": [
+        "Louise Poubel",
+        "Cole Biesemeyer"
+      ]
+    },
+    {
+      "name": "fire_truck/materials/textures/fire_truck.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck/materials/textures/fire_truck.png",
+      "sha256": "a9a3003ebaf730427bd669344c5bc734deabefeb8a00260dbac9d18acd44a9cc",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_truck/materials/textures/fire_truck.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_truck/meshes/fire_truck.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck/meshes/fire_truck.mtl",
+      "sha256": "6d8256c0e93fde99aeed61f06e8eeeb8d063581fd3ba011b8fcdaaa284b031c3",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_truck/meshes/fire_truck.mtl",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_truck/meshes/fire_truck.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck/meshes/fire_truck.obj",
+      "sha256": "6cb094c8cfd01d263961ef8e210ab8e2988373af4a4b14ab525c6e567046dc2e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_truck/meshes/fire_truck.obj",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_truck/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck/model.config",
+      "sha256": "da7efe395a7e5ef92d15800244a18cdff35521abaf2d3967447103a87c098459",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_truck/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "fire_truck/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck/model.sdf",
+      "sha256": "94517ade5caea4bff18354cd5828a04da597d68a38e16f0094add6c87a048922",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/fire_truck",
+      "local": "game/Assets/External/Resources/Realism/Source/fire_truck/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/materials/scripts/gas_station.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/materials/scripts/gas_station.material",
+      "sha256": "56f8ab6ffa7bf29e5612ee8e3d08025fbd6780f2191fc3763103ac9934811b89",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/materials/scripts/gas_station.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/materials/textures/GasStation_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/materials/textures/GasStation_Diffuse.png",
+      "sha256": "1c244370d3788e07a16c63ffea59ffb5111dd67527a4d9a993c9fe23f8add276",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/materials/textures/GasStation_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/materials/textures/GasStation_Normal.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/materials/textures/GasStation_Normal.png",
+      "sha256": "36435595a614e5928d7394c63200a9cbd1b01bf7526006046257e4b67eb66d37",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/materials/textures/GasStation_Normal.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/materials/textures/GasStation_Spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/materials/textures/GasStation_Spec.png",
+      "sha256": "33d437f999cb264a2bb3a0feb2d27e943cee062dd940591d6315c40b83642c86",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/materials/textures/GasStation_Spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/meshes/gas_station.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/meshes/gas_station.dae",
+      "sha256": "5915cbf048a776fb89b13347f01ccba27f9f04e263d9be5c66769ecefb21110a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/meshes/gas_station.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/model-1_3.sdf",
+      "sha256": "94e7e1b9703500a7d9d7becc6828061538af41e3cf8225bab677035ca7b145db",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/model-1_4.sdf",
+      "sha256": "769184075a2713a657af1d460f35bbdb66efd615e3b89bacc8fc252a1f12d0e7",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/model.config",
+      "sha256": "e529f2517491ed23f5c905db90560aa71d9771d2ae1d69acf62e8c58709fa536",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "gas_station/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station/model.sdf",
+      "sha256": "339ab47dd55829f533a1648c3b1d4679d6a074c91307b7e8743fe0f4c1186aa8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/gas_station",
+      "local": "game/Assets/External/Resources/Realism/Source/gas_station/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "grocery_store/materials/textures/grocery_store_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store/materials/textures/grocery_store_diffuse.jpg",
+      "sha256": "4728671ed3d22dd1285696d7cc38368f4fea540b6bdec8ace269c67e65e2ff93",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store",
+      "local": "game/Assets/External/Resources/Realism/Source/grocery_store/materials/textures/grocery_store_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "grocery_store/materials/textures/grocery_store_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store/materials/textures/grocery_store_spec.jpg",
+      "sha256": "5281ad2a05b39ad8ce1d021245368eec0acc48efc7364e035f1caee4bfb599dd",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store",
+      "local": "game/Assets/External/Resources/Realism/Source/grocery_store/materials/textures/grocery_store_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "grocery_store/meshes/grocery_store.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store/meshes/grocery_store.dae",
+      "sha256": "7c31851bc242d21322667d55f2c059efeda614513e037ec3399ce55dc5d7379a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store",
+      "local": "game/Assets/External/Resources/Realism/Source/grocery_store/meshes/grocery_store.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "grocery_store/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store/model.config",
+      "sha256": "6e50c78589ef20095e3096aa153994ba14240ac0b9c8f6093fdfb462ce73cbc5",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store",
+      "local": "game/Assets/External/Resources/Realism/Source/grocery_store/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "grocery_store/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store/model.sdf",
+      "sha256": "df1337de555fbd81a2df26a7d8cd6ae038651216ea739ebc5f5a4c5ce1b8f698",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/grocery_store",
+      "local": "game/Assets/External/Resources/Realism/Source/grocery_store/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "hatchback/materials/textures/hatchback.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback/materials/textures/hatchback.png",
+      "sha256": "c38fb8c07a745471e07895a3ef95d098f3049865b0cc22d0e07ad0318d0c14c9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback",
+      "local": "game/Assets/External/Resources/Realism/Source/hatchback/materials/textures/hatchback.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "hatchback/materials/textures/wheels3.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback/materials/textures/wheels3.png",
+      "sha256": "048b7037fdf2803842680fb51ba0261c59919e30c43b93a0ff12d2bf26525317",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback",
+      "local": "game/Assets/External/Resources/Realism/Source/hatchback/materials/textures/wheels3.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "hatchback/meshes/hatchback.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback/meshes/hatchback.mtl",
+      "sha256": "249104df3778229da4413e713dd77a9c2385eb71ac090280ec34a28278c4d1e3",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback",
+      "local": "game/Assets/External/Resources/Realism/Source/hatchback/meshes/hatchback.mtl",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "hatchback/meshes/hatchback.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback/meshes/hatchback.obj",
+      "sha256": "75d609dee9b8c2467ddac0cc1fc0b23c750b250f50cc75d6480a21302358d4d8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback",
+      "local": "game/Assets/External/Resources/Realism/Source/hatchback/meshes/hatchback.obj",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "hatchback/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback/model.config",
+      "sha256": "4942fc4d90ea8abb076915b591813c5ee1789a790045c6625e278a3eddb2a546",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback",
+      "local": "game/Assets/External/Resources/Realism/Source/hatchback/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "hatchback/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback/model.sdf",
+      "sha256": "1919fa731880f9b789cef2f3dfb02d9a0cace463c32c8d2a38176cceb996c931",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/hatchback",
+      "local": "game/Assets/External/Resources/Realism/Source/hatchback/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/materials/scripts/house_1.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/materials/scripts/house_1.material",
+      "sha256": "601c05b0c82cf6d13ba1e61e4fcadfb49327b941dd58da9e3ba8ecd946f61f17",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/materials/scripts/house_1.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/materials/textures/House_1_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/materials/textures/House_1_Diffuse.png",
+      "sha256": "5f4369cc3e8a0b5642be1b9bebb650cdae6fd73d1c10049d5597c67081b24f39",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/materials/textures/House_1_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/materials/textures/House_1_Normal.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/materials/textures/House_1_Normal.png",
+      "sha256": "12dc7a0d7baa237f904900ea9f13ca41e67ac0d91fbdf0c0de6d849d6520f94f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/materials/textures/House_1_Normal.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/materials/textures/House_1_Spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/materials/textures/House_1_Spec.png",
+      "sha256": "21a0809c7dbe6d40e702f3680449f9ce93bdc0b77c230d0609658719ecf57015",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/materials/textures/House_1_Spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/meshes/house_1.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/meshes/house_1.dae",
+      "sha256": "0e4d77fe3369dea0d06957cf2571aa8d4509256510dc285b6423230cf94753ee",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/meshes/house_1.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/model-1_3.sdf",
+      "sha256": "99974f9b492d633d3d33eed36fe7007ad5a33830e0d3fdf5f1db7a73fa4836fb",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/model-1_4.sdf",
+      "sha256": "23f85cc72e290e891839fc9487ce88ae126a6f4e7efbede2aaeee5961a0e1cdb",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/model.config",
+      "sha256": "b9c11a6d2b712336ecac8d1b5e4400740610691ac8dc415c454c3143680bc4d0",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_1/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1/model.sdf",
+      "sha256": "801f021b550e6dd36580c3de65aac642fb412b8ff9d5e87daf6d3a35138fab34",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_1",
+      "local": "game/Assets/External/Resources/Realism/Source/house_1/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/materials/scripts/house_2.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/materials/scripts/house_2.material",
+      "sha256": "2cddf1f6e4913ce89a448727275e07665c2aebb12c02fb539d6c1989526a148f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/materials/scripts/house_2.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/materials/textures/House_2_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/materials/textures/House_2_Diffuse.png",
+      "sha256": "bc6b3931f200c23a6bbe8ca95bd2f78f2ec3af352e26cd88ddac89a92747ead3",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/materials/textures/House_2_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/meshes/house_2.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/meshes/house_2.dae",
+      "sha256": "99a279004e1bc14b5323e98503cb2b788f8390465596fe7e17700e0631395fcf",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/meshes/house_2.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/model-1_3.sdf",
+      "sha256": "62b110ef444ff7f9829ef9c4b91c7b4e7245821fcac56c0a1bd6fc6195b91c3a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/model-1_4.sdf",
+      "sha256": "76c06c77a72c09b4c992014842e7d81ecdabb0a87961a3e01938c64a87e9db27",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/model.config",
+      "sha256": "6242467ba4e9d1960754dc9b177051e504a65326223c65438a66cac6d051be1d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_2/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2/model.sdf",
+      "sha256": "2ee4851fa78b31b822a6c8d8464c5103b95d1a46468d47821b508e99b80bd67a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_2",
+      "local": "game/Assets/External/Resources/Realism/Source/house_2/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/materials/scripts/house_3.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/materials/scripts/house_3.material",
+      "sha256": "b132aec7359c58b590ad37cb83d0d3e4dea7b208d82c1a9d91178ad84d3abebe",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/materials/scripts/house_3.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/materials/textures/House_3_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/materials/textures/House_3_Diffuse.png",
+      "sha256": "af602fa919b22b617b8dafd0d68f9dcfd4f181403d09fe434c4e9294462518aa",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/materials/textures/House_3_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/meshes/house_3.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/meshes/house_3.dae",
+      "sha256": "712e1a3f2947a3fd354fe15f8ca36b2a1315ae76737387dbe815cd6112f56a2d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/meshes/house_3.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/model-1_3.sdf",
+      "sha256": "3572a238846786302e82a3b4e6bbba29544125dda47008b79db1791392510664",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/model-1_4.sdf",
+      "sha256": "306759ba295b27bad624975a62ff9f43aa0f0e0d47bd6e1b6ae920e44288f879",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/model.config",
+      "sha256": "d3a4f4ca2be8cde24a4b35bf4fc6c33bb9fbca53e4b27a5e12b3759a6afe1007",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "house_3/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3/model.sdf",
+      "sha256": "94f3dbb451504badfa6f3f20bc50b0eabbe2c439f073a4d5874fbfafbcac4b03",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/house_3",
+      "local": "game/Assets/External/Resources/Realism/Source/house_3/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/materials/textures/jersey_barrier.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/materials/textures/jersey_barrier.png",
+      "sha256": "0ac4c5e2869896d246baefeee729ac8a0678fb03c5662b355caaf09f6ccd5dbe",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/materials/textures/jersey_barrier.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/materials/textures/jersey_barrier_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/materials/textures/jersey_barrier_diffuse.png",
+      "sha256": "0ac4c5e2869896d246baefeee729ac8a0678fb03c5662b355caaf09f6ccd5dbe",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/materials/textures/jersey_barrier_diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/materials/textures/jersey_barrier_spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/materials/textures/jersey_barrier_spec.png",
+      "sha256": "c1854c59a113a0e9bb15a9460037a45cf9d392ba53d7cdccaf4e0508b4a5b6cd",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/materials/textures/jersey_barrier_spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/meshes/jersey_barrier.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/meshes/jersey_barrier.dae",
+      "sha256": "e435b41d7ced4eb79b6c5386d9bbea8c34713f8c00f9f5149388392205e11297",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/meshes/jersey_barrier.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/model-1_4.sdf",
+      "sha256": "da7a43cb804765b1a58c9d89951e691fef35b99872105c935d5c86f3ebfd30f4",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/model.config",
+      "sha256": "2dc73c3b5aa190d64a0fafc201fb7d47f4303a4ba4153e041a3231957bb3e9a8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "jersey_barrier/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier/model.sdf",
+      "sha256": "0d27ea26aa5723d9ccdbc88c43a5e4aedd79b56713546b1036937f0c4a1a5e93",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/jersey_barrier",
+      "local": "game/Assets/External/Resources/Realism/Source/jersey_barrier/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "law_office/materials/textures/law_office_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office/materials/textures/law_office_diffuse.jpg",
+      "sha256": "e7a04c916f9c9441e590fd1150910c3898ea99d925a8981d8da88b00cde0dad9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office",
+      "local": "game/Assets/External/Resources/Realism/Source/law_office/materials/textures/law_office_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "law_office/materials/textures/law_office_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office/materials/textures/law_office_spec.jpg",
+      "sha256": "06dded901a615e858e59bf1d799331775b1c61e609443945a8261c1a620e19b8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office",
+      "local": "game/Assets/External/Resources/Realism/Source/law_office/materials/textures/law_office_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "law_office/meshes/law_office.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office/meshes/law_office.dae",
+      "sha256": "25cc977490c3cb454bb27445b3ed2ec1519b2463508d73bad138940200882560",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office",
+      "local": "game/Assets/External/Resources/Realism/Source/law_office/meshes/law_office.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "law_office/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office/model.config",
+      "sha256": "78e9c7cf792ebc1385ad71e5e14f9e217841e4e33c9ffbd0e84e612991c20514",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office",
+      "local": "game/Assets/External/Resources/Realism/Source/law_office/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "law_office/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office/model.sdf",
+      "sha256": "3d39dbb3bf08b23d1606cb57ef464ccd9b94a9062c93ba9a7106a3ea2bed543d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/law_office",
+      "local": "game/Assets/External/Resources/Realism/Source/law_office/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/materials/scripts/mailbox.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/materials/scripts/mailbox.material",
+      "sha256": "cea1e34e3c3a1cfdbcc8a746b61c186b2b2bc655f269f5847b76019861d21f59",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/materials/scripts/mailbox.material",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/materials/textures/Mailbox_Diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/materials/textures/Mailbox_Diffuse.png",
+      "sha256": "6d3ea0034381a55eba35f2572a2e8483b8482bd9a975baf4e35e5444e585ffeb",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/materials/textures/Mailbox_Diffuse.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/materials/textures/Mailbox_Diffuse.tga.orig",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/materials/textures/Mailbox_Diffuse.tga.orig",
+      "sha256": "7ff758f183deb293acc2b25f0678c60d51a095398296397f0a63b8c1fd6b749d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/materials/textures/Mailbox_Diffuse.tga.orig",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/materials/textures/Mailbox_Spec.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/materials/textures/Mailbox_Spec.png",
+      "sha256": "8f172c58086be6781661803f30e26ea58a087115886f463b38b8b8f9cdaa90fd",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/materials/textures/Mailbox_Spec.png",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/meshes/mailbox.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/meshes/mailbox.dae",
+      "sha256": "fd851e406ef88b5712a6d1ba8f92b8b26c2b62e1330bead1d2fe0e37adf106fc",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/meshes/mailbox.dae",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/model-1_3.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/model-1_3.sdf",
+      "sha256": "2895a7a3bec9f75ef2f84f946e9e03fca8884c03cc0a7433e452ff6234efa69f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/model-1_3.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/model-1_4.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/model-1_4.sdf",
+      "sha256": "6c11a2d450318e9cc74bc29e5b26ba6fc9a7a8558c67d6a3ceaef76523face0c",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/model-1_4.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/model.config",
+      "sha256": "86b1d4c83c02684a767b5d991a6f301653d8f8b919a1964552103f4b9e7e601d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/model.config",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "mailbox/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox/model.sdf",
+      "sha256": "779c85c41adbd3f437e352f9b068bc35a92cea1cd4c1229f19251c3e3f9e5063",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/mailbox",
+      "local": "game/Assets/External/Resources/Realism/Source/mailbox/model.sdf",
+      "authors": [
+        "Cole Biesemeyer",
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "oak_tree/materials/scripts/caster_fp.glsl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/materials/scripts/caster_fp.glsl",
+      "sha256": "86818f35f5b6b7e99fa4dd276c6b1090fae157a7b95d199f877b43a5bb1a394f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/materials/scripts/caster_fp.glsl",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/materials/scripts/caster_vp.glsl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/materials/scripts/caster_vp.glsl",
+      "sha256": "ed8df153446011e1d7f77c7c12f5387de99a6e3216f98661ed96c59a8b8f1d84",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/materials/scripts/caster_vp.glsl",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/materials/scripts/oak_tree.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/materials/scripts/oak_tree.material",
+      "sha256": "da1045a12bc2e1f889eb855116c13e514a3b1ec8d780d94bf76ccf1a29defb7a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/materials/scripts/oak_tree.material",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/materials/textures/bark_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/materials/textures/bark_diffuse.png",
+      "sha256": "35b52144a8c5522df4e97a9a2125231699ad143f6f7273815a47a5064660f794",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/materials/textures/bark_diffuse.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/materials/textures/branch_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/materials/textures/branch_diffuse.png",
+      "sha256": "f378bfa2f09f309ac79729afc0a4b6b482e5caa47ac6d982cadf1ebea880d872",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/materials/textures/branch_diffuse.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/meshes/oak_tree.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/meshes/oak_tree.dae",
+      "sha256": "b3edcfcf4875d2898103ee841ae6530d251730548c0575de8334d4e96d19bd27",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/meshes/oak_tree.dae",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/model.config",
+      "sha256": "f258f8caff9d910972c484baa4624a966731efd95a06cb66e6ab1cf26134f7c7",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/model.config",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "oak_tree/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree/model.sdf",
+      "sha256": "f9e911ff3310451a8f6ca15545fbf478ff55ca4ebd471697aa3ab58be94fe532",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/oak_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/oak_tree/model.sdf",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "parking_garage/materials/textures/parking_garage_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage/materials/textures/parking_garage_diffuse.jpg",
+      "sha256": "3fdd5ed504e2f1120a14c5e4d2dd114a9d5bc6435961c78d232421166cdf0579",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage",
+      "local": "game/Assets/External/Resources/Realism/Source/parking_garage/materials/textures/parking_garage_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "parking_garage/materials/textures/parking_garage_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage/materials/textures/parking_garage_spec.jpg",
+      "sha256": "2b3c9d329feaefb6b690ed359518df88b396c3edfb9952cab5cee6e2427b04d5",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage",
+      "local": "game/Assets/External/Resources/Realism/Source/parking_garage/materials/textures/parking_garage_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "parking_garage/meshes/parking_garage.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage/meshes/parking_garage.dae",
+      "sha256": "8f2994635242a26e4a9094067e71c21005da3170e731e64f3e257c469370434b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage",
+      "local": "game/Assets/External/Resources/Realism/Source/parking_garage/meshes/parking_garage.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "parking_garage/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage/model.config",
+      "sha256": "159f9b31cc51ad0b6ab67f3de402522fecd5bff31b0f223aa255538eae1bff58",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage",
+      "local": "game/Assets/External/Resources/Realism/Source/parking_garage/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "parking_garage/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage/model.sdf",
+      "sha256": "61518b4c66f0f62781b8f621eef24428383ec4d9f120f14ab1a783795a63d28b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/parking_garage",
+      "local": "game/Assets/External/Resources/Realism/Source/parking_garage/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/eyebrow001-unmodified.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/eyebrow001-unmodified.png",
+      "sha256": "bd9d94033a85c16af38fb135f5fed4ab2e1a26982db952826e58a2672c8c9a9c",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/eyebrow001-unmodified.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/eyebrow001.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/eyebrow001.png",
+      "sha256": "b2b15dd52470d6d073d18ebf56bcb1f3b45567cd42a2c75557c0ed2adc0f1ec1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/eyebrow001.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/green_eye.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/green_eye.png",
+      "sha256": "97b79fb62dde7211c142ce398b9506d42a74bdc478230e90ec69377ffdce4e22",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/green_eye.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/jeans01_normals.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/jeans01_normals.png",
+      "sha256": "2aa953834fa0bcf240fe069dc1ef283d801573e077bc5f9da04847370e9837d1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/jeans01_normals.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/jeans_basic_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/jeans_basic_diffuse.png",
+      "sha256": "c4b2f9126873078ecf8a3678e28622196fa6cb47e131b6067d6ffe81919b0ca6",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/jeans_basic_diffuse.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/male02_diffuse_black-unmodified.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/male02_diffuse_black-unmodified.png",
+      "sha256": "d3ef0f625df4d5cea6c9cd89e00b9e86c3b488d63672f9ed5b1327a17abd60dc",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/male02_diffuse_black-unmodified.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/male02_diffuse_black.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/male02_diffuse_black.png",
+      "sha256": "37c166c53575369f57cf233e775f87ef225b3fe9f66ff7ba34b3abb12dcd46be",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/male02_diffuse_black.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/teeth.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/teeth.png",
+      "sha256": "d0afb57869c6fbb56b98f5efc4aec629ee7593e70d8dd2bfb9de923acfb65f43",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/teeth.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/tshirt02_normals.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/tshirt02_normals.png",
+      "sha256": "f31407a3f8ae20736f8f9693906f6ad64569032bc4afd0798c305526fa51d33d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/tshirt02_normals.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/tshirt02_texture.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/tshirt02_texture.png",
+      "sha256": "932e21f76307fda21692a3b4db03fcddc68127d410b4ccbf9fb5cf95ecfbc1b1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/tshirt02_texture.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/materials/textures/young_lightskinned_male_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/materials/textures/young_lightskinned_male_diffuse.png",
+      "sha256": "4233a4e1e2d423daf8e5aa25521df93253be54b0ab6490147afae39b076f4fcb",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/materials/textures/young_lightskinned_male_diffuse.png",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/meshes/walking.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/meshes/walking.dae",
+      "sha256": "e2ae109264af6d8a625523a72e30a5ffa1a4ec34278f9bf1e10e614fa074c379",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/meshes/walking.dae",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/model.config",
+      "sha256": "413e06f05598f816bb70332fdca95acfadfa544f8f7f781874c2644f94e78f84",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/model.config",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "person_walking/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking/model.sdf",
+      "sha256": "edebb13dae917fb3f07814e5182d0fca7cdcc61fde918d8b69815391e07b3e59",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/person_walking",
+      "local": "game/Assets/External/Resources/Realism/Source/person_walking/model.sdf",
+      "authors": [
+        "Marina Kollmitz"
+      ]
+    },
+    {
+      "name": "pickup/materials/textures/pickup_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup/materials/textures/pickup_diffuse.jpg",
+      "sha256": "828211a3dde36ad50abdcd18ae677c718bc50ddb7ae33cfc9563ebf573d1e2e5",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup",
+      "local": "game/Assets/External/Resources/Realism/Source/pickup/materials/textures/pickup_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "pickup/materials/textures/wheels2.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup/materials/textures/wheels2.jpg",
+      "sha256": "d8c626c5f1463a68c34d6f46e4f98e1c5d010282530697f1358725c27fb36f15",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup",
+      "local": "game/Assets/External/Resources/Realism/Source/pickup/materials/textures/wheels2.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "pickup/meshes/pickup.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup/meshes/pickup.dae",
+      "sha256": "5f6a2fa88c5d29be4b83df5c2bf376b9cebae6319dc546f127a2d0efcb41f44e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup",
+      "local": "game/Assets/External/Resources/Realism/Source/pickup/meshes/pickup.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "pickup/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup/model.config",
+      "sha256": "d3499b0adb4dce33998532a7a41225cfb9f50e56b8e3b453a9354d8c6aa2b022",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup",
+      "local": "game/Assets/External/Resources/Realism/Source/pickup/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "pickup/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup/model.sdf",
+      "sha256": "0c4e4557f1f5fe8d924c5e16dc54334fbaca6bd48a94345490aeeb64881f18cc",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pickup",
+      "local": "game/Assets/External/Resources/Realism/Source/pickup/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "pine_tree/materials/scripts/pine_tree.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree/materials/scripts/pine_tree.material",
+      "sha256": "ce9df2f64da08083bddebc404032bf535cf5d3657a578811733b42d43acd28f1",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/pine_tree/materials/scripts/pine_tree.material",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "pine_tree/materials/textures/bark_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree/materials/textures/bark_diffuse.png",
+      "sha256": "344e17ef587dc7d0e2e36d3094c7aa0d0dbd048b3f5af05e917a84f21d9abd17",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/pine_tree/materials/textures/bark_diffuse.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "pine_tree/materials/textures/branch_2_diffuse.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree/materials/textures/branch_2_diffuse.png",
+      "sha256": "aece9329148a3cb072c252029bd00624d7e62541b25c3303c0e0152e6bdd0c99",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/pine_tree/materials/textures/branch_2_diffuse.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "pine_tree/meshes/pine_tree.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree/meshes/pine_tree.dae",
+      "sha256": "59ed97a15067ff158d2e165f651bb71756ebbe8261146672e0cce085eb1e99c4",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/pine_tree/meshes/pine_tree.dae",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "pine_tree/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree/model.config",
+      "sha256": "01d6020e5589492b84a6a36bffacdcfd68f0a18abba9e3057806e818b2966528",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/pine_tree/model.config",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "pine_tree/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree/model.sdf",
+      "sha256": "f2fea2127535dc48102afab0b0376d6e5385b31135df40956bccf8067b9d8943",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/pine_tree",
+      "local": "game/Assets/External/Resources/Realism/Source/pine_tree/model.sdf",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "police_station/materials/textures/police_station_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station/materials/textures/police_station_diffuse.jpg",
+      "sha256": "2b1e81365bb2980c140fd0f317e533def15836ac39ca6aa784311773a9ab9b26",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station",
+      "local": "game/Assets/External/Resources/Realism/Source/police_station/materials/textures/police_station_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "police_station/materials/textures/police_station_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station/materials/textures/police_station_spec.jpg",
+      "sha256": "537583df480fd3656ab6765c4db137b71e2c947d3e9f387814fa5dbd8c4ce634",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station",
+      "local": "game/Assets/External/Resources/Realism/Source/police_station/materials/textures/police_station_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "police_station/meshes/police_station.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station/meshes/police_station.dae",
+      "sha256": "34fc8a92eb066d2da69b8c16cfb21add2532b017ab6c382be08cd52713af10e9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station",
+      "local": "game/Assets/External/Resources/Realism/Source/police_station/meshes/police_station.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "police_station/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station/model.config",
+      "sha256": "7bc206490e4e21df5af77d4bd93f749e2476511cb16c0b9a6ea28cd43ce1d611",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station",
+      "local": "game/Assets/External/Resources/Realism/Source/police_station/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "police_station/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station/model.sdf",
+      "sha256": "9043d259c5cbf3923683b1c7b5532ea8491b81edfe1426c9bfffdee81886c6e7",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/police_station",
+      "local": "game/Assets/External/Resources/Realism/Source/police_station/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "prius_hybrid/materials/textures/Hybrid.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/materials/textures/Hybrid.png",
+      "sha256": "e6474fd1cf90afe11936d86d2c52264dea26cd18cdc5e59f28d4d918ecb1eebd",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/materials/textures/Hybrid.png",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "prius_hybrid/materials/textures/Hybrid_Interior.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/materials/textures/Hybrid_Interior.png",
+      "sha256": "6f0da0f51944ce26a8a8cb6ac094b35268a1ba53b0cba3279a38346c413bb811",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/materials/textures/Hybrid_Interior.png",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "prius_hybrid/materials/textures/Wheels3.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/materials/textures/Wheels3.png",
+      "sha256": "048b7037fdf2803842680fb51ba0261c59919e30c43b93a0ff12d2bf26525317",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/materials/textures/Wheels3.png",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "prius_hybrid/meshes/Hybrid.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/meshes/Hybrid.mtl",
+      "sha256": "68a78ecb4e27994597a5b8f664726ca6b4a129c6c49fee1db7249ddfb8297892",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/meshes/Hybrid.mtl",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "prius_hybrid/meshes/Hybrid.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/meshes/Hybrid.obj",
+      "sha256": "557684ee2f60e162ec016944e026e362c21ad185839458d9148170035779ab56",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/meshes/Hybrid.obj",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "prius_hybrid/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/model.config",
+      "sha256": "802d6eef0a1243c064bea77d98558843520ee50fd39586f9f241ebc6b7357254",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/model.config",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "prius_hybrid/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid/model.sdf",
+      "sha256": "eae7b0895a9c84bf68b51e2016c791dbf2925d18c3a225bf24520ec540563905",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/prius_hybrid",
+      "local": "game/Assets/External/Resources/Realism/Source/prius_hybrid/model.sdf",
+      "authors": [
+        "Ian Chen"
+      ]
+    },
+    {
+      "name": "stop_light/materials/scripts/stop_light.material",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/materials/scripts/stop_light.material",
+      "sha256": "fe11426cbc3ad116f55d8c9716ede4f18fa2dafc3feac7e86cdce0b60f579006",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/materials/scripts/stop_light.material",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light/materials/textures/greyscale_light.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/materials/textures/greyscale_light.png",
+      "sha256": "d3097b521ca97448bf5fd6e252120ff244ff61dfb4b3807bebd18a0dfc3ccd4b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/materials/textures/greyscale_light.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light/materials/textures/stop_light.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/materials/textures/stop_light.png",
+      "sha256": "8d9eac037621a4c94efba6b86ac88991180c050618f3e9806cde8f8753e82556",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/materials/textures/stop_light.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light/meshes/stop_light.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/meshes/stop_light.mtl",
+      "sha256": "4384e65205acc320ce02ac431f242c612d4535f57340df377430ccb01c784343",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/meshes/stop_light.mtl",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light/meshes/stop_light.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/meshes/stop_light.obj",
+      "sha256": "d1ddc84a4e5563a6d2a4bcbcb89d137f949b4e34588af0810ee50201390713d0",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/meshes/stop_light.obj",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/model.config",
+      "sha256": "18bb7831f81e721cb0115ac48b90b8aa6afac8ef88c48d85dba6b1efdc89b3d4",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/model.config",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light/model.sdf",
+      "sha256": "9e05fc28c76ab54320c1112b8273ed66ddaa0770456768041c9f106c110da9a9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light/model.sdf",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/materials/textures/stop_light.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/materials/textures/stop_light.png",
+      "sha256": "8d9eac037621a4c94efba6b86ac88991180c050618f3e9806cde8f8753e82556",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/materials/textures/stop_light.png",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/meshes/stop_light_extension.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/meshes/stop_light_extension.mtl",
+      "sha256": "b2b1d2850eee17c7bc0566ec2151d28854d7ff5e7757a46951bc3efca6124de8",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/meshes/stop_light_extension.mtl",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/meshes/stop_light_extension.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/meshes/stop_light_extension.obj",
+      "sha256": "7421138fd77668215f5baa934cb3ca9a646ea0b426c8c0a3d2d5cbc0397cf3ba",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/meshes/stop_light_extension.obj",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/meshes/stop_light_post.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/meshes/stop_light_post.mtl",
+      "sha256": "2bad6c50de8a6887dfae255e5e6b38caf4e1e4cd2d9f5cecab912de120f1fddd",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/meshes/stop_light_post.mtl",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/meshes/stop_light_post.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/meshes/stop_light_post.obj",
+      "sha256": "ec806746ef6f7f1cb0da353f8d2e069d5edc3013bb9f03c596545cbc5a38b107",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/meshes/stop_light_post.obj",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/model.config",
+      "sha256": "e2cf7edd32707db5b5e3335b90dbc11304968c7926259c2899e68d43750d8119",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/model.config",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "stop_light_post/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post/model.sdf",
+      "sha256": "7139aba7499868863071499631f980e0bad7e2b96448b07308040081099485e5",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/stop_light_post",
+      "local": "game/Assets/External/Resources/Realism/Source/stop_light_post/model.sdf",
+      "authors": [
+        "Louise Poubel"
+      ]
+    },
+    {
+      "name": "suv/materials/textures/suv.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv/materials/textures/suv.png",
+      "sha256": "ddf8c7c2646190e7f315fbc4a523dda92c1172a510eff2bdbe9898e7495ebcee",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv",
+      "local": "game/Assets/External/Resources/Realism/Source/suv/materials/textures/suv.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "suv/materials/textures/wheels_01.png",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv/materials/textures/wheels_01.png",
+      "sha256": "9b76e5f5e37f226d1fc9ff31c9d91c904a104bf930833c0c8b5cf4bb24793d85",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv",
+      "local": "game/Assets/External/Resources/Realism/Source/suv/materials/textures/wheels_01.png",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "suv/meshes/suv.mtl",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv/meshes/suv.mtl",
+      "sha256": "c0086b5af6c86e4b7eb6a93987e4f8325aba9019031e4623293fb3308651452e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv",
+      "local": "game/Assets/External/Resources/Realism/Source/suv/meshes/suv.mtl",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "suv/meshes/suv.obj",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv/meshes/suv.obj",
+      "sha256": "37ab9ef37a4880f9c4f191e441f51d3afa05973793c004a7606a893f19b63e7c",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv",
+      "local": "game/Assets/External/Resources/Realism/Source/suv/meshes/suv.obj",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "suv/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv/model.config",
+      "sha256": "2a0dc091922174fde22b6a97e0cd811e85b9a8c04122300fe2620f3d11e061ea",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv",
+      "local": "game/Assets/External/Resources/Realism/Source/suv/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "suv/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv/model.sdf",
+      "sha256": "b78f03963f747d7a33f0f590472326aac9381bb665284bd8d775770b410987a9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/suv",
+      "local": "game/Assets/External/Resources/Realism/Source/suv/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "tower_crane/materials/textures/crane_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane/materials/textures/crane_diffuse.jpg",
+      "sha256": "2104c530b9e97280e046898c5aa41f0f66d6710225304a931125ccdc09bed22d",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane",
+      "local": "game/Assets/External/Resources/Realism/Source/tower_crane/materials/textures/crane_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "tower_crane/materials/textures/crane_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane/materials/textures/crane_spec.jpg",
+      "sha256": "b048907a396b7e36334185b42a7ad23a6d8a20fac97304f987344d9943e4da9b",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane",
+      "local": "game/Assets/External/Resources/Realism/Source/tower_crane/materials/textures/crane_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "tower_crane/meshes/tower_crane.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane/meshes/tower_crane.dae",
+      "sha256": "74559bda81f9ee355bc7536348233b7fa98e1953fc39bcb6527a4956255cd422",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane",
+      "local": "game/Assets/External/Resources/Realism/Source/tower_crane/meshes/tower_crane.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "tower_crane/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane/model.config",
+      "sha256": "9ea42361cc8a4077949643b0000c3fcdcd4de34992eb1a45f5ca21b87bd32762",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane",
+      "local": "game/Assets/External/Resources/Realism/Source/tower_crane/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "tower_crane/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane/model.sdf",
+      "sha256": "ddee0659520c4dbbb27d56e617d6d27571b59f2e1aa054366d569c9c8707a93f",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/tower_crane",
+      "local": "game/Assets/External/Resources/Realism/Source/tower_crane/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "truss_bridge/materials/textures/truss_bridge_diffuse.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge/materials/textures/truss_bridge_diffuse.jpg",
+      "sha256": "61a7e304929e04cb1660a5db22a1bd9c5bbd94e2c1a4d6f09e8530097a03a41e",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge",
+      "local": "game/Assets/External/Resources/Realism/Source/truss_bridge/materials/textures/truss_bridge_diffuse.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "truss_bridge/materials/textures/truss_bridge_spec.jpg",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge/materials/textures/truss_bridge_spec.jpg",
+      "sha256": "b564246f397984bb2eee4dc196057578ca11ff2e3fbc0540f1f981dd20dea36a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge",
+      "local": "game/Assets/External/Resources/Realism/Source/truss_bridge/materials/textures/truss_bridge_spec.jpg",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "truss_bridge/meshes/truss_bridge.dae",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge/meshes/truss_bridge.dae",
+      "sha256": "788f8a27d38e770c8fd57fe2fa1279932c34adcc797169b6d6cfc5001c1c2b7a",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge",
+      "local": "game/Assets/External/Resources/Realism/Source/truss_bridge/meshes/truss_bridge.dae",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "truss_bridge/model.config",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge/model.config",
+      "sha256": "751824d5b7a7b3f3dd24fc4756204debe96a03102a639de18e522d5e7ecf10ab",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge",
+      "local": "game/Assets/External/Resources/Realism/Source/truss_bridge/model.config",
+      "authors": [
+        "Nate Koenig"
+      ]
+    },
+    {
+      "name": "truss_bridge/model.sdf",
+      "url": "https://raw.githubusercontent.com/osrf/gazebo_models/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge/model.sdf",
+      "sha256": "3ae59ec270c881e67925b590996c19db87a4fd1a4c7ed6cf475f1b8b1a3c50d9",
+      "license": "CC-BY-3.0",
+      "source": "https://github.com/osrf/gazebo_models/tree/8163eb4b5e7e21985c6591d1c0bfb56468c0093f/truss_bridge",
+      "local": "game/Assets/External/Resources/Realism/Source/truss_bridge/model.sdf",
+      "authors": [
+        "Nate Koenig"
+      ]
+    }
+  ]
+}

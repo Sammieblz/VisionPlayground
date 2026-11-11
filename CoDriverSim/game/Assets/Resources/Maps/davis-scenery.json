@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "basis": "Simulation storefronts and activity entrances keyed to mapped footprints; business identities and interiors are fictional.",
+  "entries": [
+    {"sourceId":"way/253117067","label":"BOOKS & COFFEE","palette":0},
+    {"sourceId":"way/45208366","label":"NEIGHBORHOOD MARKET","palette":1},
+    {"sourceId":"way/45208370","label":"BICYCLE WORKSHOP","palette":2},
+    {"sourceId":"way/45208369","label":"TOWN BAKERY","palette":3},
+    {"sourceId":"way/45208368","label":"FLOWERS & GIFTS","palette":0},
+    {"sourceId":"way/45213009","label":"CORNER CAFE","palette":1},
+    {"sourceId":"way/45208404","label":"COMMUNITY STUDIO","palette":2},
+    {"sourceId":"way/45208405","label":"LOCAL GROCER","palette":3},
+    {"sourceId":"way/45208398","label":"REPAIR SHOP","palette":0}
+  ]
+}

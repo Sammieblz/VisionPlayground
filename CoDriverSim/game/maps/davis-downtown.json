@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "davis-downtown",
+  "name": "Downtown Davis, California",
+  "status": "source-survey",
+  "bbox_south_west_north_east": [38.5408, -121.7475, 38.5498, -121.7358],
+  "origin_lat_lon": [38.5453, -121.74165],
+  "traffic_side": "right",
+  "display_speed_unit": "mph",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "ODbL-1.0",
+  "license_url": "https://www.openstreetmap.org/copyright",
+  "reference_url": "https://www.cityofdavis.org/city-hall/community-development-and-sustainability/planning-and-zoning/downtown-davis-plan",
+  "notes": [
+    "Candidate for a separate real-world map; Cedar Grove remains the playable regression map.",
+    "Map geometry is not photogrammetry, surveyed elevation or verified lane geometry.",
+    "Unknown lane counts, speed limits, signal phases and building heights must remain explicitly unknown.",
+    "No streetcar route or other fictional town system is asserted to exist in this district."
+  ]
+}

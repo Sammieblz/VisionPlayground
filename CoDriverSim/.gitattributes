@@ -1,0 +1,9 @@
+# Unity serializes empty YAML values with trailing spaces. Keep its native format.
+*.meta whitespace=-blank-at-eol
+*.asset whitespace=-blank-at-eol
+*.mat whitespace=-blank-at-eol
+*.unity whitespace=-blank-at-eol
+# Preserve upstream license texts verbatim, including their whitespace.
+src/codriversim/licenses/** -whitespace
+# Reviewed generated map data stays available, without dominating code review.
+game/Assets/Resources/Maps/davis-downtown.json linguist-generated=true

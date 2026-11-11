@@ -1,0 +1,1523 @@
+# Realism rebuild — implementation record
+
+This continues the accepted Davis/Mercedes/living-town plan. The previous development
+candidate is preserved. Passing its tests did not establish visual acceptance.
+
+## Delivery gates
+
+- [ ] Prepared assets: original sources, hashes, licenses, axes, materials, moving-part anchors and LODs.
+- [ ] Continuous Davis surfaces, readable paint/signs, architectural detail, railway and bridge extension.
+- [ ] Mercedes cabin/player, SUV dynamics, stock-Comma simulation configuration and Honda baseline.
+- [ ] Forward-moving traffic, bounded contacts, complete nearby activity and animation cycles.
+- [ ] Animated HUD companion, readable instruments, scalable Comma presentation and menus.
+- [ ] Python/Unity regressions, physical courses, controller checks and replay/isolation checks.
+- [ ] Complete-population 30-minute performance run, comparison captures and packaged verification.
+- [ ] Public distribution: eligible asset manifest, notices, source and reproducible packaging.
+
+## Preservation and distribution
+
+Source before this pass is backed up under the ignored `.cache/realism-pass/` folder.
+Downloaded tools, original assets and generated exports remain outside Git.
+The supplied Mercedes is usable in the local prototype; its source page currently
+lists personal use, so it is excluded from public asset distributions until redistribution
+permission is established. CC0/CC-BY assets retain their individual provenance.
+
+## Current work
+
+Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
+revised Davis streets are integrated. The latest completed packaged session,
+`94db574ba27f40fc908fb47db3044606`, runs **1,876.75 advancing simulation seconds**
+at **31.70 FPS**, with **19.32 Hz camera delivery / 6.12 Hz detection**. It has no
+pauses, player contacts or sustained pedestrian crossing stalls. Camera delivery
+misses the near-20 Hz check, and a car/truck conflict inside a mapped junction
+creates a persistent queue. World qualification therefore still fails.
+Its source, `0ba3f72`, passes **145/145 Editor and 35/35 PhysicalWorld checks**,
+including ten ambulance seeds and the 2.51 km, three-stop passenger trip.
+The new vehicle conflict now has a failing physical entry regression and a passing
+reservation correction. The candidate also preserves approach arrival order and
+bounded camera cadence recovery; its complete Editor suite passes **154/154**.
+PhysicalWorld and packaged workload checks are underway. Those earlier test passes
+do not qualify the changed sustained traffic behavior.
+
+Current work is correcting those failures, measuring the combined workload,
+reviewing fresh activity/visual captures and preparing the eligible public
+package. Visual acceptance and the final controller/Comma check remain open.
+Measurements below identify their exact candidates; an earlier candidate's
+results are not a blanket pass for later changes.
+
+## Measurements from the first packaged checkpoint
+
+The preserved package `Realism-20261110-025150` has code identity
+`36c698499fa3e3a3ec5e80255e17ca18c787b5ed27b826ede824bed55900515d`.
+It predates the bridge extension and the subsequent facade performance corrections.
+
+- Python: 79 tests passed; Ruff checks passed.
+- Unity editor: 98 tests passed. GLS dry-course 0–60 mph **5.40 s** and 60 mph
+  braking **41.79 m**. Honda and finite-contact regressions passed.
+- Stock v0.9.7 read back GLS mass 2660 kg, wheelbase 3.134 m and steering ratio 18.7.
+  In the packaged Cedar Grove session, an initial request failed on
+  `controlsdLagging`; a later keyboard request engaged, drove approximately 6 m,
+  and braking returned authority to the human. This is not a lane-keeping pass.
+- Two **150-second, mostly stationary** 720p RX 580 checks: Cedar Grove averaged
+  39.23 FPS, 19.73 Hz camera and 5.53 Hz detection; Davis averaged **11.82 FPS**,
+  13.39 Hz camera and 6.49 Hz detection. These are not the required sustained run.
+- Davis submitted about 209 million triangles and 8,574 draw calls per frame.
+  Investigation found excessive distant facade detail. The next build removes
+  unnecessary flat-wall tessellation, limits facade detail range, and uses the
+  existing building shells for shadow casting. Results remain to be measured.
+
+The fictional bridge loop is now being integrated with the same map definition
+used by navigation, road meshes and the minimap. It remains subject to geometry,
+physical clearance, driving and performance qualification. Supplied animated cat,
+walking character and vegetation have been audited; they are not yet imported as
+finished replacements. Public-build exclusion exists but still needs a packaging test.
+
+## Optimized Davis checkpoint
+
+Package `Realism-20261110-031808`, code identity
+`7fcad1423e68428c53015980a08e480f3e698d3d48ff16b21bc84f9b350dfa17`,
+ran a 150-second, mostly stationary Davis check with the observer and stock Comma
+services enabled. Mean **30.72 FPS**, p95 **45.26 ms**, p99 **55.25 ms**;
+camera **19.80 Hz**, detector **6.43 Hz**, sensor-to-observer p95 **346.9 ms**.
+No warning was triggered, so warning latency was not measured. A late frame
+submitted 12.06 million triangles and 2,349 draw calls, down from 209 million
+and 8,574 in the failed checkpoint. This does not qualify sustained driving.
+
+The bridge's physical approach tests passed at 8 and 26.82 m/s. Later visual
+inspection found the truss was too narrow: its clear span is now derived from
+the upright geometry, rather than the wide abutment bounding box. That visual
+correction and the latest cockpit/storefront/civilian work postdate this package.
+
+New storefront openings passed physical clearance checks. The supplied civilian
+passed a PlayMode check for moving feet, forward orientation and stationary
+animation root. Three populated Davis tests initially failed because their
+playerless fixtures exposed a null player reference; a map-spawn fallback fixes
+the error and their longer activity checks are being rerun. Failed reports are
+retained in `outputs/unity/realism-playmode.xml`.
+
+## Population regression follow-up
+
+The next full PlayMode run (`realism-playmode-final-pass.xml`, despite its filename)
+**failed** Davis transit, parking and ambulance seed 22. The focused parking and
+seed-22 passes did not establish that the populated town was reliable. The failures
+are retained; none is waived by the editor/Python passes (104 and 79 respectively).
+
+Current fixes check the complete crosswalk before pedestrians enter, allow vehicles
+holding a junction reservation to clear before yielding to an ambulance, and reserve
+shop entrances for one visitor at a time. Storefront threshold geometry now joins an
+actual sidewalk triangle rather than a nearby vertex. A separate PlayMode check
+requires complete navigation paths from the sidewalk into every activity shop.
+
+The earlier populated rerun exposed transit/alighting and parking failures.
+Those failures led to the fixes and measured rerun below. The source and latest
+visual work have not yet been packaged or subjected to the 30-minute performance
+gate.
+
+## Populated activity rerun and subsequent art work
+
+`outputs/unity/realism-population-qualified.xml` records **10/10 passing PlayMode
+tests in 850.24 seconds**, including ten occupied ambulance dispatch/return seeds,
+a complete parking/occupant cycle, a bus passenger trip, storefront navigation,
+bridge approaches and finite pedestrian impacts. The pedestrian recovery from an
+off-sidewalk displacement is force-driven; it does not warp the actor onto the
+navigation mesh. This is an activity regression result, not release qualification.
+
+Subsequent changes need their own verification: the prepared cat with original
+walk/run and two standing idle clips; a two-detail-level CarConcept traffic coupe;
+varied facade windows/plaster; continuous rail profiles and ballast; water shading;
+cockpit seat/FOV controls; and interruptible skeletal pedestrian impact/recovery.
+Captures and failed predecessors remain under `outputs/qualification/realism/`.
+The cat FBX round-trip reproduced 12 sampled bone poses with maximum error
+0.000000923 m. That validates export transforms, not its in-game foot placement.
+
+The stock Comma bridge audit found a sensor-axis error: yaw was published into the
+raw event's Z component, and acceleration omitted the gravity response. Unity now
+samples physical velocity at the 100 Hz physics step and sends optional explicit
+device-axis IMU vectors. The adapter maps them through the unchanged v0.9.7 sensor
+decoder. Device axes are forward/right/down; upright stationary specific force is
+(0, 0, -9.81) m/s². Missing/malformed IMU fails closed. This is not yet evidence of
+successful lane keeping; all stock engagement checks remain enabled.
+
+The Python regression after this change passes **85 tests**, with Ruff checks
+passing. `realism-imu-editor-rerun.xml` records **108/108** editor passes, including
+the dry vehicle courses, IMU axes, prepared coupe and skeletal recovery checks.
+`realism-imu-populated.xml` records **11/11** PlayMode passes in **815.83 seconds**,
+including the cat ground/forward/walk check and ten populated ambulance seeds.
+The latter's per-seed evidence is copied to
+`outputs/qualification/realism/ambulance-imu-art-qualified.json`.
+
+The candidate is now being rebuilt. Runtime Comma behavior, complete-workload
+performance, public package and final visual/controller checks remain pending.
+The package build writes a Unity packed-asset audit, and public packaging rejects
+local-only assets. `scripts/verify-game-package.py` checks hashes and exercises the
+bundled CLI from a temporary working directory outside the checkout. Activity
+video capture is explicitly separate from performance qualification.
+
+## IMU-corrected package and roadblock investigation
+
+`Realism-20261110-062214` is a development candidate, not the default shortcut.
+Its code identity is
+`5693b7533557147d6d5e8eaf56b8bb31a4f111b68c0a6908797d2cb71c75f3f3`.
+The packed-asset audit and isolated bundled-Python/CLI verification passed.
+
+- A 240-second Cedar Grove run used genuine stock openpilot v0.9.7. Three separate
+  engagements were observed: 1.3 seconds/4.3 metres (ended on stale connection),
+  23.2 seconds/168.3 metres, and 15.6 seconds/80.9 metres. The latter two ended on
+  human braking. These are short straight-road checks, not sustained autonomy.
+  Mean rendering was 43.41 FPS; p95/p99 frame time 35.02/41.80 ms; camera 19.73 Hz;
+  detector 6.22 Hz; warning latency p95 430.32 ms (15 samples). No player contacts
+  were recorded. An activity video and ready/active screenshots are retained.
+- A 300-second Davis run used the explicitly labelled qualification driver, not
+  Comma. It travelled 1,404.47 metres without player collision; no sampled traffic
+  or rail overlap was detected. Mean rendering was 30.22 FPS; p95/p99 frame time
+  49.39/58.16 ms; camera 19.83 Hz; detector 6.33 Hz; warning latency p95 392.42 ms
+  (69 samples). Three brief unrequested reverse-speed samples remain in the report.
+  Neither run is the required 30-minute qualification or an Xbox test.
+
+Those runs exposed long ordinary-traffic queues. Davis stop signs had been assigned
+to nearby through roads even when their source OSM way was an omitted alley. The
+compiler now records source parent roads and direction and assigns controls only
+to matching playable lanes. It retains 101 assigned and 13 unassigned source stop
+facts. Independent stop-sign dwell memories prevent alternating nearby signs from
+resetting each other. No road geometry was changed by that recompilation.
+
+In Cedar Grove, boundary speed signs stood at crossing roads, and some entrance
+paths extended into avenue lanes. Their physical placement is corrected. Vehicles
+already occupying a junction now complete the turn before pulling aside for an
+ambulance. Subsequent diagnostics found a rail collider catching the curb, a
+streetcar stopping at red after committing to a crossing, and a 30 cm unsupported
+gap between road and sidewalk. Those are corrected. Both full-population
+six-minute traffic checks pass, as does physical dog/cat crossing in both
+directions. The earlier failed reports remain available.
+
+The scene-rebuild regression exposed a native out-of-memory crash: generated
+facade meshes/materials and navigation data outlived destroyed towns. Explicit
+ownership now releases these resources without destroying imported shared assets.
+The focused repeated-Davis cleanup check passes. After that fix the complete
+PlayMode run completed without the crash: **14/15 passed**. The remaining failure
+was a bus/ambulance deadlock in seed 22; its corrective retest is pending. The
+editor run passed **111/111**; Python regression remains **89/89**.
+
+A licensed low-rise model is attached to one compatible Davis footprint, retaining
+the mapped collision shell. This is an initial architecture variation, not visual
+acceptance for the district. Two clothed MakeHuman civilian variants are prepared
+with public CC0 assets, pinned inputs and detail levels; Unity import/retargeting
+qualification is pending. Blender previews do not establish in-game appearance.
+
+Public packaging, complete-workload performance, final visual acceptance and
+hardware checks remain open. The latest packaged candidate predates these fixes.
+
+### Subsequent road and civilian checks
+
+The bus sweep now reserves extra lateral room only while bending. Its previous
+full-turn allowance extended down a straight exit and blocked an opposing vehicle.
+The corrected seed-22 ambulance cycle passes; a later seed exposed a separate
+raised footway crossing a road, trapping an ordinary car. The compiler now clips
+raised footways against the road surface. The independent serialized-mesh audit
+finds **0 m² raised pedestrian/road overlap**, with all **1,288** connection checks
+still free of continuity/access errors. Road/lane/rail geometry is unchanged; map
+landmarks and the sidewalk mesh differ from the earlier physical-review map.
+
+Previously rejected physical turns remain excluded after regeneration even when
+the old review hash is stale. That conservative retention is explicitly labelled;
+it does not make the new physical review pass. The complete populated regression
+is being rerun with these corrections and the restored restrictions.
+
+The two MakeHuman characters are integrated with the existing finite-mass walkers.
+Both have valid humanoid bindings, cloth/skin/hair textures, two detail levels and
+no added collision shapes. **114/114 editor checks** and the focused two-character
+walk/recovery check pass. Ground checks bake the actual mesh with FBX unit scaling,
+rather than treating padded renderer bounds as shoe geometry. The texture adapter
+also now distinguishes a linked diffuse texture from an unused Blender socket color.
+New in-world 720p/1080p captures are retained under `visual/citizen_a-*` and
+`visual/citizen_b-*`. These are presentation captures, not a performance benchmark.
+
+### Populated regression and physical map review, 10 November
+
+The final populated PlayMode run passed **17/17** checks, including all ten Davis
+ambulance seeds (21–30), six-minute ordinary traffic runs, finite-mass contacts,
+animal crossings, transit/parking activity, scene cleanup and character animation.
+The earlier failing reports remain available. A pedestrian/car circular wait was
+resolved with a bounded, navigation-constrained walking detour around stationary
+vehicles. The pedestrian retains its destination, yields if the vehicle moves,
+and neither teleports nor pushes the car aside. A focused physical test verifies
+completion with less than 15 cm of handbraked-car displacement.
+
+The fresh Unity physical audit drove **847** enabled car/bus turn paths. All reached
+their exits; two bus paths exceeded the pavement footprint tolerance. Their three
+internal segments are now excluded for buses, retaining all earlier restrictions.
+The remaining **845** paths passed. A separate runtime routing comparison confirms
+that the scheduled bus route is unchanged. The reviewed map SHA-256 is
+`15b53ebd8c65d7af42454c3c524fed0af4688a956111b375aa6d6f165cd6412a`.
+The geometric compiler audit still reports no continuity/access errors across
+1,288 connections and no raised sidewalk/road surface overlap. These checks do
+not certify the source map's real-world rules or eliminate all dynamic conflicts.
+
+The final editor run passed **114/114** after those restrictions and a rendering
+change: small cockpit mirrors now cull detailed facade attachments beyond 45 m,
+while their building shells remain visible to 120 m. Main and AI cameras retain
+normal facade detail. Any performance gain remains unmeasured until the new
+packaged application is tested. A scene inventory is an estimate of visible work,
+not a GPU benchmark.
+
+Evidence is retained in `outputs/unity/realism-detour-populated.xml`,
+`outputs/unity/realism-build-editor.xml`, and under
+`outputs/qualification/realism/` in `map-physical-current.json`,
+`bus-route-restriction-review.json` and `scene-render-inventory.json`.
+Python regression remains **89/89**. The complete-workload 30-minute run,
+public-package verification, visual acceptance and final Xbox Comma/takeover
+check remain delivery gates; passing these automated regressions does not finish
+the requested overhaul.
+
+### Packaged hotspot measurement
+
+The isolated local package `Realism-20261110-091604` passed file integrity and
+bundled CLI verification outside the checkout (2,604 files). Build code identity:
+`58c674e486eef3a842a221d37e1930e5f5cd5fb0c1bd33e031b410af51353ef5`.
+Its 180-second stationary Davis cockpit check, session
+`3f33b565de3e4a119a94941f0ec291db`, **failed the rendering target**: 25.15 FPS,
+p95/p99 frame times 54.65/63.86 ms. Camera delivery was 19.72 Hz and general
+detection 6.42 Hz. Observer latency p95 was 357.54 ms; there were no warning
+samples, so warning latency is unavailable. This was not a driving qualification.
+
+The starting area contained 34–35 nearby people. Nearby moving vehicles peaked
+at nine but averaged 3.54 in the sampled interval. Some queues were legitimate
+signal waits; one car waited behind the stationary player in its lane. This
+measurement does not establish the six-moving-vehicles activity target. No sampled
+traffic or rail overlap and no unrequested reverse-motion samples were recorded.
+Actual cockpit captures show working mirror images, the mounted Comma screen,
+dashboard and HUD companion. Visual acceptance remains separate.
+
+Rendering samples indicate CPU cost above GPU cost. A subsequent candidate is
+testing URP's GPU Resident Drawer while preserving population, camera frequency
+and physics. Its shader variants are retained explicitly and static batching is
+disabled as required by that rendering path. The unsupported built-in-renderer
+`layerCullSpherical` setting was removed from the mirrors. Performance improvements
+must be measured in the resulting application before acceptance.
+
+The GPU Resident Drawer experiment was **rejected** after its equivalent packaged
+180-second check: 20.69 FPS, p95/p99 62.21/74.79 ms, camera 19.09 Hz and detector
+6.24 Hz. Session `00d8621737084f9f9834aaf679ed8d1c` belongs to preserved package
+`Realism-20261110-094136` (code `f83eeea497ea11ca813a3e6d453310274eefc29697947d3d27a30d7137d92eb3`).
+It rendered correctly but cost more CPU time on this scene. The default rendering
+path and its prior batching settings are restored. The next candidate uses two
+shadow cascades across the unchanged 90 m shadow range and skips off-screen
+mirrors while retaining the cadence of visible mirrors. Auxiliary-camera CPU
+submission timings are recorded separately from GPU timing for diagnosis.
+
+The run reviewer now requires 1,800 seconds of advancing recorded simulation
+time. A long initial loading frame or a pause cannot satisfy the duration gate.
+Aggregate frame statistics still include startup; short-run figures above must
+not be described as steady-state-only measurements. Fresh physical-course evidence
+in `outputs/qualification/realism/physics-current.json` records **19/19** passing
+cases from the final editor test: GLS 0–60 mph **5.40 s**, 60 mph braking **41.79 m**,
+with input/test-result hashes. These remain game calibration results.
+
+The two-cascade/visible-mirror package `Realism-20261110-095402` measured **26.81 FPS**
+including startup over 180 seconds, p95/p99 52.50/66.67 ms, camera 19.61 Hz and
+detector 6.48 Hz (session `7c8928f9dcd94b18876c2987501a7369`). This improves the
+short aggregate result but is not a sustained performance pass.
+
+The next camera transport uses pooled, explicitly owned pixel buffers, replacing
+a fresh 1,746,768-byte allocation per RGB frame. The latest-frame queue releases
+superseded buffers; completed writes, malformed responses, shutdown and late
+readbacks release their buffers as well. The wire sends only the valid image
+length. **117/117 editor checks pass**, including three new buffer-ownership/socket
+failure checks. Minimap sampling now uses filtered mipmaps to reduce jagged edges
+during rotation and zoom; map geometry and navigation are unchanged. Sustained
+performance was subsequently measured below; visual acceptance remains pending.
+
+### Sustained workload and reproduced failures
+
+Package `Realism-20261110-100923`, code
+`ad91c2d2aae002d03ebaa72268e54cc572cf72bac164b94f593f4243b35c22e5`,
+completed session `f675d024366a4a429cd407bf21ebdcd5` at 1280×720 with the default
+population, observer and official Comma services enabled. Its explicitly labelled
+qualification driver was driving; Comma automation was not engaged.
+
+| Measurement | Result |
+|---|---:|
+| Advancing recorded simulation | 1,817.58 s |
+| Mean rendering rate | 40.55 FPS |
+| Frame time p95 / p99 | 40.91 / 55.41 ms |
+| Camera delivery | 19.74 Hz |
+| General detection | 6.26 Hz |
+| Warning latency p95, 867 samples | 387.43 ms |
+| Comma healthy samples | 99.06% |
+| Recorded driving distance | 10,086.59 m |
+
+This is a **performance pass, not a gameplay/release pass**. The run recorded
+four railway-gate contacts, one permanently stopped ordinary car and a 317.65 s
+bus wait. No traffic/rail penetrations were found in the once-per-second samples;
+that sampling does not prove absence of every transient contact. Emergency and
+parking activity completed. The actual cockpit capture shows the filtered map,
+mirrors, instruments, mounted model visualization and HUD companion.
+
+The 5th Street car stop was reproduced at its recorded pose: an inner lane's
+signal pole intruded into the outer lane, capping the planner at 0.06794 m/s.
+Disabling that exact pole cleared the query. A shared roadside mast with separate
+overhead lane heads now clears the same pose without removing signal phases.
+Before/after evidence: `outputs/qualification/realism/traffic-stop-audit-before.json`
+and `traffic-stop-audit.json`.
+
+The bus was waiting for a turning truck; the truck's straight nose query pointed
+into the stopped bus while its curved route was clear. A checked, walking-speed
+steering-arc continuation is under physical regression. The gate contacts exposed
+a missing advance rail-warning stop in the Davis test/NPC path. Both now consider
+the train warning and the arm's reopening clearance. Static obstacles are also
+checked along the curved braking horizon. These changes require fresh regression
+and sustained measurements; the preceding run is retained as failed gameplay
+evidence rather than relabelled after a source change.
+
+Source is published in draft PR [#2](https://github.com/Sammieblz/VisionPlayground/pull/2).
+The CoDriverSim wheel/CLI/Python checks passed on Windows and Linux with Python
+3.11 and 3.12 in GitHub Actions. The unrelated pre-existing EyePause workflow is
+outside this change. A public binary release and final visual/controller checks
+are still pending.
+
+### Traffic corrections and physical follow-up
+
+The mapped signal change passed **120/120 editor checks**, including bus-sized
+clearance at every incoming signal lane and the exact 5th Street stopped-car pose.
+World diagnostics now record the planner's actual clearance blocker per vehicle.
+The subsequent populated suite passed **18 of 19 CoDriverSim PlayMode cases**,
+including all ten ambulance seeds, both towns' ordinary traffic, Davis boarding/
+alighting and parking, animal/civilian animation and finite-contact regressions.
+Its one failure was the newly added railway stop fixture: a requested two-metre
+margin left only 0.41 m of physical clearance after progressive braking settled.
+The upstream Input System also ran two passing integration cases and skipped two
+of its own mouse tests; those are not counted as project verification.
+
+After increasing the rail approach allowance, a focused **3/3 PlayMode** follow-up
+passed: Honda and GLS stop/reopen/resume, plus the recorded truck/bus conflict with
+a waiting-bus displacement limit of 0.15 m. At near-stop (0.149 m/s), Honda front
+clearance was **2.39 m** and GLS **1.87 m**, both with zero contacts. Both remained
+clear while the arm rose and then resumed. The truck physically travelled 15.07 m
+through its turn without penetration or pushing the bus aside. The earlier failed
+suite is preserved; it is not rewritten as a full passing run of the later source.
+
+Evidence: `outputs/unity/realism-traffic-editor.xml`,
+`realism-traffic-populated.xml`, `realism-rail-margin.xml`, and
+`outputs/qualification/realism/ambulance-traffic-qualified.json`.
+Local/public packages and a new sustained run are the next gates.
+
+Original project code now carries an MIT license. The Python wheel declares the
+MIT/Apache combination because its adapted MetaDrive shader retains Apache-2.0;
+the wheel and Windows package include the corresponding texts and upstream
+notices. Existing pinned dependency versions are unchanged.
+
+Both traffic-corrected profiles built with code identity
+`6ba37c4fb9c1331fc324306eec842e7fb56d796fd3e634926c22be4aabeab9d6`.
+The isolated local package is `Realism-local-20261110-112822`; the public package
+is `Realism-public-20261110-113200`, with 2,305 packed source assets and zero
+local-only assets. Both passed integrity and isolated CLI verification.
+
+The public 180-second launch check, session `225a9f3d95664512b4e704e4333bf435`,
+recorded no player contacts or sampled traffic/rail overlaps. Its startup-inclusive
+mean was 28.64 FPS, camera delivery 19.11 Hz and detection 6.33 Hz. It is not a
+sustained performance pass. The cockpit capture exposed the fallback's legacy
+floating readout; it is being replaced with the same live Canvas instrument
+cluster used by the local cabin, in a dashboard housing with neutral matte
+upholstery. The qualification driver also now uses the selected profile's
+wheelbase, replacing its Honda-only constant. Neither change modifies Comma's
+upstream models or control logic. Both profiles are being rebuilt before delivery.
+
+### Packaged cockpit review and crossing blockage
+
+The next packages, `Realism-local-20261110-114821` and
+`Realism-public-20261110-115250`, share code identity
+`b706b03d88ebaf1828d796a38ac1896f6405f68a021b33496b07a70557ca852d`.
+Both passed package integrity and isolated CLI checks. Public launch session
+`6264820ded1a421998b68481ecb96bef` completed 180 seconds with no recorded player
+contacts or sampled vehicle/rail overlaps. Startup-inclusive rendering was
+26.69 FPS, camera delivery 19.01 Hz and detection 6.30 Hz. Its cockpit capture
+exposed overlap between the new instrument housing and the Comma device. Their
+public-car anchors are being adjusted; the Mercedes uses independent anchors.
+
+The attempted sustained GLS run, `c2c58f51f5834d61a09b5ae7a2c1c44b`, was ended
+early after a long crossing blockage appeared. It recorded 879.78 seconds of
+advancing simulation, 30.17 FPS including startup, p95/p99 frame times
+59.91/83.70 ms, camera delivery **18.92 Hz**, detection 6.25 Hz and warning
+latency p95 464.07 ms across 415 warning samples. It had zero player contacts
+and no sampled vehicle/rail overlap, but **failed qualification**: car 9 waited
+201.55 seconds, car 21 behind it 197.40 seconds, and the bus behind that queue
+129.20 seconds. Comma services were enabled; the labelled qualification driver
+was driving. This is neither a 30-minute pass nor Comma driving evidence.
+
+Person 49 stopped in the crosswalk at (-79.7173, 0, -95.3962), in front of car 9.
+The exact map has a complete navigation path to the far sidewalk, but the direct
+collision sweep hits that car's nose. An isolated physical reproduction cleared
+in 15.62 seconds with the previous code, so the static pose alone does not prove
+the cause of the long-run stall. A follow-up adds same-side detours, crossing
+progress recovery, completion based on physical arrival, and stopped-crossing
+navigation diagnostics. Focused fault-injection and populated runs must establish
+whether those changes resolve the actual failure.
+
+`scripts/archive-game.py` now creates a public ZIP and SHA-256 sidecar only from
+a redistributable package's verified manifest. It excludes runtime recordings,
+logs and unlisted files, rejects changed bytes and local-only art, and never
+overwrites an existing download. Eight focused archive tests passed, followed by
+the complete Python/CLI matrix on Windows/Linux and Python 3.11/3.12. This does
+not waive the outstanding game qualification. `scripts/visual-review.py --run
+PACKAGE SESSION LABEL` adds original packaged screenshots, measured results and
+build identities to the local visual review page.
+
+The crossing follow-up passed **4/4 focused PlayMode checks**, including a lost-
+navigation fault at the recorded Davis car nose. The pedestrian physically reached
+the far sidewalk in 9.34 seconds without penetrating the car, snapping position,
+or moving the held vehicle more than 0.15 m. The other cases exercise a stopped
+car detour, an occupied bus crossing, and impact interruption. Evidence:
+`outputs/unity/realism-crossing-recovery.xml`. A fresh populated run and packaged
+long run remain necessary; this fixture alone does not prove the long-run cause.
+
+The pine's pale edges were traced to white RGB in transparent texture pixels.
+Foliage import now pads visible colors into the transparent area and preserves
+alpha coverage in mipmaps, including already imported cached textures. Actual
+24 m and 65 m Unity captures are retained before and after the change under
+`outputs/qualification/realism/visual-before-material-pass/` and `visual/`.
+No source texture was repainted or screenshot enhanced. Public cockpit anchors
+and the activity-tour label also changed and still require packaged review.
+
+The subsequent populated follow-up passed **6/6 PlayMode cases** in 1,135 seconds:
+animal crossings in both directions, ordinary traffic in both towns, Davis bus
+passenger travel, a complete parking occupant/vehicle cycle, and all ten ambulance
+dispatch/return seeds (21–30) with temporary blocked access. The bus covered
+2,511 m, visited three stops and completed boarding/alighting. Parking physically
+departed, searched and returned. Evidence: `outputs/unity/realism-crossing-populated.xml`
+and `outputs/qualification/realism/ambulance-crossing-qualified.json`. These are
+accelerated behavior tests, not the real-time rendering/inference qualification.
+New local and public packages are being built from this follow-up.
+
+Those packages are `Realism-local-20261110-125442` and
+`Realism-public-20261110-125938`, sharing code identity
+`9d944517f28121c2a84e4ff9275c13a51927cc53925a0eab8e3c95c5aeb97d05`.
+Both passed integrity and isolated CLI checks; the public packed-asset audit
+contains 2,340 source assets and no local-only assets. The Python/wheel/CLI matrix
+also passed all four Windows/Linux, Python 3.11/3.12 jobs for source `634f445`.
+
+Public session `23d8740d6a694a94b761fdbf36548fea` completed its 200-second
+presentation check with zero recorded player contacts, no sampled traffic/rail
+overlaps, and no two-minute vehicle wait. Startup-inclusive performance was
+**26.50 FPS**, p95/p99 **60.56/79.95 ms**, camera **19.13 Hz**, detector **6.33 Hz**,
+and warning latency p95 **455.85 ms** over 41 warning samples. It is not a
+performance pass. Its screenshot showed the public wheel/decorative display
+obscuring the cluster, despite resolving the separate Comma-device overlap.
+
+The following presentation change moves the cluster above that obstruction and
+disables the replaced concept-car display. The cockpit Comma UI now renders as
+a world-space Canvas on the device, removing a redundant auxiliary camera pass
+while keeping the same read-only layout/model-overlay component. A focused
+PlayMode camera-isolation check passes. That test first exposed a null-reference
+error in the existing service-free UI fixture path; null-owner initialization is
+now supported again, with the companion shown disconnected. The failed test is
+retained as `realism-cockpit-isolation-before.xml`; the passing follow-up is
+`realism-cockpit-isolation.xml`. No dynamics or traffic changes are in this pass;
+actual presentation and performance still need renewed packaged measurements.
+
+The updated service-free captures completed for all seven Comma layout states at
+720p and 1080p. The public instrument inspection now shows speed, gear, mph and
+RPM above the dashboard without the decorative panel covering them. These are
+labelled inspection/layout fixtures; the next packaged captures must verify the
+new direct Canvas in the running application before delivery.
+
+The direct-Canvas candidates are `Realism-local-20261110-131707` and
+`Realism-public-20261110-132121`, code
+`b97a59b8a533fee47ee930cd83d021512d29d020d2a1710aef24490523f65b77`.
+Public session `9b0bf0d0c6a44f36b284fda5823ee876` recorded **29.42 FPS**,
+p95/p99 **55.84/69.69 ms**, camera **19.66 Hz**, detector **6.22 Hz**, and warning
+latency p95 **387.80 ms** across 42 warning samples, including startup. It had no
+recorded player contacts, sampled traffic/rail overlaps or two-minute vehicle
+waits. This is a short comparison, not a 30-minute qualification. The Python CI
+matrix passed for `04da31e`.
+
+Its packaged capture verified the readable instrument cluster and direct device
+Canvas, but exposed model road-edge lines drawing beyond the device. The camera
+viewport now clips its children. Two focused PlayMode cases pass: observer-camera
+exclusion and a rendered pixel comparison requiring an oversized model path to
+draw inside the screen without changing pixels outside it. The test also exposed
+a missing explicit CanvasRenderer dependency on the companion in the editor;
+that dependency is now declared. Evidence: `realism-cockpit-clipping.xml`, with
+the earlier renderer-dependency failure retained in `realism-cockpit-clipping-before.xml`.
+The combined long run is still pending this final presentation rebuild.
+
+The clipped-display packages are `Realism-local-20261110-133433` and
+`Realism-public-20261110-133910`, code
+`770bc026817d7a38fcd4ad92d828b75b6379238966f65719db248b49c5dd0345`.
+Both passed integrity and isolated CLI verification. The four-job Python
+matrix passed for `1a64af7`. Public session `7c9f4d1093414123b7460e9c68b61c56`
+completed 200 seconds with zero player contacts, no sampled traffic/rail overlap,
+and no two-minute vehicle wait. Its actual cockpit capture shows readable speed,
+gear and RPM, the mounted Comma display and the animated HUD companion.
+
+That short run measured **27.54 FPS**, p95/p99 **60.35/95.52 ms**, camera
+**18.98 Hz**, detection **6.26 Hz**, and warning latency p95 **352.50 ms** across
+41 samples. It does not pass the performance target. The local sustained run is
+in progress; neither the rendered-pixel clipping test nor a short screenshot
+check substitutes for that result. Public packaging also now includes the
+previously omitted MakeHuman core-asset provenance manifest and a controls guide;
+these packaging-only changes do not alter the measured game binaries.
+
+### Interrupted sustained run and stale service measurements
+
+The local session `120e9204f91c4377818089da7d9cd9ea` is **not qualified**.
+The model stream stopped updating near application time 1,074 seconds, before
+the later manual controller testing and map changes. The observer process exited;
+Comma subsequently stopped when camera delivery ceased. The original observer
+launcher discarded stdout, so the precise exit cause is unavailable. The prior
+`f675d024366a4a429cd407bf21ebdcd5` and `c2c58f51f5834d61a09b5ae7a2c1c44b`
+recordings retain fresh model output at their ends; this failure does not establish
+that their services stopped in the same way.
+
+This exposed a reporting defect: diagnostics retained the last command's healthy
+flag, and the performance report reused the observer's last reported rates.
+The actual control arbiter still rejects commands older than 250 ms. The new
+reviewer checks recorded model/command freshness and map continuity; missing
+whole-session throughput evidence cannot pass its rate gates. The original report
+is preserved as `run-review-120e9204f91c4377818089da7d9cd9ea-before-freshness-fix.json`
+under `outputs/qualification/realism/`. Its corrected review measures fresh model
+output in only **54.7%** of samples. The aggregate 41.88 FPS includes the period
+after inference stopped and later manual driving; it is not the required combined
+workload result. Manual testing visited both maps, and the advancing world-time
+interval was 1,775.04 seconds.
+
+The bus also waited **149.85 seconds** at the E Street turn, across signal waits
+and occupied turn clearance. It physically resumed two seconds after the recorded
+stationary interval; it was not permanently stuck. The original two-minute review
+threshold remains failed. The queue history is retained in `bus-long-wait-review.json`.
+No ordinary vehicle reached that threshold, and no traffic/rail overlap was found
+in the sampled world rows. These observations do not waive the failed gates.
+
+The source follow-up measures received/detected frames across the full session,
+including service downtime and restarts; expires diagnostic readiness by command
+age; records observer stdout/stderr, transport errors and an exit-reason JSON;
+and discards obsolete GPU readback completions before the strict ordered camera
+connection. Out-of-order completion is a defended failure case, not the proven
+cause of this shutdown. **100 Python tests pass**, including persistent transport
+exit evidence and stale-health reporting. The focused Unity measurement, buffer
+and control suite passes **26/26** (`realism-service-measurements.xml`). The user
+has finished testing the untimed game; rebuilt local/public applications and
+renewed sustained/recovery checks are next. No root-cause or release pass is claimed.
+
+The follow-up packages are `Realism-local-20261110-142937` and
+`Realism-public-20261110-143601`, code
+`6e6510600df26eb9fb14c0b2b442c33b578cc68eb5eba32fd3fff481e9dc6400`.
+Both passed integrity/isolated CLI checks, and all four Python CI jobs passed for
+`c65bc83`. In public session `be5f611926ab4f45918ea363bb0374d3`, the fault probe
+terminated only the verified game-owned observer. Recorded observer/command health
+became false; the Diagnostics restart buttons restored observer generation 2 and
+fresh model output. The recovered stream remained live through application time
+165 seconds. This intentional-outage check is not a performance qualification.
+
+Its visual review exposed a separate capture defect: Windows `PrintWindow`/Pillow
+`window=` could return an old D3D surface after the game's state changed. Those
+screenshots and the older window-method video remain preserved but are excluded
+from current visual/motion acceptance. Internal Unity screenshots are unaffected.
+Capture now verifies the foreground owner and reads the visible client rectangle,
+stops on focus loss, and records distinct frame counts and completion/error state.
+The Diagnostics page also now hides stale rate/latency values and labels valid
+rates as session averages. The brief queued local attempt was stopped to rebuild
+these presentation corrections before another long run.
+
+
+### Sustained service recovery follow-up
+
+Packages `Realism-local-20261110-144828` and `Realism-public-20261110-145311`
+share code `8edc9a95f94fd53c6d1bca16218e49b2027d757160d92deabfc64ae7c637be97`.
+Both passed integrity and isolated CLI checks. All four CoDriverSim Python CI jobs
+passed for `83b60a9`. Public session `2e78836886e04b0db50ef02e37781873` passed
+the owned-observer fault/restart check; verified foreground captures show stale
+rates becoming unavailable, restored service status, and the return to driving.
+Its deliberate outage is excluded from performance qualification.
+
+Local session `765cfb71a0d648c7b3dd5c3d70b7e887` completed **1,876.53 seconds**
+of advancing Davis simulation and **10,039.63 metres**, with no controller input,
+pauses, service restart or recorded player contact. It measured **32.37 FPS**,
+p95/p99 frame time **56.84/77.49 ms**, whole-session camera delivery **19.17 Hz**,
+and detection **6.33 Hz**. Warning latency p95 was **422.56 ms** across 978 samples.
+Fresh observer/model/healthy-command coverage was **99.91% / 99.07% / 99.14%**.
+The earlier observer shutdown did not recur, but its original cause remains unknown.
+
+No sampled traffic/rail overlap or two-minute vehicle wait was found. The longest
+bus wait was **115.32 seconds** and cleared; the longest ordinary wait was **79.06
+seconds**. Five complete parking visits, six bus stops, 49 train stops and complete
+emergency phases were observed. Pedestrians at the busy shop crossing sometimes
+congested and later cleared; this run does not establish polished animation or the
+required nearby population at every test hotspot. The actual midpoint screenshot
+shows readable local instruments, mirrors and the clipped mounted Comma display;
+facade repetition remains visible. Stock Comma supplied live model/control data,
+while the explicitly labelled qualification harness drove the car. This is not a
+Comma autonomous-driving result.
+
+**The camera-rate gate failed** (19.5 Hz is the recorded near-20 tolerance), so
+this is not complete performance qualification. There were 36,831 captured/submitted
+frames versus 36,041 received, and no GPU queue-capacity drops. The follow-up
+replaces the single pending transport slot with at most two waiting frames,
+discarding frames queued longer than 100 ms and waking the worker on submission.
+This is intended to absorb GPU completion bursts without obsolete-frame buildup.
+It adds separate transport-drop measurements and burst/expiry/ownership tests;
+its measured benefit remains to be verified in new packages. No threshold is relaxed.
+
+
+The delivery follow-up passes **29/29 focused Unity checks** in
+`outputs/unity/realism-camera-delivery.xml`, including a real socket response held
+while two further frames arrive, bounded overload, age expiry and buffer cleanup.
+Its local/public packages are being rebuilt; the rate improvement is unmeasured.
+
+Two complete 220-second activity-view recordings are retained as
+`activity-davis-status.mp4` and `activity-cedar-status.mp4`, with identity/timestamp
+sidecars and H.264 browser copies. The game camera changes activity targets; the AI
+still receives the vehicle camera. Foreground desktop capture sampled only
+**3.41 / 3.39 Hz**, despite 15 FPS encoding, so repeated frames preserve wall time
+and limit animation assessment. The optional pinned MSS 10.2.0 backend is being
+compared; its first short probe competed with the Cedar recorder and is not a
+clean speed comparison. The review page now explicitly labels actual sampling.
+Frames show the remaining primitive construction machine and repeated facades;
+these are unresolved visual defects, not first-release acceptance.
+
+
+### Articulated construction follow-up
+
+The primitive excavator is replaced by the CC0 Innerscene compact tracked model,
+pinned in `game/construction-manifest.json`. Its 928 mesh objects are prepared as
+five articulated sections with two detail levels (106,568 / 29,835 triangles),
+transparent cab glazing and runtime telescoping hydraulics. The seated MakeHuman
+operator uses the existing Quaternius driving animation with hands fitted to the
+measured controls. Source/pin geometry and modifications remain in the preparation
+report; the 3,600 kg body mass and timings are simulation estimates.
+
+Actual Unity captures (`visual/construction-00-720.png` through the cycle) show
+the prepared machine. Three focused checks pass in `realism-construction-physical.xml`: public
+provenance/detail levels, the full 16-second cycle without rod detachment or
+ground penetration, and two cycles of physical settling followed by a finite
+impact response. No activity code resets the machine's physical root. The Python
+regression remains 100/100. Both packaged profiles are being rebuilt; these checks
+do not establish whole-town visual or performance acceptance.
+
+The prior queue-only public recovery probe (`b1f71beccb574c19883e69cb4f8df6e4`)
+restored generation 2 and kept the stream live, but its pre-injection checkpoint
+was already stale. It is retained as recovery evidence, not a clean healthy-to-failed
+transition proof. The probe now requires consecutive fresh samples after opening
+Diagnostics and immediately before injection. A clean 67.22-second post-recovery
+window received 19.97 camera frames/s and 6.11 detections/s; that stationary short
+window does not replace sustained qualification of the bounded queue.
+
+
+### Physical sidewalk journeys
+
+Review of the sustained session found several extra citizens travelling only
+10?50 metres in 30 minutes. Wandering used world-X offsets even on angled Davis
+streets, and nearest-surface spawning could choose disconnected corner patches.
+A new physical test reproduced the inability to obtain a walking route. Connected
+spawn selection and complete sidewalk routes restored movement; subsequent tests
+exposed endpoint oscillation and a path brushing building `way/45208365`.
+
+Davis navigation now rasterizes the same building wall mesh used by PhysX, including
+its door openings. Final-segment locomotion brakes using physical distance, retaining
+bounded force, vehicle checks and pedestrian clearance. Visits select reachable,
+available entrances and use a cooldown instead of crowding three shared queue points.
+All eight previously stranded test actors now physically complete 9?25 metre journeys
+in the populated world; all mapped shop access paths remain complete. Evidence:
+`realism-sidewalk-walls.xml` (2/2), with earlier failed route/contact checks retained.
+The wider crossing/traffic/transit/parking/ten-seed emergency suite is being rerun.
+
+The earlier moving qualification route had at most 11 people within 200 m, while
+a static central cluster contained approximately 35?36. The harness starts away
+from the normal player spawn. Those counts do not validate the two-minute downtown
+hotspot activity target; the new mobile population needs fresh packaged observation.
+
+Construction packages `Realism-local-20261110-161424` and
+`Realism-public-20261110-161806` share code
+`83a76d19de1e097089520a348f8d59d7ecc9fc364739c657c47b935a196c0d55`;
+both passed integrity and isolated CLI checks. All four Python CI jobs passed for
+`fe3d506`. These packages predate the sidewalk changes above.
+
+### Street furniture and sustained contact recovery
+
+The wider walking rerun (`realism-walking-world.xml`) passed 10/12 cases, including
+all ten ambulance dispatch/return cycles, transit, parking and crossing fixtures.
+Both ordinary-traffic checks failed. Detailed traces showed a pedestrian held in
+continuing contact with a Cedar truck and a Davis cat physically blocked by a
+signal pole while vehicles correctly yielded. The initial suspicion about signal
+reservations did not explain these recorded failures; reservation logic is unchanged.
+
+Continuing vehicle contact now removes locomotion directed into the body without
+repeatedly freezing steps away from it. Small static street furniture is included
+in the navigation bake using conservative physical bounds. A held-truck fixture
+uses explicit handbraking rather than the NPC route controller during the contact
+check. The original failing fixtures and traces are retained.
+
+`realism-furniture-contact.xml` passes 3/3: the recorded truck contact clears without
+moving the handbraked vehicle more than 0.15 m, the cat completes its recorded
+crossing around the pole, and eight sidewalk journeys still physically complete.
+The populated traffic, shop access and activity checks require a fresh rerun.
+Python CI for `ab39485` passed all four Windows/Linux, Python 3.11/3.12 jobs.
+
+### Architectural finishes and street-facing shop fronts
+
+The next visual pass adds three hash-pinned CC0 material sets (12 source maps at
+2K), a stable six-finish facade palette, painted modeled joinery, street-facing
+retail glazing with frames and awnings, and parapets/bitumen for flat roofs.
+Pitched roofs retain their tile finish. Near and distant wall materials use the
+same stable map identity. The licensed Poly Haven architectural profiles remain;
+these are adapted appearances, not claims about the surveyed Davis buildings.
+
+Matched 720p/1080p Unity captures are under `visual/`; the previous captures are
+preserved under `visual-before-architecture-pass/`, and the first finish attempt
+under `visual-architecture-first-pass/`. The lighter stucco follow-up improves
+wall/trim separation, and the commercial ground floors now differ from upstairs
+windows. Repetition, empty-looking glazing and sparse landscaping still limit
+realism. These captures establish the actual rendered change, not whole-game
+visual acceptance. Whole-population behavior and sustained rendering/inference
+qualification remain necessary after this pass.
+
+### Storefront landing qualification
+
+The initial architectural editor rerun passed 128/129 checks. Its storefront
+fixture still invoked the old building signature. After correcting that call,
+a stronger floor check first exposed the fixture's missing mapped sidewalk, then
+an actual unsupported approach at `way/45208404`. The original single diagonal
+threshold could miss the straight-ahead door waiting point.
+
+Landings now follow the door axis before joining the mapped sidewalk, with matching
+world-aligned concrete UVs. The isolated physical check verifies closed-door
+collision, open-door clearance and floor support at every mapped activity entrance;
+`realism-storefront-landing.xml` passes. Earlier failures are retained. The complete
+129-case editor suite and all 23 populated-world cases are being rerun before the
+new local/public packages are produced. All four Python 3.11/3.12 Windows/Linux CI
+jobs passed for `1613b56`; those do not qualify Unity behavior.
+
+### Anticipating approaching rail vehicles
+
+The landing candidate passes all 129 editor and 23 physical-world assertions in
+`realism-architecture-landing-editor.xml` / `realism-architecture-landing-world.xml`.
+All ten ambulance seeds returned without ambulance contacts; the copied cycle
+report is `ambulance-architecture-landing-qualified.json`. The world suite took
+1,599.38 seconds. However, its ordinary Cedar traffic case logged a pedestrian
+impact with the streetcar at 4.16 m/s. Traffic continuing after an impact is not a
+contact-avoidance pass. A new assertion now rejects unscripted rail contacts.
+
+The isolated traffic rerun did not repeat that timing-dependent event. A controlled
+7 m/s streetcar course did reproduce the underlying short-lookahead failure:
+the walker had entered the track before the forward obstacle probe could detect
+the approaching nose (`realism-approaching-streetcar-side.xml`, impact 7.09 m/s).
+Actors now forecast measured rail movement along track tangents at 10 Hz, over a
+three-second horizon. They wait only when remaining outside the rail envelope is
+safer; actors already in the path retain their escape movement. Forces remain
+bounded, and the forecast does not change a vehicle pose or reach perception.
+
+The reproduced course passes after this change
+(`realism-approaching-streetcar-yield.xml`). A separate already-on-track escape
+case and the full 25-case world suite are running. These changes are not yet
+packaged or performance-qualified. Python CI passed all four jobs for `0a80a18`.
+
+Review of the older Davis activity recording `9b4dcb7e3eab49268ad192b4f4386868`
+found three sampled complete shop returns. During simulation seconds 60–180,
+34–35 people were within 200 m of the player, but moving vehicles ranged from
+0–9 (mean 3.68); only 28.0% of samples met the six-moving-vehicle target. The
+hotspot traffic target did not pass in that earlier recording. Fresh activity
+footage and counts remain necessary after the walking/traffic corrections.
+
+### Combined rail/contact regression result
+
+`realism-architecture-rail-anticipation-editor.xml` passes 129/129, and
+`realism-architecture-rail-anticipation-world.xml` passes 25/25 in 1,514.10 seconds.
+The latter includes both approaching-rail waiting and already-on-track escape,
+ordinary traffic on both maps, storefront access, transit boarding/alighting,
+parking, and all ten ambulance seeds. Review of every case's contact output found
+only the deliberately initialized truck contact and the deliberate vehicle-impact
+fixture. No unscripted rail contact was recorded in this run. This is a finite
+regression sample, not a guarantee against every possible encounter.
+
+The behavior under test is commit `daaf6dc`; the subsequent packaging change only
+adds linked setup/evaluation documents to the installed folder. All four Python
+Windows/Linux, 3.11/3.12 CI jobs passed for `daaf6dc`.
+
+Activity diagnostics now also save player position and real elapsed time in the
+same world sample. Previously, world time was scaled simulation time while driving
+diagnostics used real elapsed time. Joining those clocks directly is invalid,
+especially after loading or pausing. The original directly recorded nearby counts
+remain usable; reconstruction of an outdoor-only count from the older moving-player
+recording is unavailable. Its two-minute window contains two sampled complete shop
+returns, but no complete transit trip. This logging-only correction does not change
+actor or vehicle behavior. Fresh packages, recovery, sustained performance and
+visual/activity checks remain pending.
+
+### Packaged recovery and architectural workload regression
+
+Local package `Realism-local-20261110-184859` and public package
+`Realism-public-20261110-185344` share code identity
+`f559375a1d1c6c2a201521538c1254be20f45c8f501b03e41ab5130edec8d0b7`.
+Both pass installed-file integrity and isolated CLI checks; the public packed-asset
+audit contains no local-only assets. Python CI passes all four jobs for `2e85b46`.
+The installed official v0.9.7 checkout still has no tracked modifications.
+
+Public recovery session `06dc4da6c2d04fddb24eb8bacff471d3` passes the stricter check:
+three fresh healthy samples immediately before terminating the verified game-owned
+observer, observed loss of both fresh observer and healthy commands, generation-two
+observer restart, Comma restart, then fresh streams through 165 seconds. Actual
+foreground captures show unavailable stale readings and restored human driving.
+The deliberate outage makes this a recovery check, not a throughput qualification.
+
+The subsequent local workload was stopped after 255.99 elapsed seconds because
+it clearly missed performance targets. Session `7c14c2d092f7485ca02eeab454243e73`
+contains 233.14 advancing simulation seconds: **22.69 FPS**, p95/p99
+**71.82/102.31 ms**, camera **18.67 Hz**, detector **6.01 Hz**, warning p95
+**468.48 ms** (58 samples), and no player contacts. This is a failed, shortened
+attempt, not a completed 30-minute test. The camera transport dropped no frames;
+the frame-order guard dropped one. Render samples reached approximately 6,900
+draw calls. The render/update workload, rather than transport queue loss, now limits
+camera delivery.
+
+The next rendering change groups immutable facade modules by material in small
+spatial cells, retaining geometry, UVs, finite world collision, and approximately
+the same detail range. Identical joinery/glass finishes share materials across
+buildings. Population, dynamics and Comma behavior are unchanged. Focused geometry
+preservation checks and fresh packaged performance measurements are required;
+the earlier passing contact suite does not qualify this performance change.
+
+The batching candidate passes `realism-spatial-facades-editor.xml` (131/131),
+including transformed geometry, UV/material retention and independent distant
+culling. `realism-spatial-facades-lifecycle.xml` passes both generated-geometry
+cleanup and independent-camera presentation isolation. A new packaged short
+performance probe is next; no improvement is claimed from these tests alone.
+
+### Spatial-batch probe and transport stall
+
+Package `Realism-local-20261110-191531`, session
+`a4e768fb64b242b7b53fcaee108af588`, completed its five-minute probe. It is a failed
+AI workload check: the observer stopped replying at frame 3,600 (camera timestamp
+211.015 seconds), then a 9.79-second main-thread stall was sampled. Both AI
+connections subsequently disconnected. No relevant System/Application event was
+returned for the inspected Windows event window. The cause remains unconfirmed.
+
+Whole-run 30.39 FPS cannot establish an improvement with AI enabled because the
+last part ran without fresh AI. Whole-session camera/detector rates were
+12.89/4.19 Hz; p95/p99 frame times were 61.82/83.80 ms. There were no player
+contacts, pauses, or sampled traffic/rail overlaps. The failed run is preserved.
+
+A bounded, separate watchdog now records the Python transport stage and thread
+stacks if a stage stalls for two seconds, up to eight reports per process. It
+never writes on the transport thread and logs no image data or capability token.
+Release-player profiling also requests the available CPU/render-thread/wait
+counters instead of assuming development-only physics markers are present.
+These are diagnostic changes, not a claimed fix for the failure. The Python
+regression suite passes 102 tests; a fresh ten-minute packaged probe is next.
+
+### Ten-minute repeat with system-pressure measurements
+
+The diagnostic candidate `Realism-local-20261110-193334`, session
+`4fbf7f2416ab402e9aa0f044d6e8511c`, ran for 600.01 elapsed seconds with no service
+restart, disconnect, player contact, or sampled traffic/rail overlap. The original
+transport failure did not recur; this does not establish that its cause is fixed.
+Code identity is `4f51ecf77d83806dbe847dd6385cb2440e33d783136b4c6d8a8d3a90f2a56daf`.
+
+It still **fails performance**: 24.70 FPS, p95/p99 72.69/97.19 ms, camera
+18.72 Hz, detection 6.14 Hz, warning p95 447.73 ms (289 samples), and observer
+p95 455.85 ms. Whole-session fresh observer/healthy command/model fractions are
+99.86%/97.49%/97.16%. This is the scripted qualification driver, not Comma driving.
+System samples recorded median 696 MB available RAM and 84.44% CPU load;
+these observations do not by themselves prove the cause of the slowdown.
+
+An ordinary car remained stationary for 207.51 seconds behind the parking actor.
+The parking car was still requesting reverse at approximately
+(11.486, -0.012, -233.425), while the queued car waited near
+(18.591, -0.012, -232.053). No unrequested reversing or collision was recorded,
+but this persistent maneuver deadlock fails the traffic gate. A fixed reversal
+endpoint and its conservative clearance probe are under investigation.
+All four Python CI jobs passed for `fdc947e` (Windows/Linux, Python 3.11/3.12).
+
+The separate development-only CPU capture
+`outputs/sessions/2ee24ee6f82e48e6b42a064f323e1cc3/cpu-window.raw` contains 116
+profiled frames. TrafficActor physics callbacks dominate this trace (30.76 ms
+inclusive per profiled frame), followed by actor locomotion (8.82 ms). These
+numbers include development/profiler overhead and are not release FPS results.
+A texture audit reports 1,568 MB in loaded textures, with several generated
+RGBA maps retaining readable CPU copies. Finer component markers are being
+measured before changing the simulation calculations. The diagnostic player is
+built into `outputs/profile-game`, is clearly labelled diagnostic-only and is
+not used by the distribution packager. Its explicit `-profile-window` option
+records ten seconds after startup; the capture component is excluded from
+ordinary release builds.
+
+### Recorded parking queue and measured navigation work
+
+The more detailed ten-second development trace, session
+`63f01720e4084b1e9369a2d909edd950`, contains 152 frames. Traffic planning costs
+14.43 ms per profiled frame, including 7.32 ms in repeated nearest-lane queries.
+These are diagnostic timings, not release performance measurements.
+
+The recorded parking/queue poses from the ten-minute failure now reproduce in
+`realism-parking-queued-before.xml`: the car stayed 2.66 metres short of the
+fixed reversing endpoint, already aligned with 2nd Street. The revised exit
+allows a stopped parking car to finish reversing only when its complete body
+fits inside the intended lane, near the planned endpoint. It then uses the
+ordinary forward clearance rules. The same fixture passes in
+`realism-parking-queued-after.xml`, with continuous movement, no contact, and no
+displacement of the waiting car.
+
+Nearest-lane candidate sets are now prepared once per map instead of allocated
+on every query. Hinted path projections use the cumulative-distance index to
+visit only relevant segments, preserving the original projection filter,
+fallback and tie order. The full Editor suite passes 135 tests in
+`realism-map-search-editor.xml`, including exhaustive projection comparisons
+and whole-body parking-envelope rejection cases. Vehicle forces, the 100 Hz
+physics step, actor population and model/controller behavior are unchanged.
+`realism-map-search-parking.xml` passes both the recorded queue fixture and the
+populated parking/boarding/return cycle (115.39 seconds total test time). The
+parking vehicle records no contact. The populated scene did log a bird landing
+contact with the moving ambulance (5.86 m/s relative speed, zero recorded
+impulse); this is retained for activity review and is not a contact-free town
+claim. Fresh release performance and visual/activity review remain pending.
+Visual capture commands now accept `-visual-output` so fresh captures can be
+stored beside previous evidence without replacing it.
+
+### Shared-memory lifetime correction
+
+Before starting the next release probe, WSL `/dev/shm` was found 97% full.
+Eighty-three **closed CoDriverSim sessions** retained 7,758,884,864 bytes of
+message-queue/camera files. Every exact namespace matched a retained game service
+log; normal-user and root read-only process audits found no live mappings/users.
+Only those verified directories were removed. Legacy manual Comma namespaces,
+unrelated IPC and WSL processes were left intact. `/dev/shm` fell to 4% used;
+Windows subsequently reported approximately 6.73 GiB of available physical memory.
+Evidence is retained in `ipc-audit.json`, `ipc-root-audit.json` and
+`ipc-cleanup.json` under `outputs/qualification/realism/`.
+
+The Linux supervisor now releases its exact session namespace after all adopted
+descendants exit, including after a hard bridge crash. It rejects redirected or
+unexpected directory contents and preserves accessible live users. Cleanup
+results are written beside the service records. A restart cleans only its own
+inactive namespace; no global cache purge or WSL shutdown is used. The new helper
+is included in packaged applications.
+
+Windows Python regression passes **110 tests** (two Linux-only lifecycle cases
+skipped). WSL passes all **10 IPC tests**, including real supervisor/subreaper
+checks for normal bridge exit and a SIGKILL bridge crash with an orphan worker.
+This fixes a verified resource leak. It does not establish the cause of the
+earlier transport stall or qualify current performance; a fresh probe is next.
+
+### Packaged parking/navigation/IPC screening result
+
+Package `Realism-local-20261110-201915`, session
+`dbb89ed8da7041e5838b38718c60c7a9`, completed 600.01 elapsed seconds / 559.30
+advancing simulation seconds. Code identity is
+`c0e4e3520e0d28ce65854b2182e7d5bf080f710d01f461c214301864cc46de7f`;
+the package also includes the IPC lifetime correction from `e17ce9b`.
+Integrity and isolated CLI checks pass. All four Windows/Linux Python CI jobs
+pass for that commit.
+
+Mean **28.57 FPS** still fails the rendering target; p95/p99 are
+**54.78/67.44 ms**. Whole-session camera **19.63 Hz** meets the documented
+near-20-Hz tolerance, and detection is **6.07 Hz**. Warning p95 is **401.83 ms**
+(263 samples). This is another ten-minute screening run, not the required
+30-minute qualification and not Comma autonomy.
+
+No player contact, pause, sampled vehicle/rail overlap, or two-minute ordinary
+traffic/active-emergency block was observed. Parking returned and departed
+again, the previously blocked car moved, and the emergency cycle completed.
+The Comma healthy-sample fraction was 97.45%. On exit the new supervisor receipt
+confirms 37 IPC files / 123,990,016 allocated bytes were released, returning
+`/dev/shm` to its unchanged legacy baseline of 285 MB. System samples still
+show pressure (median 899 MB available Windows memory and 86.20% CPU).
+Fresh graphics/activity review and further measured rendering work follow.
+
+### Recorded activity and rendering correction
+
+Unmodified 220-second foreground recordings are retained as
+`activity-davis-ipc.mp4` (session `89ad3a35cf934766aa9e6683afbc971e`) and
+`activity-cedar-ipc.mp4` (`264b7db8b0914a09811371ce56a464f3`). Both completed
+at approximately 15 captured frames/second; capture overhead excludes them
+from performance qualification. Davis's sampled 60–180 second window had
+34–35 outdoor people within 200 m of the stationary player, but only **3.79
+moving vehicles on average**, meeting six in one third of samples. Cedar had
+25.22 outdoor people and **1.66 moving vehicles** on average. Three complete
+shop returns were sampled across the Davis recording; four transit trips were
+sampled in Cedar. State records do not establish animation quality, line of
+sight, or complete activity coverage. The spectator camera follows different
+actors while the population count remains centred on the player.
+
+Visual review exposed excessive dry-ground glints, dark facade glazing and a
+spectator camera passing through walls. The next candidate makes rough dry
+surfaces matte, gives the modeled window panes a clean dielectric finish,
+recalculates tangents after threshold UV changes, and checks static obstructions
+for chase/activity cameras. The independent AI camera is unchanged.
+
+Converted linear metallic/smoothness and occlusion maps now use offline BC7
+compression and discard their CPU pixel copies. A GPU readback regression saves,
+unloads, reloads and replaces the asset; all four sampled channels stay within
+0.035 of their source values, and the mip chain survives. Classic Forward is
+being measured for the one-directional-light scene; render settings now have a
+separate build fingerprint. Nearest-lane searches also skip heading work for
+candidates that cannot improve positional error, and full-path projections
+skip unnecessary endpoint binary searches.
+
+`realism-render-memory-editor.xml`: **137/137 Editor tests passed**, including
+GPU texture persistence, camera obstruction, exhaustive navigation comparisons
+and the existing vehicle/contact calibration cases. Fresh player captures and
+sustained performance must establish whether these changes improve the application.
+
+The first neighborhood-routing check passes **138/138 Editor tests**. Twelve
+ordinary cars/trucks use nearby legal circuits; eight retain district trips.
+The Davis geometry check covers all twelve local actors over seeds 21, 22 and
+30, including continuous lane alignment and the 195 m neighborhood bound. This
+does not by itself establish six moving vehicles or congestion-free behavior.
+
+The subsequent full populated run was stopped after Cedar exposed a rail/contact
+regression. Its retained log is `realism-neighborhood-world.log`; diagnostic
+snapshots were copied into `neighborhood-first-failure/`. The bus stopped after
+4.8 m, with the junction blocked behind a car/streetcar collision. A focused
+pre-fix test then proves **Car 19 overlaps the streetcar by 1.125 m before the
+first physics step** (`realism-initial-rail-before.xml`, failed as expected).
+The initial-placement search previously ran before rail vehicles existed.
+
+Rail bodies are now created and synchronized first. Initial ordinary-traffic
+placement checks their complete collision volumes plus a departure gap, and
+also leaves space around the player. The bounded search fails explicitly if
+no clear position exists. These placements occur during town loading/reset;
+active actors still move through physics. Focused Cedar bus/traffic and initial
+rail-clearance checks are being rerun before packaging.
+
+### Denser traffic and pedestrian clearance follow-up
+
+Initial rail clearance now passes for both maps. The Cedar bus then exposed a
+turning deadlock: its opposing car's straight nose cast intersected the waiting
+bus, although the steered body could pass. Cedar now uses the existing three-metre
+swept-body check to allow at most 1 m/s continuation. Signals, crossing priority,
+and the remaining physical clearance limits still apply. The bus completed two
+stops and 299 m in `realism-cedar-turn-clearance.xml`; that run still failed the
+ordinary-traffic wait criterion, so it was not accepted as a populated-world pass.
+
+The denser run also exposed a walker stuck behind Cedar's raised sidewalk.
+`realism-cedar-sidewalk-recovery.xml` reproduces it from the recorded position.
+Both the height probe and the supporting-ground probe now cover the 33 cm rise;
+locomotion continues to use bounded mass-scaled forces without pose correction.
+`realism-cedar-step-support.xml` passes the recorded person/cat recovery case,
+including a per-step displacement bound. Its traffic case still fails because
+cars and pedestrians can mutually block a crossing after a phase change.
+
+The next candidate prevents a fresh Cedar junction reservation while a crossing
+is in progress, and lets a committed turn clear before granting a pedestrian
+start. Walking endpoints vary within the crosswalk width; agents have distinct
+avoidance priorities and leave the landing after physically reaching the far
+sidewalk. The source changes and their focused checks remain under review. No
+new package or 30-minute qualification result is claimed for them yet.
+
+`realism-cedar-boundary-motion.xml` subsequently passes all **four** focused
+cases: six simulated minutes of ordinary populated traffic, the recorded curb
+recovery for a person and cat, the recorded signal-pole recovery, and the
+existing displaced-walker recovery. The pole failure came from navigation's
+clamped position disagreeing with the solid body. Recovery now blends bounded
+movement along the boundary with movement back onto navigation; the previous
+tiny correction alone could not overcome contact friction. Diagnostics report
+the velocity after avoidance and identify the vehicle blocking it.
+
+Cedar's estimated signal cycle now includes 28 seconds of pedestrian clearance
+after the last walk start. Its previous six seconds were shorter than the
+22-metre crossing time and repeatedly consumed the following vehicle green.
+Davis retains its mapped signal program. Crossing completions require the actor
+to be physically on the far sidewalk; no collision bodies are repositioned or
+disabled to clear traffic. Full world/Editor regressions and a new external
+package are the next gates. A small storefront join change also puts the access
+surface just below the existing sidewalk instead of visibly laying raised slabs
+over it; fresh captures still need to verify the appearance.
+
+The combined source passes **139/139 Editor tests** in
+`realism-neighborhood-final-editor.xml` (21.48 seconds), including the new
+crosswalk/committed-turn exclusion test. The full physical-world suite is running
+as `realism-neighborhood-final-world`; packaging is conditional on that result.
+
+That full run was stopped after its Davis population snapshot showed an
+unresolved pedestrian/turning-vehicle queue at 346.67 simulated seconds.
+There is no final XML pass for that interrupted run, and its build/package
+stages did not execute. Retained evidence is in
+`neighborhood-davis-crosswalk-repro/`. Before stopping, the log recorded the
+Davis bus completing three stops / 2,511 m with boarding and alighting, and
+the recorded parking queue clearing; these are partial results only.
+
+The new Davis fixture uses the recorded crosser and waiting-person body poses.
+The waiting person's solid body was ahead of the crosser while navigation had
+clamped its agent behind them. A physical walker-clearance check now proposes a
+short, walkable detour around the actual body, preserving the same bounded
+locomotion, static-obstacle checks, and vehicle avoidance. Focused checks are
+running before another full qualification attempt.
+
+`realism-davis-walker-clearance.xml` now passes both the recorded physical
+pedestrian-pair fixture and the six-simulated-minute Davis ordinary-traffic
+check (149.17 seconds total). The complete suite is being restarted with this
+correction included; these two passes alone are not release qualification.
+
+### Combined neighborhood correction qualification
+
+Commit `092d516` passes **139/139 Editor tests** and **30/30 physical-world
+PlayMode tests** (`realism-neighborhood-v2-editor.xml` and
+`realism-neighborhood-v2-world.xml`). The world suite took 1,589.96 seconds.
+All ten ambulance dispatch/return seeds, 21–30, completed with no recorded
+ambulance contact; their simulation durations were 258.67–376 seconds.
+The retained cycle report is `ambulance-neighborhood-v2-qualified.json`.
+Both populated traffic checks, complete bus/parking activities, initial rail
+clearance, recorded pedestrian recoveries, bridge/gate physics, and camera
+isolation are included. Python CI run `42950105457` also passes for this commit.
+
+The Windows player built successfully and package
+`Realism-local-20261110-223436` passes integrity and bundled-CLI verification.
+Its sustained run is session `a5a7f130c2d34a46add57c5ad9748e6f`, with the controller
+off, 1280×720 cockpit view, AI services enabled, and the explicitly identified
+qualification driver. This driver is not Comma autonomy.
+
+During that run, pedestrians 1, 4 and 9 remain about 0.2 m from their
+crossing endpoints. The recorded physical approach force becomes too small to
+overcome contact friction before the body reaches the walking-area tolerance.
+The sampled poses and build identity are retained in
+`neighborhood-crossing-endpoint-repro/` for a targeted physical regression.
+Cars 9 and 15 also waited 126.19 and 127.20 simulated seconds at a junction with
+pedestrian, vehicle and emergency-yield conflicts; both subsequently cleared
+without recorded contact. Those durations fail the current two-minute queue
+check and require review. The final result is recorded below.
+
+Fresh activity/visual evidence and the final physical Xbox Comma
+engagement/takeover check remain open. These passing tests do not close those
+release gates.
+
+### Completed neighborhood performance run; world qualification failed
+
+The same package/session completed 1,900.01 elapsed seconds and **1,878.04
+advancing simulation seconds**, covering 10,500.68 m with no pauses or player
+contacts. All rendering/inference checks pass for this workload:
+
+| Measurement | Recorded result |
+| --- | ---: |
+| Mean frame rate | 35.73 FPS |
+| Frame-time p95 / p99 | 46.53 / 55.34 ms |
+| Camera delivery | 19.95 Hz |
+| General detection | 6.20 Hz |
+| Sensor-to-warning p95 | 383.55 ms (779 samples) |
+| Sensor-to-observer p95 | 361.67 ms |
+| Fresh healthy Comma-command samples | 98.70% |
+| Camera transport / reorder drops | 0 / 0 |
+
+There are no sampled road-vehicle or rail overlaps and no sampled backward
+motion without a reverse request. The bus reaches five stops, the train 49,
+parking completes three returns, and a complete emergency cycle is observed.
+However, the longest bus wait is **359.68 s** and the active ambulance wait is
+**628.89 s**. The bus yields to the pedestrian stalled near `(-293.59, -8.31)`.
+A separate central junction queue has car 18 holding a reservation while its
+exit is blocked by truck 4; the truck waits for that reservation. Their recorded
+poses, headings and blockers are retained in
+`neighborhood-crossing-endpoint-repro/world-activities-late.json`.
+This is a **failed world qualification**, despite the performance pass.
+
+The complete report is the package's
+`outputs/qualification/run-review-a5a7f130c2d34a46add57c5ad9748e6f.json`.
+The system-pressure log is `realism-neighborhood-v2-system.jsonl`.
+The application and owned helper processes exit; its IPC cleanup reports 37
+owned files / 194,584,576 bytes released. No unrelated WSL shutdown was used.
+
+`neighborhood-performance-comparison/` contains PNG/SVG charts, source hashes
+and the plotting script comparing this run with the earlier 9.3-simulated-minute
+28.57 FPS screening. The runs differ in build, route history and duration, so
+the chart is aggregate evidence, not a controlled component benchmark. Neither
+run measures Comma autonomy or real-road perception accuracy.
+
+The new arrival regressions first fail against the previous code
+(`realism-arrival-before.xml`, 0/2): a person stops 0.221 m short of an
+unobstructed destination, and the recorded Davis endpoint remains in Crossing.
+The final approach now maintains a slow walking request until the physical body
+is within 0.04 m, then brakes with the existing bounded forces. It does not warp
+the body or suppress contacts. `realism-arrival-after.xml` passes all **six**
+focused cases in 56.64 seconds: person/dog/cat arrival, the three recorded Davis
+endpoints, displaced-walker recovery, the opposed-pedestrian fixture, and Cedar
+curb/pole recoveries. This change postdates the measured package.
+
+The junction history reveals that truck 4's path error grows from about 0.3 m
+to over 3 m during a prolonged zero-speed request. Its body slowly drifts and
+rotates into the opposing lane while braked. Stationary tire/brake integration
+is being reproduced separately before changing junction priority.
+
+### Stationary vehicle drift reproduction and correction
+
+`realism-stationary-before.xml` reproduces the physical failure without traffic:
+over 600 seconds of braking with steered wheels, the truck drifts **6.4075 m /
+50.426 degrees** on level ground and **10.5829 m / 113.319 degrees** on a
+5-degree cross-slope. The bus drifts **0.4626 m**. Car and ambulance cases pass
+the original limits; the suite is 2/5, not a pass.
+
+Removing duplicated brake/rolling stopping demand alone is insufficient
+(`realism-stationary-after.xml`, 2/5). A 40 ms tire response stabilizes the level
+cases, but slope rotation remains (`realism-stationary-relaxation.xml`, 4/5;
+`realism-stationary-contact.xml`, 4/5). These attempts remain available.
+
+The final correction calculates suspension loads first, transfers anti-roll
+load between supported wheels, then uses those same loads for tire grip and
+gravity compensation. Normal/tangential reactions share the contact point;
+rolling resistance only supplies stopping demand left after braking. The
+simulation parameter `VehicleProfile.tireRelaxationTime` defaults to 0.04 s.
+Forces remain bounded by contact load and grip. Body poses/velocities are not
+overwritten, and no kinematic holding mode is introduced.
+
+`realism-stationary-load-transfer.xml` passes **24/24 vehicle-physics tests**
+in 38.06 seconds. All five long-hold cases report 0.0000 m / 0.000 degrees at
+their logged precision and pass the unchanged 0.10 m / 1-degree limits. Each
+also passes an external-impulse check demonstrating finite movement. The
+pedestrian/animal contact, reverse/bay, suspension, slope, turning and bridge
+regressions in that suite pass. Honda game calibration remains **10.60 s
+0–60 mph / 42.20 m braking from 60 mph**; GLS remains **5.41 s / 41.88 m**.
+These are game calibration results, not validated measurements of real cars.
+
+Full Editor/populated-world checks, a new package and sustained activity run
+are required for the combined arrival/vehicle changes. The prior 35.73 FPS
+package predates them and does not qualify this newer source.
+
+### Combined world checks and railway furniture regression
+
+The complete arrival/vehicle candidate passes **144/144 Editor tests** and
+**32/32 PhysicalWorld tests** (`realism-static-hold-v1-*.xml`). The latter takes
+1,630.03 seconds and includes all ten ambulance seeds, 21 through 30, without
+recorded ambulance contact. The retained cycle report is
+`overhaul/ambulance-static-hold-v1-qualified.json`.
+
+Reviewing those cycle logs nevertheless finds an ordinary car blocked by a
+railway gate pedestal at `(294.25, 0, -28.01)`. That estimated furniture placement
+intrudes 0.806 m into the mapped turning lane
+`:cluster_1815032088_9171014823_2_0`. Its direct regression fails before correction
+(`realism-gate-before.xml`, 0/1). The longer packaged test was not started with
+this known obstruction.
+
+Gate placement now checks every lane corridor, including internal junction
+turns, at the same elevation. It searches 4–12 m before the source crossing,
+retains the 5 m roadside offset and existing arm coverage, and requires 0.75 m
+between the pedestal centre and lane edge. These are explicitly estimated
+simulation furniture parameters. It refuses a placement with no clear candidate;
+it does not remove the collider or make traffic ignore the gate. Only the
+obstructing gate needs to move, approximately 3 m along the roadside.
+The complete corrected Editor suite passes **145/145** in 55.91 seconds
+(`realism-gate-final-editor.xml`). All **five affected PlayMode checks pass**
+in 335.49 seconds (`realism-gate-final-world.xml`): Davis traffic flow, the
+2.51 km / three-stop bus route with boarding and alighting, initial rail/body
+clearance, and Honda/GLS stopping before a closed rail arm without contact.
+Python CI run `42963134168` passes for `45fe242`. The Windows rebuild and new
+sustained combined run remain separate gates.
+
+### Rebuilt package; sustained run interrupted by controller use
+
+`Realism-local-20261111-001133` builds and passes integrity checks for all 2,630
+manifest files plus bundled CLI checks. Its code identity is
+`9fc6106c95334677637719e36fa1ab278c133f80cf15cefca5a66152935ce8d0`.
+The attempted sustained session is `4652dc960c9c4001913c10ce35eace65`.
+
+At 285.02 seconds, controller reset/reconnection pauses the game safely.
+At 308.76 seconds it resumes in human mode; four camera changes and accelerator
+input are recorded. Manual driving then contacts a sidewalk and a railway
+barrier. The app closes after 389.02 elapsed seconds, with 341.85 advancing
+simulation seconds and 23.87 paused seconds. This is an **interrupted run**, not
+the required thirty-minute qualification. Its measured 26.06 FPS, camera
+18.63 Hz and detection 5.81 Hz are retained without treating mixed manual and
+scripted activity as a controlled performance comparison.
+
+No sampled traffic/rail overlaps or unintended reverse movements occur in this
+short session. A parking return is observed and the ambulance is on its return
+journey when the app closes. Normal shutdown releases 37 owned IPC files /
+107,290,624 bytes. The new build still requires an uninterrupted sustained run,
+fresh nearby-activity review and the physical Xbox Comma request/takeover check.
+
+### Uninterrupted rebuilt run: throughput measured, pedestrian failures retained
+
+The user made the controller unavailable again. Session
+`7f74123cc75744cd9e6f60ccbdb42de0` in the same package completed **1,878.12
+advancing simulation seconds / 10,498.31 m**, with 1,900.01 elapsed seconds,
+no pauses and no player contacts. It used the qualification driver, not Comma
+autonomy. Its measured workload has these results:
+
+| Measurement | Result |
+| --- | ---: |
+| Mean FPS | 32.43 |
+| Frame p95 / p99 | 51.57 / 62.43 ms |
+| Camera / general detection | 19.88 / 5.89 Hz |
+| Sensor-to-warning p95 | 482.24 ms (718 samples) |
+| Sensor-to-observer p95 | 412.19 ms |
+| Healthy Comma-command samples | 99.27% |
+| Fresh model / observer samples | 98.95% / 99.91% |
+| Camera transport / reorder drops | 2 / 0 |
+
+There are no sampled vehicle/rail overlaps or unintended reverse movements.
+The bus reaches seven stops, with a longest wait of 68.06 s. Parking completes
+two returns and a complete ambulance dispatch/return occurs. **World
+qualification still fails**: person 9 remains against a narrow sidewalk corner
+for 1,680.77 s; person 31 stops immediately ahead of a turning truck for
+1,016.90 s. The resulting junction queue also stalls the ambulance for 818.80 s.
+The complete report is the package's
+`outputs/qualification/run-review-7f74123cc75744cd9e6f60ccbdb42de0.json`.
+
+`gate-run-pedestrian-repro/` retains sampled world/driver rows, build identity,
+the late junction poses and two explicitly unverified geometry hypotheses.
+The run reviewer now checks stationary **Crossing** actors independently of
+vehicles, excludes intentional idle/transit waiting states, and reports missing
+position coverage as unavailable. Its six focused Python tests and Ruff checks
+pass. Physical reproductions are being run before changing locomotion.
+The throughput pass does not qualify the intended fully functioning town.
+
+Normal shutdown releases 37 owned IPC files / 192,090,112 bytes. Fresh static
+720p/1080p scene captures are in `visual-gate-final/` (22 PNGs). The storefront
+join is flush in those captures; repetitive facades and cockpit material glints
+still need visual review. Static cabin captures do not initialize live mirrors
+or the Comma display. Activity recordings remain required on a corrected build.
+
+### Recorded corner and truck-nose regressions
+
+Both exact-pose reproductions fail before changes
+(`realism-corner-nose-before.xml`, 0/2, 48.90 s): person 9 stays 8.907 m from
+its destination and person 31 stays 7.219 m away. The first correction extends
+step detection across a starting/stalled actor's footprint when the original
+centre-line probe finds no usable ledge. Static support, maximum ledge height
+and bounded lift forces remain unchanged; no body pose is overwritten.
+That corner clears, and eight of nine focused checks pass in
+`realism-corner-nose-after.xml`. The truck case remains a retained failure.
+
+The truck detour's sampled endpoint lies exactly on the navigation boundary,
+which causes the navigation ray to reject it. `realism-nose-navigation.xml`
+retains that diagnostic. The final detour change selects the destination side
+when the actor's whole footprint is already beyond the vehicle end, insets only
+an endpoint boundary hit, then re-samples and ray-checks the interior point.
+Both detour segments also receive physical vehicle-clearance casts.
+Boundaries earlier along a segment still reject the route.
+
+`realism-nose-interior.xml` passes all **three** focused detour tests in 57.07 s.
+The recorded truck case passes at its exact pose and at ±0.06 m lateral offsets,
+with penetration, finite-movement and parked-truck displacement checks. Full
+Editor and populated-world suites, a new package and another sustained run are
+still required for these combined locomotion changes.
+
+Python regression passes **112 tests with two platform-specific skips**; Ruff
+checks and formatting pass. `VISUAL_REVIEW.html` now uses the 22 fresh scene
+captures and identifies both completed world-failure runs; older activity
+videos remain labelled historical. `gate-performance-review/` contains a
+PNG/SVG comparison and source provenance, explicitly identifying unmet checks.
+
+### Combined walker suite: transit corner blockage
+
+`realism-walkers-final-editor.xml` passes **145/145**. The populated suite in
+`realism-walkers-final-world.xml` passes **33/34** in 1,929.26 seconds. All ten
+ambulance seeds, 21–30, complete without recorded contact; their preserved report
+is `overhaul/ambulance-walkers-final-qualified.json`. The Davis passenger-trip
+test exceeds its 300-second wall-clock timeout. Its saved late sample is
+`realism/transit-walkers-final-failure.json`, at 866.67 simulation seconds: the
+bus has visited one stop and waits behind truck 16 at a crossing.
+
+People 22 and 46 wait beside that truck's front corner. Person 22 is 0.296 m
+beyond the nose and 0.753 m outside the side of the collision body. Its diagonal
+walking request runs into the truck; the truck's crossing rule requests zero
+speed, and the available navigation area cannot accommodate the proposed detour.
+`realism-truck-corner-before.xml` reproduces this mutual wait in a small physical
+fixture and fails. The slow occupied-crossing clearance rule now also covers a
+person less than 0.5 m beyond the nose and more than 0.5 m outside the body's side.
+Direct-front stopping and the forward/curved-path collision checks remain active.
+`realism-truck-corner-after.xml` passes both that fixture and the existing occupied
+bus crossing, with no body penetration. The populated transit retest is still
+required; this focused pass is not a complete town qualification.
+
+### Reflection preparation and timber surface
+
+The daylight HDR cube was imported with `cubemapConvolution: 0`, then assigned
+as the custom material-reflection cube. This supplied ordinary sky mipmaps to
+URP's roughness lookup. Preparation now uses Unity's specular-prefiltered mipmaps
+for both new and existing imports. The matched 22-image sets in
+`visual-reflection-before/` and `visual-reflection-after/` use 2× MSAA at 720p and
+1080p. In the matched cabin views, the bright dashboard/vent glints are removed
+without changing the upholstery or trim values. This does not establish complete
+visual acceptance or live mirror/UI behavior.
+
+Railway sleepers now use the pinned CC0 Rough Wood maps with a dark authored
+treatment. A shared per-track mesh keeps grain along the timber at the source's
+0.5 m scale; tangents are regenerated after the UV change. The mesh is registered
+for cleanup when the town is destroyed. Sleeper geometry and collision behavior
+are unchanged. Python regression remains **112 passed / two skipped**, with Ruff
+and formatting checks passing. A new combined package/run is still required.
+
+### Corrected combined suite
+
+For `0ba3f72`, `realism-corner-final-transit.xml` passes the populated transit
+reproduction in 193.37 seconds. The bus travels 2,510.4 m and visits three stops,
+with both boarding and alighting observed. Its retained late population sample is
+`transit-corner-final-qualified.json`.
+
+The subsequent complete suites pass **145/145 Editor checks** in 85.48 seconds
+and **35/35 PhysicalWorld checks** in 1,686.83 seconds. All ten ambulance seeds,
+21–30, complete without recorded contact; the preserved report is
+`overhaul/ambulance-corner-final-qualified.json`. Python CI `42976155693` also
+passes. The pipeline now proceeds to build/package verification and a new
+controller-off, 1,900-second combined workload. Test passes do not establish its
+future performance result or visual/activity acceptance.
+
+### Corrected package: completed run and new vehicle conflict
+
+`Realism-local-20261111-023650` passes all 2,630 package-file checks and the
+isolated bundled CLI checks. Its code identity is
+`df93a6b0e7e9af4d2457afa7ab46d1662040ab17d43cff01bd16759db2de0029`.
+With the controller confirmed off, session `94db574ba27f40fc908fb47db3044606`
+completes 1,900.01 elapsed seconds, **1,876.75 advancing simulation seconds**,
+and **10,460.70 m**. It uses the qualification driver, not Comma autonomy.
+
+| Measurement | Result |
+| --- | ---: |
+| Mean FPS | 31.70 |
+| Frame p95 / p99 | 58.26 / 85.48 ms |
+| Camera / general detection | 19.32 / 6.12 Hz |
+| Sensor-to-warning p95 | 466.27 ms (919 samples) |
+| Sensor-to-observer p95 | 425.27 ms |
+| Fresh healthy Comma commands | 98.80% of samples |
+| Fresh model / observer | 98.50% / 99.80% of samples |
+| Transport / out-of-order frame drops | 2 / 1 |
+
+There are no pauses, player contacts, sampled road/rail overlaps or unrequested
+reverse movements. The longest sampled pedestrian crossing stall is 2.10 s.
+Parking completes four returns and ambulance dispatch/return cycles occur.
+**This is not a combined pass:** camera delivery is below the reviewer's explicit
+19.5 Hz near-target tolerance. Car 6 and truck 20 mutually stop inside junction
+`cluster_271743555_4268393103_5674148817_95715421`, with each reporting the other's
+body in its path. Their stationary interval reaches **1,182.41 s**. The bus reaches
+four stops but later waits **935.97 s**. A separate busy-junction wait for car 18
+lasts **340.05 s** before clearing. The worst active ambulance wait is **131.73 s**.
+
+`junction-queues-94db574ba27f40fc908fb47db3044606/` preserves the recorded poses,
+lane geometry and clearance histories. Actual-turn clearance and reservation
+lifetime are hypotheses pending reproduction, not established fixes.
+Normal shutdown releases 37 owned IPC files / 194,830,336 bytes. The observer
+records normal connection closure and no package-owned Windows processes remain.
+The new Desktop and Start-menu development shortcuts open this verified package's
+normal menu for manual driving, without a session time limit.
+
+### Junction admission reproduction and candidate correction
+
+The recorded trace shows truck 20 losing its reservation at 688.20 s while already
+on an internal turn, about 38 m from the junction centre. The centre-distance queue
+test misclassifies that committed truck as a distant queued approach and grants
+car 6 a conflicting turn. A stopped turn can also be released by the red-light
+approach test. Internal mapped turns now retain ownership until the existing
+rear-clearance exit rule is satisfied.
+
+`realism-reservation-fixture.xml` fails both recorded Editor cases before the fix.
+The physical approach replay in `realism-reservation-entry-before.xml` also fails:
+the car enters while a truck corner is still 11.87 m before the exit boundary.
+After the correction, all 18 traffic Editor cases pass, and
+`realism-reservation-after-physical.xml` passes the moving-body replay. The truck
+travels 114.82 m, the car 30.39 m, the car waits for every truck corner to clear,
+and neither body penetrates the other. The earlier exact-stuck-pose fixture and
+unsuccessful turning-creep experiment remain retained as failed evidence; the
+creep experiment was removed.
+
+The separate 340-second queue motivates arrival-order tracking: a waiting queue
+head retains its request when temporarily blocked, while clear green approaches
+can pass it. Inactive or unrenewed requests expire. Physical clearance and signal
+rules still apply, and only NPC/qualification drivers request these reservations;
+the observer and Comma actuator interface are unchanged.
+
+Camera scheduling previously discarded all pending cadence recovery when more
+than 100 ms late. The candidate keeps at most 100 ms of recovery and captures only
+fresh renders with actual timestamps, at most once per render frame. Long stalls
+discard excess deadlines rather than accumulating work. Diagnostics record the
+discarded-deadline count. New jitter, duplicate-time and long-stall tests pass;
+this is not yet a measured camera-rate improvement.
+
+The combined candidate passes **154/154 Editor cases** in 59.57 seconds in
+`realism-turn-priority-editor.xml`. PhysicalWorld, packaging and the new complete
+workload remain in progress. The prior failed run remains on `VISUAL_REVIEW.html`,
+alongside explicitly historical activity videos and matched static captures.

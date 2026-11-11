@@ -1,0 +1,6 @@
+# Optional Windows visual-review tooling; not bundled into the observer runtime.
+-r requirements-game-lock.txt
+Pillow==13.0.0
+mss==10.2.0
+dxcam==0.3.0
+comtypes==1.5.0

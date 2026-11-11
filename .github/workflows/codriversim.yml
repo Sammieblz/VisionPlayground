@@ -1,0 +1,62 @@
+name: CoDriverSim Python regression
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'CoDriverSim/**'
+      - '.github/workflows/codriversim.yml'
+  pull_request:
+    paths:
+      - 'CoDriverSim/**'
+      - '.github/workflows/codriversim.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codriversim-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  observer-and-cli:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+          cache: pip
+          cache-dependency-path: CoDriverSim/requirements-lock.txt
+      - name: Install pinned dependencies and build the package
+        run: |
+          python -m pip install -r CoDriverSim/requirements-lock.txt
+          python -m pip wheel --no-deps --no-build-isolation --wheel-dir CoDriverSim/dist ./CoDriverSim
+          python -c "import pathlib, subprocess, sys; subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-deps', str(next(pathlib.Path('CoDriverSim/dist').glob('*.whl')))])"
+      - name: Check Python style
+        run: |
+          python -m ruff check CoDriverSim/src CoDriverSim/tests
+          python -m ruff format --check CoDriverSim/src CoDriverSim/tests
+      - name: Test the installed package outside the checkout
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -I -m pytest "${{ github.workspace }}/CoDriverSim/tests" -q -o pythonpath= --junitxml="${{ github.workspace }}/CoDriverSim/outputs/pytest.xml"
+          python -I -m codriversim --help
+          python -I -m codriversim --version
+          python -I -m codriversim demo --output-dir codriversim-cli-demo
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codriversim-${{ matrix.os }}-py${{ matrix.python }}
+          path: |
+            CoDriverSim/outputs/pytest.xml
+            CoDriverSim/dist/*.whl
+          if-no-files-found: warn
