@@ -9,6 +9,20 @@ rebuild changes assets, pedestrian presentation, map surfaces and traffic cleara
 its current results and open gates are tracked in [REALISM_REBUILD.md](REALISM_REBUILD.md).
 Earlier seven-test and turn-audit passes do not qualify that changed build.
 
+## Active rebuild status
+
+| Gate | Latest evidence |
+| --- | --- |
+| Pedestrian arrival | Commit `353c0d1`: the simple arrival and recorded Davis endpoint fixtures fail before the fix; all six focused arrival/curb/pedestrian checks pass afterward. |
+| Stationary vehicle physics | Commit `f52b437`: 24 vehicle-physics tests pass, including five ten-minute braked-hold cases and finite impact response. The original level truck drifted 6.41 m; the corrected cases report no drift at logged precision. The complete Editor suite passes 144/144. |
+| Sustained rendering and inference | Package `Realism-local-20261110-223436`, before those two fixes: 1,878.04 advancing simulation seconds, 35.73 FPS, p95/p99 46.53/55.34 ms, camera 19.95 Hz, detection 6.20 Hz, warning p95 383.55 ms. No pauses, player contacts or transport drops. |
+| Sustained world behavior | That same run fails: unfinished pedestrian crossings block a bus, and stationary truck drift blocks a junction/ambulance. Focused fixes are implemented; their combined populated-world and new packaged checks are running. |
+| Visuals and nearby activity | Fresh Davis/Cedar recordings and captures remain required. Earlier recordings missed the nearby-moving-vehicle count. Static captures and population presence alone do not establish complete animation cycles. |
+| Comma and controller | Stock v0.9.7 remains intact. The final physical Xbox X-request/LT-takeover check remains open. Qualification-driver performance runs do not measure Comma autonomy. |
+| Distribution | Source is on draft PR #2. Earlier eligible-package checks do not qualify the new runtime; no binary release is published. |
+
+## Earlier overhaul evidence
+
 | Gate | Evidence and current status |
 |---|---|
 | Finite contacts and locomotion | Person/dog/cat cannot continuously displace the handbraked car in the 15-second physical course. Impact reactions, curb stepping and no navigation pose snapping have focused checks. |

@@ -39,6 +39,46 @@ namespace CoDriver
             return go;
         }
 
+        public static Vector3 RailwayGatePosition(
+            MapDefinition map,
+            MapLandmark crossing,
+            Vector3 forward,
+            int side
+        )
+        {
+            var right = Vector3.Cross(Vector3.up, forward);
+            // Gate bases are estimated roadside furniture, not source-map facts.
+            // An adjacent junction can curve into the usual 8 m approach offset.
+            // Move along the roadside only, preserving arm coverage and checking
+            // all lanes (including turns), rather than ignoring the obstruction.
+            for (int step = 0; step <= 16; step++)
+            {
+                float adjustment = ((step + 1) / 2) * .5f * (step % 2 == 0 ? 1 : -1);
+                var position =
+                    crossing.position + right * side * 5 - forward * side * (8 + adjustment);
+                bool clear = true;
+                foreach (var lane in map.lanes)
+                {
+                    var centre = lane.Path.Position(lane.Path.NearestDistance(position));
+                    if (Mathf.Abs(centre.y - position.y) > 2)
+                        continue;
+                    float separation = Vector3
+                        .ProjectOnPlane(centre - position, Vector3.up)
+                        .magnitude;
+                    if (separation < lane.width * .5f + .75f)
+                    {
+                        clear = false;
+                        break;
+                    }
+                }
+                if (clear)
+                    return position;
+            }
+            throw new System.InvalidOperationException(
+                $"Railway gate {crossing.sourceId} side={side} needs a reviewed roadside placement."
+            );
+        }
+
         public static void Build(Town town)
         {
             var map = town.Map;
@@ -262,7 +302,7 @@ namespace CoDriver
                         ).AddComponent<RailGate>();
                         gate.transform.SetParent(town.transform, false);
                         gate.transform.SetPositionAndRotation(
-                            landmark.position + right * side * 5 - forward * side * 8,
+                            RailwayGatePosition(map, landmark, forward, side),
                             Quaternion.LookRotation(forward * side)
                         );
                         gate.ExplicitCrossing = true;

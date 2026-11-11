@@ -8,6 +8,44 @@ namespace CoDriver.Tests
     public sealed class MapAndPresentationTests
     {
         [Test]
+        public void DavisRailwayGatePedestalsLeaveMappedDrivingEnvelopesClear()
+        {
+            var map = MapDefinition.Load("davis-downtown");
+            int checkedGates = 0;
+            foreach (var crossing in map.landmarks.Where(l => l.subtype == "level_crossing"))
+            {
+                var approach = map.Nearest(crossing.position, routable: false);
+                var forward = approach.Path.Direction(
+                    approach.Path.NearestDistance(crossing.position)
+                );
+                foreach (int side in new[] { -1, 1 })
+                {
+                    var point = DavisWorld.RailwayGatePosition(map, crossing, forward, side);
+                    checkedGates++;
+                    // Estimate placements from the road corridor, retaining a
+                    // roadside base and an arm before the source crossing.
+                    float before = Vector3.Dot(crossing.position - point, forward * side);
+                    Assert.That(before, Is.InRange(4f, 12f), crossing.sourceId);
+                    foreach (var lane in map.lanes)
+                    {
+                        var centre = lane.Path.Position(lane.Path.NearestDistance(point));
+                        if (Mathf.Abs(centre.y - point.y) > 2)
+                            continue;
+                        float clearance =
+                            Vector3.ProjectOnPlane(centre - point, Vector3.up).magnitude
+                            - lane.width * .5f;
+                        Assert.GreaterOrEqual(
+                            clearance,
+                            .7f,
+                            $"{crossing.sourceId} side={side}: pedestal at {point} obstructs {lane.id}"
+                        );
+                    }
+                }
+            }
+            Assert.AreEqual(12, checkedGates);
+        }
+
+        [Test]
         public void DavisConnectionsAreContinuousAndKeepTheirSourceIdentity()
         {
             var map = MapDefinition.Load("davis-downtown");

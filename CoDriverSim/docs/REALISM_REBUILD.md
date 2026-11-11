@@ -25,13 +25,14 @@ permission is established. CC0/CC-BY assets retain their individual provenance.
 ## Current work
 
 Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
-revised Davis streets are integrated. Commit `092d516` passes 139 Editor and 30
-physical-world tests, including ten ambulance dispatch/return seeds. Its external
-Windows package passes integrity and bundled-CLI verification. Its completed
-31.3-simulated-minute run meets the rendering/inference targets, but exposes
-pedestrians stopping just short of crossing endpoints and prolonged bus,
-ambulance and ordinary-vehicle queues. These are open findings, not waived by
-the automated test passes or the performance result.
+revised Davis streets are integrated. The `092d516` package's completed
+31.3-simulated-minute run meets rendering/inference targets but fails world
+qualification: unfinished pedestrian crossings and stationary truck drift create
+prolonged queues. The arrival and tire-load corrections pass the full 32-test
+physical-world suite, including ten ambulance seeds, in
+`realism-static-hold-v1-world.xml`. A separate late gate-pedestal obstruction
+found in its traffic logs is also corrected; the subsequent complete Editor
+suite passes 145/145. Its affected populated-world checks are running.
 
 Current work is correcting those failures, measuring the combined workload,
 reviewing fresh activity/visual captures and preparing the eligible public
@@ -1260,3 +1261,29 @@ These are game calibration results, not validated measurements of real cars.
 Full Editor/populated-world checks, a new package and sustained activity run
 are required for the combined arrival/vehicle changes. The prior 35.73 FPS
 package predates them and does not qualify this newer source.
+
+### Combined world checks and railway furniture regression
+
+The complete arrival/vehicle candidate passes **144/144 Editor tests** and
+**32/32 PhysicalWorld tests** (`realism-static-hold-v1-*.xml`). The latter takes
+1,630.03 seconds and includes all ten ambulance seeds, 21 through 30, without
+recorded ambulance contact. The retained cycle report is
+`overhaul/ambulance-static-hold-v1-qualified.json`.
+
+Reviewing those cycle logs nevertheless finds an ordinary car blocked by a
+railway gate pedestal at `(294.25, 0, -28.01)`. That estimated furniture placement
+intrudes 0.806 m into the mapped turning lane
+`:cluster_1815032088_9171014823_2_0`. Its direct regression fails before correction
+(`realism-gate-before.xml`, 0/1). The longer packaged test was not started with
+this known obstruction.
+
+Gate placement now checks every lane corridor, including internal junction
+turns, at the same elevation. It searches 4–12 m before the source crossing,
+retains the 5 m roadside offset and existing arm coverage, and requires 0.75 m
+between the pedestal centre and lane edge. These are explicitly estimated
+simulation furniture parameters. It refuses a placement with no clear candidate;
+it does not remove the collider or make traffic ignore the gate. Only the
+obstructing gate needs to move, approximately 3 m along the roadside.
+The complete corrected Editor suite passes **145/145** in 55.91 seconds
+(`realism-gate-final-editor.xml`). Affected Davis traffic, bus and railway tests,
+a rebuilt package and the sustained combined run remain separate gates.
