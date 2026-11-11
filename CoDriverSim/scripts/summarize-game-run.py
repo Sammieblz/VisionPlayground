@@ -37,6 +37,38 @@ def vehicle_stalls(world):
     return result
 
 
+def crossing_stalls(world):
+    """Flag unfinished crossings separately from intentional sidewalk/transit waits."""
+    if not world or any(
+        "actor_positions" not in row
+        or len(row["actor_positions"]) != len(world[0]["people"])
+        or len(row["people"]) != len(world[0]["people"])
+        for row in world
+    ):
+        return None
+    result = []
+    for index in range(len(world[0]["people"])):
+        anchor = None
+        last_motion = None
+        longest = 0
+        observed = False
+        for row in world:
+            role, _, state = row["people"][index].partition(":")
+            if state != "Crossing":
+                anchor = last_motion = None
+                continue
+            observed = True
+            position = row["actor_positions"][index]
+            if anchor is None or displacement(anchor, position) > 0.15:
+                anchor, last_motion = position, row["timestamp"]
+            longest = max(longest, row["timestamp"] - last_motion)
+        if observed:
+            result.append(
+                {"actor_index": index, "role": role, "longest_stationary_seconds": longest}
+            )
+    return result
+
+
 def automation_episodes(driving):
     episodes = []
     active = []
@@ -144,6 +176,7 @@ def main():
             player_last_motion, player_anchor = row["timestamp"], row["position"]
         player_stationary = max(player_stationary, row["timestamp"] - player_last_motion)
     stalls = vehicle_stalls(world)
+    crossers = crossing_stalls(world)
     ordinary_stalls = [s for s in stalls if s["role"] in {"Car", "Truck"}]
     service_stalls = [s for s in stalls if s["role"] in {"Bus", "Emergency"}]
     emergency_phases = {r["emergency"].split(":")[0] for r in world}
@@ -198,6 +231,11 @@ def main():
         "bus_and_active_emergency_waits_below_two_minutes": all(
             s["longest_stationary_seconds"] < 120 for s in service_stalls
         ),
+        "no_crossing_actor_stationary_for_two_minutes": (
+            all(s["longest_stationary_seconds"] < 120 for s in crossers)
+            if crossers is not None
+            else None
+        ),
         "complete_emergency_cycle_observed": all(
             f"phase {phase}" in emergency_phases for phase in range(8)
         ),
@@ -238,6 +276,7 @@ def main():
         "rail_overlap_samples": rail_overlaps if rail_coverage else None,
         "ordinary_vehicle_stalls": ordinary_stalls,
         "bus_and_active_emergency_stalls": service_stalls,
+        "crossing_actor_stalls": crossers,
         "nearby_population_samples": [
             {
                 "timestamp": r["timestamp"],
@@ -282,6 +321,8 @@ def main():
             "A null rail-overlap check means that build did not record rail overlap diagnostics",
             "Parking state names alone do not establish that a return maneuver finished",
             "Long stationary intervals need review; a queue can be legitimate",
+            "Crossing stalls use physical positions and Crossing state; intentional idle, "
+            "transit waits and animation quality are not evaluated by that check",
             "Camera target is 20 Hz; 19.5 Hz is the explicitly recorded near-target tolerance",
             "Simulation-only qualification driver is not human or Comma driving performance",
             "File hashes describe files at review time, not proof of the original running build",

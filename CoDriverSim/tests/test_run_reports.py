@@ -29,6 +29,38 @@ def test_stalls_cover_twenty_cars_and_classify_services_by_recorded_role():
     assert next(s for s in result if s["role"] == "Bus")["longest_stationary_seconds"] == 130
 
 
+def test_unfinished_physical_crossing_is_not_hidden_by_moving_traffic():
+    world = [
+        dict(
+            timestamp=t,
+            people=["Person:Crossing", "Person:Waiting for transit", "Cat:Idling"],
+            actor_positions=[dict(x=-341.45282, y=0, z=113.36115)] * 3,
+        )
+        for t in (0, 60, 121)
+    ]
+    assert report.crossing_stalls(world) == [
+        {"actor_index": 0, "role": "Person", "longest_stationary_seconds": 121}
+    ]
+
+
+def test_crossing_measurement_resets_after_motion_and_between_separate_crossings():
+    world = [
+        dict(timestamp=t, people=["Dog:" + state], actor_positions=[dict(x=x, y=0, z=0)])
+        for t, x, state in (
+            (0, 0, "Crossing"),
+            (40, 0, "Crossing"),
+            (60, 1, "Crossing"),
+            (80, 1, "Crossing"),
+            (100, 1, "Idling"),
+            (900, 1, "Crossing"),
+            (930, 1, "Crossing"),
+        )
+    ]
+    assert report.crossing_stalls(world)[0]["longest_stationary_seconds"] == 40
+    del world[-1]["actor_positions"]
+    assert report.crossing_stalls(world) is None
+
+
 def test_separate_engagements_are_not_reported_as_one_continuous_drive():
     def row(t, active, reason):
         return dict(

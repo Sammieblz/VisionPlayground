@@ -1002,6 +1002,123 @@ namespace CoDriver.Tests
         }
 
         [UnityTest, Timeout(300000)]
+        public IEnumerator RecordedDavisSidewalkCornerDoesNotTrapWalker()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis sidewalk corner").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var pedestrian = town.Walkers[9];
+            foreach (var other in town.Traffic)
+                other.gameObject.SetActive(false);
+            foreach (var other in town.Walkers)
+                if (other != pedestrian)
+                    other.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            var goal = new Vector3(-338.58f, .1f, 104.93f);
+            pedestrian.PrepareCrossing(new Vector3(-341.45282f, 0, 113.36115f), goal);
+            pedestrian.BeginCrossing();
+            var body = pedestrian.GetComponent<Rigidbody>();
+            var previous = body.position;
+            float start = Time.time;
+            while (pedestrian.Crossing && Time.time - start < 20)
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.Less(
+                    Vector3.Distance(previous, body.position),
+                    .09f,
+                    "Corner recovery must use physical movement, not a navigation snap"
+                );
+                previous = body.position;
+            }
+            string details =
+                pedestrian.NavigationDetail
+                + " "
+                + pedestrian.GetComponent<ActorLocomotion>().Diagnostic;
+            Debug.Log("CODRIVER_RECORDED_SIDEWALK_CORNER " + details);
+            Assert.Less(
+                Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude,
+                .45f,
+                details
+            );
+            Assert.IsFalse(body.isKinematic);
+        }
+
+        [UnityTest]
+        public IEnumerator RecordedDavisWalkerBeyondTruckNoseClearsCrossing()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis truck nose crossing").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var truck = town.Traffic[16];
+            var pedestrian = town.Walkers[31];
+            foreach (var other in town.Traffic)
+                if (other != truck)
+                    other.gameObject.SetActive(false);
+            foreach (var other in town.Walkers)
+                if (other != pedestrian)
+                    other.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            truck.ScenarioSpeed = 0;
+            PlaceFixture(
+                truck,
+                new Vector3(26.423523f, .119452f, -84.22641f),
+                new Vector3(.8309921f, -.0076343f, .5562319f)
+            );
+            yield return new WaitForSeconds(1.5f);
+            var parked = truck.transform.position;
+            var body = pedestrian.GetComponent<Rigidbody>();
+            var shape = pedestrian.GetComponent<Collider>();
+            var shell = truck.GetComponent<BoxCollider>();
+            var goal = new Vector3(30.05f, .1f, -89.83f);
+            foreach (float offset in new[] { 0f, -.06f, .06f })
+            {
+                var at = new Vector3(28.621044f, 0, -82.754234f) + truck.transform.right * offset;
+                pedestrian.PrepareCrossing(at, goal);
+                pedestrian.BeginCrossing();
+                var previous = body.position;
+                float start = Time.time;
+                while (pedestrian.Crossing && Time.time - start < 20)
+                {
+                    yield return new WaitForFixedUpdate();
+                    Assert.Less(Vector3.Distance(previous, body.position), .09f);
+                    previous = body.position;
+                    Assert.IsFalse(
+                        Physics.ComputePenetration(
+                            shape,
+                            body.position,
+                            body.rotation,
+                            shell,
+                            truck.transform.position,
+                            truck.transform.rotation,
+                            out _,
+                            out _
+                        ),
+                        "The person must walk around the finite truck body"
+                    );
+                }
+                string details =
+                    pedestrian.NavigationDetail
+                    + " "
+                    + pedestrian.GetComponent<ActorLocomotion>().Diagnostic;
+                Debug.Log($"CODRIVER_RECORDED_TRUCK_NOSE offset={offset:F2} {details}");
+                Assert.Less(
+                    Vector3.ProjectOnPlane(body.position - goal, Vector3.up).magnitude,
+                    .45f,
+                    details
+                );
+                Assert.Less(
+                    Vector3.Distance(parked, truck.transform.position),
+                    .15f,
+                    "The pedestrian must not push the waiting truck aside"
+                );
+            }
+        }
+
+        [UnityTest]
         public IEnumerator RecordedDavisCrossingDetoursToSameSideOfStoppedCar()
         {
             Art.Initialize();

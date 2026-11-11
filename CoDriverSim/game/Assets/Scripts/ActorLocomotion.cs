@@ -40,6 +40,7 @@ namespace CoDriver
         public bool Reacting => Time.time < recoverUntil;
         Vector3 lastDesired;
         string vehicleBlocker = "";
+        string detourStatus = "None";
         float stepRise = float.NaN,
             stepLedge = float.NaN;
         public string Diagnostic =>
@@ -58,7 +59,9 @@ namespace CoDriver
             + " avoidance="
             + vehicleBlocker
             + " rail_wait="
-            + waitingForRail;
+            + waitingForRail
+            + " detour="
+            + detourStatus;
 
         public void Initialize(string species, Transform model = null)
         {
@@ -410,6 +413,7 @@ namespace CoDriver
             )
                 return;
             nextDetourAttempt = Time.time + .75f;
+            detourStatus = "No clear navigation route around " + vehicle.name;
             // A stopped car may occupy the pedestrian's straight NavMesh route.
             // Walk around its end using bounded locomotion, within the already
             // permitted navigation area. Never move the vehicle or snap the person.
@@ -422,10 +426,17 @@ namespace CoDriver
             float best = float.PositiveInfinity;
             for (int end = -1; end <= 1; end += 2)
             {
+                // Beyond the nose/tail, the whole footprint can move laterally
+                // toward the destination side. Choosing a side from an almost
+                // zero local x sent the recorded walker to an unreachable corner
+                // and deadlocked it against the truck that was yielding to it.
+                float radius = Mathf.Max(shape.bounds.extents.x, shape.bounds.extents.z);
+                float firstSide =
+                    local.z * end > vehicle.size.z * .5f + radius + .05f ? exitSide : side;
                 var first = vehicle.transform.TransformPoint(
                     vehicle.center
                         + new Vector3(
-                            side * (vehicle.size.x * .5f + .65f),
+                            firstSide * (vehicle.size.x * .5f + .65f),
                             -vehicle.center.y,
                             end * (vehicle.size.z * .5f + .7f)
                         )
@@ -439,27 +450,90 @@ namespace CoDriver
                         )
                 );
                 if (
-                    !NavMesh.SamplePosition(first, out var a, .35f, agent.areaMask)
-                    || !NavMesh.SamplePosition(second, out var b, .35f, agent.areaMask)
-                    || NavMesh.Raycast(agent.nextPosition, a.position, out _, agent.areaMask)
-                    || NavMesh.Raycast(a.position, b.position, out _, agent.areaMask)
+                    !TryDetourPoint(agent.nextPosition, first, out var a)
+                    || !TryDetourPoint(a, second, out var b)
+                    || !DetourSegmentClear(body.position, a)
+                    || !DetourSegmentClear(a, b)
                 )
                     continue;
                 float length =
-                    Vector3.Distance(body.position, a.position)
-                    + Vector3.Distance(a.position, b.position)
-                    + Vector3.Distance(b.position, agent.destination);
+                    Vector3.Distance(body.position, a)
+                    + Vector3.Distance(a, b)
+                    + Vector3.Distance(b, agent.destination);
                 if (length >= best)
                     continue;
                 best = length;
-                detourCorners[0] = a.position;
-                detourCorners[1] = b.position;
+                detourCorners[0] = a;
+                detourCorners[1] = b;
             }
             if (float.IsPositiveInfinity(best))
                 return;
             detourVehicle = vehicle;
             detourCorner = 0;
             detourExpires = Time.time + 12;
+            detourStatus = $"{vehicle.name} via {detourCorners[0]:F2}, {detourCorners[1]:F2}";
+        }
+
+        bool TryDetourPoint(Vector3 start, Vector3 target, out Vector3 point)
+        {
+            point = default;
+            if (!NavMesh.SamplePosition(target, out var sample, .35f, agent.areaMask))
+            {
+                detourStatus = $"Corner off navigation at {target:F2}";
+                return false;
+            }
+            point = sample.position;
+            if (
+                (point - start).sqrMagnitude < .0001f
+                || !NavMesh.Raycast(start, point, out var hit, agent.areaMask)
+            )
+                return true;
+            // SamplePosition can return the exact boundary. Only an endpoint
+            // hit may be inset; a boundary earlier along the route still rejects
+            // the segment. Re-sample and ray-check the interior point as well.
+            if (Vector3.Distance(hit.position, point) < .05f)
+            {
+                var interior = Vector3.MoveTowards(
+                    point,
+                    start,
+                    Mathf.Min(.1f, Vector3.Distance(point, start) * .5f)
+                );
+                if (
+                    NavMesh.SamplePosition(interior, out sample, .025f, agent.areaMask)
+                    && !NavMesh.Raycast(start, sample.position, out _, agent.areaMask)
+                )
+                {
+                    point = sample.position;
+                    return true;
+                }
+            }
+            detourStatus = $"Route crosses navigation boundary at {hit.position:F2}";
+            return false;
+        }
+
+        bool DetourSegmentClear(Vector3 start, Vector3 finish)
+        {
+            var delta = Vector3.ProjectOnPlane(finish - start, Vector3.up);
+            if (delta.sqrMagnitude < .0001f)
+                return true;
+            float radius = Mathf.Max(shape.bounds.extents.x, shape.bounds.extents.z) + .02f;
+            if (
+                !physics.SphereCast(
+                    start + Vector3.up * .35f,
+                    radius,
+                    delta.normalized,
+                    out var hit,
+                    delta.magnitude,
+                    (1 << TrafficClearance.PlayerLayer)
+                        | (1 << TrafficClearance.TrafficLayer)
+                        | (1 << TrafficClearance.ParkedLayer)
+                        | (1 << TrafficClearance.RailLayer),
+                    QueryTriggerInteraction.Ignore
+                )
+            )
+                return true;
+            detourStatus = "Physical detour blocked by " + hit.collider.name;
+            return false;
         }
 
         void StepCurb(Vector3 forward)
@@ -481,9 +555,38 @@ namespace CoDriver
                 ) || support.rigidbody
             )
                 return;
+            if (TryStepLift(foot + forward * .45f, foot.y, support.point.y, groundMask))
+                return;
+            if (Speed > .25f)
+                return;
+            // At an oblique sidewalk corner, the capsule's side can touch a
+            // raised surface while the centre-line probe looks past its tip.
+            // Only a stalled/starting walker needs these extra footprint probes.
+            // The same static-support, ledge-height and bounded-force limits apply.
+            float width = Mathf.Clamp(
+                Mathf.Min(shape.bounds.extents.x, shape.bounds.extents.z) * .8f,
+                .06f,
+                .22f
+            );
+            var right = Vector3.Cross(Vector3.up, forward);
+            for (int ahead = 1; ahead <= 2; ahead++)
+            for (int side = -1; side <= 1; side++)
+                if (
+                    TryStepLift(
+                        foot + forward * (ahead * .18f) + right * (side * width),
+                        foot.y,
+                        support.point.y,
+                        groundMask
+                    )
+                )
+                    return;
+        }
+
+        bool TryStepLift(Vector3 probe, float footHeight, float supportHeight, int groundMask)
+        {
             if (
                 physics.Raycast(
-                    foot + forward * .45f + Vector3.up * .42f,
+                    probe + Vector3.up * .42f,
                     Vector3.down,
                     out var step,
                     .44f,
@@ -494,8 +597,8 @@ namespace CoDriver
                 && step.normal.y > .7f
             )
             {
-                float rise = step.point.y - foot.y;
-                float ledge = step.point.y - support.point.y;
+                float rise = step.point.y - footHeight;
+                float ledge = step.point.y - supportHeight;
                 stepRise = rise;
                 stepLedge = ledge;
                 // The back of Cedar's raised sidewalk is 33 cm above the
@@ -513,8 +616,10 @@ namespace CoDriver
                             )
                     );
                     body.AddForce(Vector3.up * (lift * body.mass), ForceMode.Force);
+                    return true;
                 }
             }
+            return false;
         }
 
         void OnCollisionEnter(Collision contact)

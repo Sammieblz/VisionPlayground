@@ -1291,3 +1291,98 @@ in 335.49 seconds (`realism-gate-final-world.xml`): Davis traffic flow, the
 clearance, and Honda/GLS stopping before a closed rail arm without contact.
 Python CI run `42963134168` passes for `45fe242`. The Windows rebuild and new
 sustained combined run remain separate gates.
+
+### Rebuilt package; sustained run interrupted by controller use
+
+`Realism-local-20261111-001133` builds and passes integrity checks for all 2,630
+manifest files plus bundled CLI checks. Its code identity is
+`9fc6106c95334677637719e36fa1ab278c133f80cf15cefca5a66152935ce8d0`.
+The attempted sustained session is `4652dc960c9c4001913c10ce35eace65`.
+
+At 285.02 seconds, controller reset/reconnection pauses the game safely.
+At 308.76 seconds it resumes in human mode; four camera changes and accelerator
+input are recorded. Manual driving then contacts a sidewalk and a railway
+barrier. The app closes after 389.02 elapsed seconds, with 341.85 advancing
+simulation seconds and 23.87 paused seconds. This is an **interrupted run**, not
+the required thirty-minute qualification. Its measured 26.06 FPS, camera
+18.63 Hz and detection 5.81 Hz are retained without treating mixed manual and
+scripted activity as a controlled performance comparison.
+
+No sampled traffic/rail overlaps or unintended reverse movements occur in this
+short session. A parking return is observed and the ambulance is on its return
+journey when the app closes. Normal shutdown releases 37 owned IPC files /
+107,290,624 bytes. The new build still requires an uninterrupted sustained run,
+fresh nearby-activity review and the physical Xbox Comma request/takeover check.
+
+### Uninterrupted rebuilt run: throughput measured, pedestrian failures retained
+
+The user made the controller unavailable again. Session
+`7f74123cc75744cd9e6f60ccbdb42de0` in the same package completed **1,878.12
+advancing simulation seconds / 10,498.31 m**, with 1,900.01 elapsed seconds,
+no pauses and no player contacts. It used the qualification driver, not Comma
+autonomy. Its measured workload has these results:
+
+| Measurement | Result |
+| --- | ---: |
+| Mean FPS | 32.43 |
+| Frame p95 / p99 | 51.57 / 62.43 ms |
+| Camera / general detection | 19.88 / 5.89 Hz |
+| Sensor-to-warning p95 | 482.24 ms (718 samples) |
+| Sensor-to-observer p95 | 412.19 ms |
+| Healthy Comma-command samples | 99.27% |
+| Fresh model / observer samples | 98.95% / 99.91% |
+| Camera transport / reorder drops | 2 / 0 |
+
+There are no sampled vehicle/rail overlaps or unintended reverse movements.
+The bus reaches seven stops, with a longest wait of 68.06 s. Parking completes
+two returns and a complete ambulance dispatch/return occurs. **World
+qualification still fails**: person 9 remains against a narrow sidewalk corner
+for 1,680.77 s; person 31 stops immediately ahead of a turning truck for
+1,016.90 s. The resulting junction queue also stalls the ambulance for 818.80 s.
+The complete report is the package's
+`outputs/qualification/run-review-7f74123cc75744cd9e6f60ccbdb42de0.json`.
+
+`gate-run-pedestrian-repro/` retains sampled world/driver rows, build identity,
+the late junction poses and two explicitly unverified geometry hypotheses.
+The run reviewer now checks stationary **Crossing** actors independently of
+vehicles, excludes intentional idle/transit waiting states, and reports missing
+position coverage as unavailable. Its six focused Python tests and Ruff checks
+pass. Physical reproductions are being run before changing locomotion.
+The throughput pass does not qualify the intended fully functioning town.
+
+Normal shutdown releases 37 owned IPC files / 192,090,112 bytes. Fresh static
+720p/1080p scene captures are in `visual-gate-final/` (22 PNGs). The storefront
+join is flush in those captures; repetitive facades and cockpit material glints
+still need visual review. Static cabin captures do not initialize live mirrors
+or the Comma display. Activity recordings remain required on a corrected build.
+
+### Recorded corner and truck-nose regressions
+
+Both exact-pose reproductions fail before changes
+(`realism-corner-nose-before.xml`, 0/2, 48.90 s): person 9 stays 8.907 m from
+its destination and person 31 stays 7.219 m away. The first correction extends
+step detection across a starting/stalled actor's footprint when the original
+centre-line probe finds no usable ledge. Static support, maximum ledge height
+and bounded lift forces remain unchanged; no body pose is overwritten.
+That corner clears, and eight of nine focused checks pass in
+`realism-corner-nose-after.xml`. The truck case remains a retained failure.
+
+The truck detour's sampled endpoint lies exactly on the navigation boundary,
+which causes the navigation ray to reject it. `realism-nose-navigation.xml`
+retains that diagnostic. The final detour change selects the destination side
+when the actor's whole footprint is already beyond the vehicle end, insets only
+an endpoint boundary hit, then re-samples and ray-checks the interior point.
+Both detour segments also receive physical vehicle-clearance casts.
+Boundaries earlier along a segment still reject the route.
+
+`realism-nose-interior.xml` passes all **three** focused detour tests in 57.07 s.
+The recorded truck case passes at its exact pose and at ±0.06 m lateral offsets,
+with penetration, finite-movement and parked-truck displacement checks. Full
+Editor and populated-world suites, a new package and another sustained run are
+still required for these combined locomotion changes.
+
+Python regression passes **112 tests with two platform-specific skips**; Ruff
+checks and formatting pass. `VISUAL_REVIEW.html` now uses the 22 fresh scene
+captures and identifies both completed world-failure runs; older activity
+videos remain labelled historical. `gate-performance-review/` contains a
+PNG/SVG comparison and source provenance, explicitly identifying unmet checks.

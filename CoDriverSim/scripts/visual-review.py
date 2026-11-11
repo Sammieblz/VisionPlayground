@@ -212,11 +212,12 @@ def main():
                 f'alt="{html.escape(title)} — {label}"></a><figcaption>{label}'
                 f"{resolution_link}</figcaption></figure>"
             )
-        sections.append(
-            f'<section><h2>{html.escape(title)}</h2><div class="pair">'
-            + "".join(images)
-            + "</div></section>"
-        )
+        if images:
+            sections.append(
+                f'<section><h2>{html.escape(title)}</h2><div class="pair">'
+                + "".join(images)
+                + "</div></section>"
+            )
     page = """<!doctype html><html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CoDriverSim visual review</title><style>
