@@ -39,29 +39,48 @@ namespace CoDriver
             rollingResistance = .012f;
         public Vector3 centreOfMass = new Vector3(0, .55f, .27f);
         public float[] gears = { 3.6f, 2.1f, 1.45f, 1.05f, .82f, .66f };
-        public float frontTrack, rearTrack, frontDriveFraction = 1, reverseRatio = 3.3f;
-        public float TrackAt(int wheel) => wheel < 2
-            ? (frontTrack > 0 ? frontTrack : track) : (rearTrack > 0 ? rearTrack : track);
+        public float frontTrack,
+            rearTrack,
+            frontDriveFraction = 1,
+            reverseRatio = 3.3f;
+
+        public float TrackAt(int wheel) =>
+            wheel < 2 ? (frontTrack > 0 ? frontTrack : track) : (rearTrack > 0 ? rearTrack : track);
+
         public bool abs = true,
             tractionControl = true;
 
-        public static VehicleProfile GlsSimulation() => new VehicleProfile
-        {
-            id = "gls-simulation-v1", visualResource = "WorldArt/Local/MercedesVehicle",
-            mass = 2660, wheelbase = 3.134f, track = 1.68f,
-            frontTrack = 1.669f, rearTrack = 1.692f, steeringRatio = 18.7f,
-            collisionSize = new Vector3(1.956f, 1.30f, 5.207f),
-            collisionCentre = new Vector3(0, .99f, -.10f),
-            radius = .39f, wheelMountHeight = .60f,
-            spring = 60000, damper = 7000, suspensionLength = .32f,
-            centreOfMass = new Vector3(0, .70f, .12f),
-            engineTorque = 700, finalDrive = 3.27f, efficiency = .80f,
-            frontDriveFraction = .45f, reverseRatio = 4.8f,
-            gears = new[] { 5.35f, 3.24f, 2.25f, 1.64f, 1.21f, 1, .86f, .72f, .60f },
-            brakeForce = 26000, drag = .60f, maxSteering = 35,
+        public static VehicleProfile GlsSimulation() =>
+            new VehicleProfile
+            {
+                id = "gls-simulation-v1",
+                visualResource = "WorldArt/Local/MercedesVehicle",
+                mass = 2660,
+                wheelbase = 3.134f,
+                track = 1.68f,
+                frontTrack = 1.669f,
+                rearTrack = 1.692f,
+                steeringRatio = 18.7f,
+                collisionSize = new Vector3(1.956f, 1.30f, 5.207f),
+                collisionCentre = new Vector3(0, .99f, -.10f),
+                radius = .39f,
+                wheelMountHeight = .60f,
+                spring = 60000,
+                damper = 7000,
+                suspensionLength = .32f,
+                centreOfMass = new Vector3(0, .70f, .12f),
+                engineTorque = 700,
+                finalDrive = 3.27f,
+                efficiency = .80f,
+                frontDriveFraction = .45f,
+                reverseRatio = 4.8f,
+                gears = new[] { 5.35f, 3.24f, 2.25f, 1.64f, 1.21f, 1, .86f, .72f, .60f },
+                brakeForce = 26000,
+                drag = .60f,
+                maxSteering = 35,
                 driverEye = new Vector3(-.387f, 1.43f, 0),
-            sensorMount = new Vector3(0, 1.54f, .78f),
-        };
+                sensorMount = new Vector3(0, 1.54f, .78f),
+            };
 
         public static VehicleProfile ForTraffic(string kind)
         {
@@ -125,6 +144,8 @@ namespace CoDriver
 
     public sealed class RvpVehicleDynamics : IVehicleDynamics
     {
+        static readonly Unity.Profiling.ProfilerMarker dynamicsMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.WheelDynamics");
         public Rigidbody Body { get; }
         public VehicleProfile Profile { get; }
         public float EngineRpm { get; private set; } = 900;
@@ -190,6 +211,7 @@ namespace CoDriver
 
         public void Step(VehicleControls c, float dt)
         {
+            using var measurement = dynamicsMarker.Auto();
             if (dt <= 0 || !float.IsFinite(dt))
                 return;
             c.throttle = Mathf.Clamp01(c.throttle);
@@ -263,7 +285,12 @@ namespace CoDriver
                     && Vector3.Dot(contact[i].normal, tr.up) > .25f;
                 float steer =
                     i < 2
-                        ? Ackermann(c.roadWheelAngle, Profile.wheelbase, Profile.TrackAt(i), i % 2 == 1)
+                        ? Ackermann(
+                            c.roadWheelAngle,
+                            Profile.wheelbase,
+                            Profile.TrackAt(i),
+                            i % 2 == 1
+                        )
                         : 0;
                 Quaternion rotation = tr.rotation * Quaternion.Euler(0, steer, 0);
                 loads[i] = 0;
@@ -299,7 +326,8 @@ namespace CoDriver
                     float lateral = Vector3.Dot(velocity, right);
                     float cornerMass = Profile.mass * .25f;
                     float limit = load * Profile.grip;
-                    float axleFraction = i < 2 ? Profile.frontDriveFraction : 1 - Profile.frontDriveFraction;
+                    float axleFraction =
+                        i < 2 ? Profile.frontDriveFraction : 1 - Profile.frontDriveFraction;
                     float propulsion = driveTorque * axleFraction / (2 * Profile.radius);
                     if (Profile.tractionControl && Mathf.Abs(propulsion) > limit * .98f)
                     {

@@ -166,6 +166,8 @@ namespace CoDriver
     [Serializable]
     public sealed class MapDefinition
     {
+        static readonly Unity.Profiling.ProfilerMarker nearestMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.MapNearest");
         public int schemaVersion;
         public string id,
             name,
@@ -357,6 +359,7 @@ namespace CoDriver
 
         public MapLane Nearest(Vector3 point, Vector3 forward = default, bool routable = true)
         {
+            using var measurement = nearestMarker.Auto();
             MapLane best = null;
             float error = float.PositiveInfinity;
             var cell = new Vector2Int(

@@ -7,6 +7,10 @@ namespace CoDriver
     // It is never used for player/Comma control or by the camera observer.
     public sealed class PhysicalDriver
     {
+        static readonly Unity.Profiling.ProfilerMarker followMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.DriverPlan");
+        static readonly Unity.Profiling.ProfilerMarker stepMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.DriverStep");
         public readonly RvpVehicleDynamics Dynamics;
         float steer,
             accelerator;
@@ -36,6 +40,7 @@ namespace CoDriver
             bool reverse = false
         )
         {
+            using var measurement = followMarker.Auto();
             var body = Dynamics.Body;
             var tr = body.transform;
             float speed = Vector3.Dot(body.linearVelocity, tr.forward) * (reverse ? -1 : 1);
@@ -86,6 +91,7 @@ namespace CoDriver
         // Planning is 10 Hz; forces, input smoothing and wheel contacts remain 100 Hz.
         public void Continue()
         {
+            using var measurement = stepMarker.Auto();
             if (holding)
             {
                 Dynamics.Step(

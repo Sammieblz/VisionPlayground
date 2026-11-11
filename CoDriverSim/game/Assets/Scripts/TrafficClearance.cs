@@ -4,6 +4,8 @@ namespace CoDriver
 {
     public static class TrafficClearance
     {
+        static readonly Unity.Profiling.ProfilerMarker speedMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.PathClearance");
         public const int TrafficLayer = 10,
             PlayerLayer = 11,
             WalkerLayer = 12,
@@ -230,6 +232,7 @@ namespace CoDriver
             bool staticObstacles = false
         )
         {
+            using var measurement = speedMarker.Auto();
             LastBlocker = "";
             Vector3 size = body.size / 2 + new Vector3(.12f, 0, .15f);
             float safe = float.PositiveInfinity;

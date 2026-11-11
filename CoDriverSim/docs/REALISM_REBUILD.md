@@ -893,3 +893,39 @@ Release-player profiling also requests the available CPU/render-thread/wait
 counters instead of assuming development-only physics markers are present.
 These are diagnostic changes, not a claimed fix for the failure. The Python
 regression suite passes 102 tests; a fresh ten-minute packaged probe is next.
+
+### Ten-minute repeat with system-pressure measurements
+
+The diagnostic candidate `Realism-local-20261110-193334`, session
+`4fbf7f2416ab402e9aa0f044d6e8511c`, ran for 600.01 elapsed seconds with no service
+restart, disconnect, player contact, or sampled traffic/rail overlap. The original
+transport failure did not recur; this does not establish that its cause is fixed.
+Code identity is `4f51ecf77d83806dbe847dd6385cb2440e33d783136b4c6d8a8d3a90f2a56daf`.
+
+It still **fails performance**: 24.70 FPS, p95/p99 72.69/97.19 ms, camera
+18.72 Hz, detection 6.14 Hz, warning p95 447.73 ms (289 samples), and observer
+p95 455.85 ms. Whole-session fresh observer/healthy command/model fractions are
+99.86%/97.49%/97.16%. This is the scripted qualification driver, not Comma driving.
+System samples recorded median 696 MB available RAM and 84.44% CPU load;
+these observations do not by themselves prove the cause of the slowdown.
+
+An ordinary car remained stationary for 207.51 seconds behind the parking actor.
+The parking car was still requesting reverse at approximately
+(11.486, -0.012, -233.425), while the queued car waited near
+(18.591, -0.012, -232.053). No unrequested reversing or collision was recorded,
+but this persistent maneuver deadlock fails the traffic gate. A fixed reversal
+endpoint and its conservative clearance probe are under investigation.
+All four Python CI jobs passed for `fdc947e` (Windows/Linux, Python 3.11/3.12).
+
+The separate development-only CPU capture
+`outputs/sessions/2ee24ee6f82e48e6b42a064f323e1cc3/cpu-window.raw` contains 116
+profiled frames. TrafficActor physics callbacks dominate this trace (30.76 ms
+inclusive per profiled frame), followed by actor locomotion (8.82 ms). These
+numbers include development/profiler overhead and are not release FPS results.
+A texture audit reports 1,568 MB in loaded textures, with several generated
+RGBA maps retaining readable CPU copies. Finer component markers are being
+measured before changing the simulation calculations. The diagnostic player is
+built into `outputs/profile-game`, is clearly labelled diagnostic-only and is
+not used by the distribution packager. Its explicit `-profile-window` option
+records ten seconds after startup; the capture component is excluded from
+ordinary release builds.

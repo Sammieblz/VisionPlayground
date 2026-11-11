@@ -16,6 +16,8 @@ namespace CoDriver
 
     public sealed class TrackPath
     {
+        static readonly Unity.Profiling.ProfilerMarker nearestMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.PathNearest");
         readonly List<Vector3> points = new List<Vector3>();
         readonly List<float> distances = new List<float>();
         readonly bool terrainHeight = true;
@@ -146,6 +148,7 @@ namespace CoDriver
 
         public float NearestDistance(Vector3 point, float hint = float.NaN)
         {
+            using var measurement = nearestMarker.Auto();
             float best = 0,
                 error = float.PositiveInfinity;
             for (int i = 1; i < points.Count; i++)
@@ -179,6 +182,8 @@ namespace CoDriver
 
     public sealed class TrafficActor : MonoBehaviour, ITransit
     {
+        static readonly Unity.Profiling.ProfilerMarker mappedDriveMarker =
+            new Unity.Profiling.ProfilerMarker("CoDriver.MappedDrive");
         public string Kind,
             State = "Cruising";
         public float Speed,
@@ -1000,6 +1005,7 @@ namespace CoDriver
 
         void MappedDrive()
         {
+            using var measurement = mappedDriveMarker.Auto();
             if (Kind == "Emergency" && EmergencyActivity())
                 return;
             if (Kind == "Parking" && parkingStage != 1)
