@@ -188,6 +188,7 @@ namespace CoDriver
 
         void FinishWorld()
         {
+            GetComponent<StaticFacadeBatches>()?.Bake();
             PedestrianNavigation.AddStreetFurniture(this);
             var settings = NavMesh.GetSettingsByID(0);
             settings.agentRadius = .3f;

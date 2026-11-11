@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Unity.Profiling;
+using Unity.Profiling.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace CoDriver
@@ -17,14 +19,17 @@ namespace CoDriver
 
         public void Initialize(CoDriverApp app)
         {
-            foreach (
-                var name in new[]
+            var requested = new HashSet<string>(
+                new[]
                 {
                     "Main Thread",
                     "Render Thread",
                     "Physics.Simulate",
                     "Physics.Processing",
                     "BehaviourUpdate",
+                    "BehaviourFixedUpdate",
+                    "Physics.UpdateBodies",
+                    "Animator.Update",
                     "GC.Alloc",
                     "Draw Calls Count",
                     "Batches Count",
@@ -32,16 +37,29 @@ namespace CoDriver
                     "Vertices Count",
                     "System Used Memory",
                 }
-            )
+            );
+            var handles = new List<ProfilerRecorderHandle>();
+            ProfilerRecorderHandle.GetAvailable(handles);
+            var descriptions = new List<Description>();
+            foreach (var handle in handles)
             {
-                var category =
-                    name.Contains("Count") ? ProfilerCategory.Render
-                    : name.Contains("Memory") || name == "GC.Alloc" ? ProfilerCategory.Memory
-                    : ProfilerCategory.Internal;
-                var counter = ProfilerRecorder.StartNew(category, name, 1);
+                var description = ProfilerRecorderHandle.GetDescription(handle);
+                descriptions.Add(
+                    new Description
+                    {
+                        name = description.Name,
+                        category = description.Category.ToString(),
+                        unit = description.UnitType.ToString(),
+                    }
+                );
+                if (!requested.Contains(description.Name))
+                    continue;
+                // Categories are supplied by the runtime, not guessed from the
+                // marker's spelling. Some timings do not exist in release players.
+                var counter = ProfilerRecorder.StartNew(description.Category, description.Name, 1);
                 if (counter.Valid)
                 {
-                    names.Add(name);
+                    names.Add(description.Name);
                     counters.Add(counter);
                 }
                 else
@@ -49,6 +67,19 @@ namespace CoDriver
             }
             try
             {
+                var folder = Path.Combine(app.Root, "outputs", "sessions", app.Session);
+                Directory.CreateDirectory(folder);
+                File.WriteAllText(
+                    Path.Combine(folder, "profiler-catalog.json"),
+                    JsonUtility.ToJson(
+                        new Catalog
+                        {
+                            available = descriptions.ToArray(),
+                            requested_unavailable = requested.Except(names).ToArray(),
+                        },
+                        true
+                    )
+                );
                 writer = new StreamWriter(
                     Path.Combine(
                         app.Root,
@@ -96,6 +127,21 @@ namespace CoDriver
                 writer?.Dispose();
                 writer = null;
             }
+        }
+
+        [Serializable]
+        class Description
+        {
+            public string name,
+                category,
+                unit;
+        }
+
+        [Serializable]
+        class Catalog
+        {
+            public Description[] available;
+            public string[] requested_unavailable;
         }
 
         [Serializable]

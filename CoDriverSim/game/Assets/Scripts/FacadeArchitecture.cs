@@ -72,6 +72,12 @@ namespace CoDriver
                 return Wall(style);
             if (!name.Contains("trim") && !name.Contains("glass"))
                 return original;
+            // Glass is identical across styles; painted joinery has two finishes.
+            // Share those materials so adjacent buildings can batch together.
+            style =
+                name.Contains("glass") ? 0
+                : style == 0 || style == 4 ? 0
+                : 1;
             if (finishes.TryGetValue((original, style), out var cached))
                 return cached;
             var material = new Material(original);
@@ -217,6 +223,16 @@ namespace CoDriver
                         Wall(style),
                         batches
                     );
+            }
+            var town = parent.GetComponentInParent<Town>();
+            if (town)
+            {
+                var spatial =
+                    town.GetComponent<StaticFacadeBatches>()
+                    ?? town.gameObject.AddComponent<StaticFacadeBatches>();
+                foreach (var batch in batches)
+                    spatial.Add(root.transform, batch.Key, batch.Value);
+                return true;
             }
             var renderers = new List<Renderer>();
             foreach (var batch in batches)

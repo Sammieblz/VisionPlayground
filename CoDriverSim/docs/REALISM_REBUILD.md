@@ -832,3 +832,42 @@ recording is unavailable. Its two-minute window contains two sampled complete sh
 returns, but no complete transit trip. This logging-only correction does not change
 actor or vehicle behavior. Fresh packages, recovery, sustained performance and
 visual/activity checks remain pending.
+
+### Packaged recovery and architectural workload regression
+
+Local package `Realism-local-20261110-184859` and public package
+`Realism-public-20261110-185344` share code identity
+`f559375a1d1c6c2a201521538c1254be20f45c8f501b03e41ab5130edec8d0b7`.
+Both pass installed-file integrity and isolated CLI checks; the public packed-asset
+audit contains no local-only assets. Python CI passes all four jobs for `2e85b46`.
+The installed official v0.9.7 checkout still has no tracked modifications.
+
+Public recovery session `06dc4da6c2d04fddb24eb8bacff471d3` passes the stricter check:
+three fresh healthy samples immediately before terminating the verified game-owned
+observer, observed loss of both fresh observer and healthy commands, generation-two
+observer restart, Comma restart, then fresh streams through 165 seconds. Actual
+foreground captures show unavailable stale readings and restored human driving.
+The deliberate outage makes this a recovery check, not a throughput qualification.
+
+The subsequent local workload was stopped after 255.99 elapsed seconds because
+it clearly missed performance targets. Session `7c14c2d092f7485ca02eeab454243e73`
+contains 233.14 advancing simulation seconds: **22.69 FPS**, p95/p99
+**71.82/102.31 ms**, camera **18.67 Hz**, detector **6.01 Hz**, warning p95
+**468.48 ms** (58 samples), and no player contacts. This is a failed, shortened
+attempt, not a completed 30-minute test. The camera transport dropped no frames;
+the frame-order guard dropped one. Render samples reached approximately 6,900
+draw calls. The render/update workload, rather than transport queue loss, now limits
+camera delivery.
+
+The next rendering change groups immutable facade modules by material in small
+spatial cells, retaining geometry, UVs, finite world collision, and approximately
+the same detail range. Identical joinery/glass finishes share materials across
+buildings. Population, dynamics and Comma behavior are unchanged. Focused geometry
+preservation checks and fresh packaged performance measurements are required;
+the earlier passing contact suite does not qualify this performance change.
+
+The batching candidate passes `realism-spatial-facades-editor.xml` (131/131),
+including transformed geometry, UV/material retention and independent distant
+culling. `realism-spatial-facades-lifecycle.xml` passes both generated-geometry
+cleanup and independent-camera presentation isolation. A new packaged short
+performance probe is next; no improvement is claimed from these tests alone.
