@@ -20,6 +20,72 @@ import time
 from collections import deque
 from pathlib import Path
 
+STOCK_PROVENANCE = "official-openpilot-v0.9.7-50dd024"
+
+
+def stock_warning_snapshot(sm, header, now, model_sources):
+    """Read actual upstream outputs; never synthesize FCW/LDW from geometry.
+
+    v0.9.7 controlsd owns every gate: LDW setting, >31 mph, five-second
+    blinker cooldown, inactive lateral control and calibrated camera. FCW is
+    its model hardBrakePredicted/planner event, including upstream brake and
+    engagement gates. Event messages have producer monotonic time, not a
+    camera ID: the associated frame is explicitly the controlsState model
+    input, and never relabelled as the current capture.
+    """
+
+    def fresh(name, limit):
+        return bool(
+            sm.alive.get(name, False)
+            and sm.valid.get(name, False)
+            and 0 <= now - sm.recv_time.get(name, 0) <= limit
+        )
+
+    controls = sm["controlsState"]
+    source = model_sources.get(int(controls.lateralPlanMonoTime))
+    model_known = bool(
+        source
+        and source["session_id"] == header["session_id"]
+        and 0 <= header["timestamp"] - source["timestamp"] <= 0.5
+        and source["frame_id"] <= header["frame_id"]
+    )
+    ready = fresh("controlsState", 0.25) and fresh("carControl", 0.25) and model_known
+    hud = sm["carControl"].hudControl
+    events_known = fresh("onroadEvents", 1.5)
+    names = {str(event.name) for event in sm["onroadEvents"]} if events_known else set()
+    result = []
+    for kind, active, channel, supported in (
+        ("fcw", "fcw" in names, "onroadEvents", events_known),
+        ("ldw_left", getattr(hud, "leftLaneDepart", None), "carControl", True),
+        ("ldw_right", getattr(hud, "rightLaneDepart", None), "carControl", True),
+    ):
+        known = bool(ready and supported and active is not None)
+        result.append(
+            {
+                "kind": kind,
+                "state": ("active" if active else "inactive") if known else "unknown",
+                "active": bool(active) if known else False,
+                "source": channel
+                + (
+                    ".fcw"
+                    if kind == "fcw"
+                    else ".hudControl."
+                    + ("leftLaneDepart" if kind == "ldw_left" else "rightLaneDepart")
+                ),
+                "provenance": STOCK_PROVENANCE + ";unchanged-controlsd-gating",
+                "session_id": header["session_id"],
+                "frame_known": model_known,
+                "frame_id": source["frame_id"] if model_known else -1,
+                "timestamp": source["timestamp"] if model_known else 0.0,
+                "observed_timestamp": header["timestamp"],
+                "source_log_mono_time": int(sm.logMonoTime.get(channel, 0)),
+                "model_log_mono_time": int(controls.lateralPlanMonoTime),
+                "frame_association": "controlsState.lateralPlanMonoTime model input;"
+                "not event camera ID",
+            }
+        )
+    return result
+
 
 def fresh_command(command, updated, now):
     """A responsive socket does not prove the 100 Hz producer is still alive."""
@@ -132,7 +198,7 @@ def main():
     state.velocity = vec3(0, 0, 0)
     car, sensors = SimulatedCar(), SimulatedSensors(False)
     sm = messaging.SubMaster(
-        ["controlsState", "carControl", "modelV2", "onroadEvents", "carParams"]
+        ["controlsState", "carControl", "modelV2", "onroadEvents", "carParams", "longitudinalPlan"]
     )
     stop = threading.Event()
     lock = threading.Lock()
@@ -161,6 +227,7 @@ def main():
         cruise_button = 0
         last_ui = 0.0
         ui_road = None
+        model_sources = {}
         deadline = time.monotonic()
         previous_tick = deadline
         while not stop.is_set():
@@ -247,6 +314,9 @@ def main():
                 model = sm["modelV2"]
                 source = mappings.get(model.frameId)
                 if source:
+                    model_sources[int(sm.logMonoTime["modelV2"])] = source
+                    while len(model_sources) > 120:
+                        del model_sources[next(iter(model_sources))]
                     road = {
                         "schema_version": 2,
                         "session_id": source["session_id"],
@@ -299,7 +369,20 @@ def main():
                     "alert_size": str(controls.alertSize),
                     "calibration": header["calibration"],
                     "road": ui_road,
-                    "provenance": "official-openpilot-v0.9.7-50dd024",
+                    "stock_warnings": stock_warning_snapshot(sm, header, now, model_sources),
+                    "warning_inputs": {
+                        "model_hard_brake_predicted": bool(sm["modelV2"].meta.hardBrakePredicted),
+                        "model_log_mono_time": int(sm.logMonoTime["modelV2"]),
+                        "model_matches_controls": int(sm.logMonoTime["modelV2"])
+                        == int(controls.lateralPlanMonoTime),
+                        "planner_fcw": bool(sm["longitudinalPlan"].fcw),
+                        "planner_log_mono_time": int(sm.logMonoTime["longitudinalPlan"]),
+                        "planner_matches_controls": int(sm.logMonoTime["longitudinalPlan"])
+                        == int(controls.longitudinalPlanMonoTime),
+                        "lateral_active": bool(sm["carControl"].latActive),
+                        "provenance": "diagnostics-only;upstream-event-is-authoritative",
+                    },
+                    "provenance": STOCK_PROVENANCE,
                 }
                 # Never perform Windows-mounted filesystem I/O in the vehicle
                 # update loop. The bounded worker replaces obsolete snapshots.
@@ -319,12 +402,31 @@ def main():
     def publish_presentation():
         last_frame = None
         last_health = 0.0
+        last_warnings = None
         while not stop.is_set():
             try:
                 snapshot = presentation.get(timeout=0.2)
             except queue.Empty:
                 continue
             road = snapshot["road"]
+            warning_states = tuple((w["kind"], w["state"]) for w in snapshot["stock_warnings"])
+            if warning_states != last_warnings:
+                try:
+                    with args.ready.with_suffix(".warnings.jsonl").open(
+                        "a", encoding="utf-8"
+                    ) as out:
+                        out.write(
+                            json.dumps(
+                                {
+                                    "stock_warnings": snapshot["stock_warnings"],
+                                    "warning_inputs": snapshot["warning_inputs"],
+                                }
+                            )
+                            + "\n"
+                        )
+                    last_warnings = warning_states
+                except OSError:
+                    pass
             writes = [(ui_path, snapshot)]
             if road and (road["session_id"], road["frame_id"]) != last_frame:
                 writes.append((road_path, road))

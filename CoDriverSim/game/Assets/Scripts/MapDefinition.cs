@@ -178,6 +178,18 @@ namespace CoDriver
             longitude;
         public Vector3 boundsMin,
             boundsMax;
+        Vector3 rasterBoundsMin,
+            rasterBoundsMax;
+        bool rasterBoundsCaptured;
+        public Vector3 RasterBoundsMin => rasterBoundsCaptured ? rasterBoundsMin : boundsMin;
+        public Vector3 RasterBoundsMax => rasterBoundsCaptured ? rasterBoundsMax : boundsMax;
+
+        public bool OutsideRaster(Vector3 point) =>
+            point.x < RasterBoundsMin.x
+            || point.x > RasterBoundsMax.x
+            || point.z < RasterBoundsMin.z
+            || point.z > RasterBoundsMax.z;
+
         public MapRoad[] roads = Array.Empty<MapRoad>();
         public MapLane[] lanes = Array.Empty<MapLane>();
         public MapBuilding[] buildings = Array.Empty<MapBuilding>();
@@ -223,6 +235,10 @@ namespace CoDriver
                     "Missing compiled Davis map; run compile-district.py"
                 );
             var map = JsonUtility.FromJson<MapDefinition>(resource.text);
+            // The baked raster is registered to the source district, before runtime additions.
+            map.rasterBoundsMin = map.boundsMin;
+            map.rasterBoundsMax = map.boundsMax;
+            map.rasterBoundsCaptured = true;
             map.Index();
             var limitsResource = Resources.Load<TextAsset>("Maps/davis-turn-limits");
             if (!limitsResource)
@@ -311,7 +327,9 @@ namespace CoDriver
                         laneId = lane.id,
                         position = point,
                         forward = lane.Path.Direction(distance),
-                        width = lane.width,
+                        // Close the paved shoulder as well as the lane centre.
+                        // The connected junction remains upstream for turning.
+                        width = lane.width + 6,
                     }
                 );
             }

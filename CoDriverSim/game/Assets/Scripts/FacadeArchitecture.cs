@@ -268,7 +268,8 @@ namespace CoDriver
             lod.RecalculateBounds();
             // A fixed reference size gives approximately 140 m detail range at
             // the driving FOV, independent of the full building footprint size.
-            lod.size = 10;
+            // PC quality's LOD bias must not silently double that range.
+            lod.size = 10 / Mathf.Max(.01f, QualitySettings.lodBias);
             return true;
         }
 

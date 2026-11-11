@@ -7,3 +7,5 @@
 src/codriversim/licenses/** -whitespace
 # Reviewed generated map data stays available, without dominating code review.
 game/Assets/Resources/Maps/davis-downtown.json linguist-generated=true
+# Bash launchers must remain executable by WSL after Windows checkouts.
+*.sh text eol=lf

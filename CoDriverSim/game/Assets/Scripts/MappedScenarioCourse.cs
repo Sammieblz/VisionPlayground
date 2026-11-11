@@ -35,10 +35,14 @@ namespace CoDriver
                 at = feature.position;
                 SourceId = feature.sourceId;
             }
+            else if (scenario == "Stop compliance")
+                throw new System.InvalidOperationException(
+                    "No stop sign is available for this scenario"
+                );
             if (scenario == "Animal crossing" || scenario == "Occluded pedestrian crossing")
                 localZ = -10;
             if (scenario == "Stop compliance")
-                localZ = -13;
+                localZ = -213;
             if (scenario == "Parking conflict")
             {
                 at = town.ParkingBay;
@@ -89,7 +93,11 @@ namespace CoDriver
                         ) < 12
                     )
                     .OrderBy(l => (l.position - map.Spawn).sqrMagnitude)
-                    .First();
+                    .FirstOrDefault();
+                if (feature == null)
+                    throw new System.InvalidOperationException(
+                        "No bus stop is available on the bus route"
+                    );
                 at = feature.position;
                 SourceId = feature.sourceId;
                 localZ = -100;
@@ -107,10 +115,16 @@ namespace CoDriver
                         !l.internalLane && !l.boundary && !string.IsNullOrEmpty(l.signal)
                     )
                     .OrderBy(l => (l.points.Last() - map.Spawn).sqrMagnitude)
-                    .First();
+                    .FirstOrDefault();
+                if (anchor == null)
+                    throw new System.InvalidOperationException("No signal approach is available");
                 at = map.SignalById[anchor.signal].position;
                 SourceId = anchor.signal;
             }
+            if (anchor == null)
+                throw new System.InvalidOperationException(
+                    "No driving lane is available for this scenario"
+                );
             var route = new List<MapLane> { anchor };
             var used = new HashSet<string> { anchor.id };
             float length = anchor.Path.Length;
@@ -172,5 +186,21 @@ namespace CoDriver
         }
 
         public Quaternion Rotation(float z) => Quaternion.LookRotation(Path.Direction(Anchor + z));
+
+        public void Validate(float start, float finish)
+        {
+            if (Anchor + start < 0 || Anchor + finish > Path.Length || finish <= start)
+                throw new System.InvalidOperationException(
+                    "The mapped route is too short for this scenario"
+                );
+            foreach (float z in new[] { start, finish })
+            {
+                var local = new Vector3(centreX, 0, z);
+                if (Vector3.Distance(Local(World(local)), local) > 2)
+                    throw new System.InvalidOperationException(
+                        "The mapped route doubles back on the scenario course"
+                    );
+            }
+        }
     }
 }

@@ -15,6 +15,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 
+def copy_script(source: Path, target: Path):
+    """Keep shell line endings portable even when the input checkout has CRLF."""
+    if source.suffix.lower() == ".sh":
+        target.write_bytes(source.read_bytes().replace(b"\r\n", b"\n"))
+        shutil.copystat(source, target)
+    else:
+        shutil.copy2(source, target)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--destination", type=Path)
@@ -126,7 +135,7 @@ def main():
         "comma_sim_manager.py",
         "install-game-shortcuts.ps1",
     ):
-        shutil.copy2(root / "scripts" / name, target / "scripts" / name)
+        copy_script(root / "scripts" / name, target / "scripts" / name)
     notices = target / "Notices"
     notices.mkdir()
     shutil.copy2(root / "LICENSE", target / "LICENSE.txt")

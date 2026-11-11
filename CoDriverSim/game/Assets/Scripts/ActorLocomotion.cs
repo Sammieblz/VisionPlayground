@@ -61,7 +61,13 @@ namespace CoDriver
             + " rail_wait="
             + waitingForRail
             + " detour="
-            + detourStatus;
+            + detourStatus
+            + " steering_corner="
+            + (
+                agent && agent.enabled && agent.isOnNavMesh
+                    ? agent.steeringTarget.ToString("F2")
+                    : "None"
+            );
 
         public void Initialize(string species, Transform model = null)
         {
@@ -148,17 +154,29 @@ namespace CoDriver
                     agent.destination - body.position,
                     Vector3.up
                 );
-                if (
-                    agent.hasPath
-                    && !agent.pathPending
-                    && agent.pathStatus == NavMeshPathStatus.PathComplete
-                    && toGoal.sqrMagnitude < 4
+                Vector3 toCorner = Vector3.ProjectOnPlane(
+                    agent.steeringTarget - body.position,
+                    Vector3.up
+                );
+                bool finalApproach =
+                    toGoal.sqrMagnitude < 4
                     && !NavMesh.Raycast(
                         agent.nextPosition,
                         agent.destination,
                         out _,
                         agent.areaMask
-                    )
+                    );
+                bool cornerApproach =
+                    !finalApproach
+                    && toCorner.sqrMagnitude < 1.5f * 1.5f
+                    && Vector3
+                        .ProjectOnPlane(agent.steeringTarget - agent.destination, Vector3.up)
+                        .sqrMagnitude > .25f;
+                if (
+                    agent.hasPath
+                    && !agent.pathPending
+                    && agent.pathStatus == NavMeshPathStatus.PathComplete
+                    && (finalApproach || cornerApproach)
                 )
                 {
                     // NavMesh's simulated velocity can oscillate at the destination
@@ -169,18 +187,27 @@ namespace CoDriver
                     // walkers stranded outside the far sidewalk indefinitely.
                     // Keep a slow approach until the actual body arrives; the
                     // same bounded acceleration then brakes it to rest.
+                    // Apply the same physical arrival control to intermediate
+                    // corners. A force-driven body cannot instantaneously turn
+                    // at NavMesh speed; overshooting a narrow corner repeatedly
+                    // left Person 27 oscillating against the navigation edge.
+                    // Follow the existing corridor, never a shortcut to its goal.
+                    Vector3 approach = finalApproach ? toGoal : toCorner;
                     float speed =
-                        toGoal.magnitude <= .04f
+                        finalApproach && approach.magnitude <= .04f
                             ? 0
-                            : Mathf.Min(agent.speed, Mathf.Max(.3f, (toGoal.magnitude - .04f) * 2));
+                            : Mathf.Min(
+                                agent.speed,
+                                Mathf.Max(.3f, (approach.magnitude - .04f) * 2)
+                            );
                     bool personAhead =
                         speed > .05f
                         && physics.SphereCast(
                             body.position + Vector3.up * .8f,
                             .25f,
-                            toGoal.normalized,
+                            approach.normalized,
                             out _,
-                            Mathf.Min(toGoal.magnitude, .7f),
+                            Mathf.Min(approach.magnitude, .7f),
                             1 << TrafficClearance.WalkerLayer,
                             QueryTriggerInteraction.Ignore
                         );
@@ -188,7 +215,7 @@ namespace CoDriver
                     // occupies the final segment; zeroing it makes both agents
                     // wait indefinitely instead of passing one another.
                     if (!personAhead)
-                        desired = toGoal.normalized * speed;
+                        desired = approach.normalized * speed;
                 }
             }
             // A physical contact or rounded corner can leave the body beyond the

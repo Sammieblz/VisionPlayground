@@ -55,9 +55,14 @@ The ZIP includes the redistributable cabin, bundled observer and notices. It doe
 not bundle the separately installed WSL Comma runtime. A successful package check
 does not establish visual, driving or performance acceptance.
 
-Play starts human driving. Xbox triggers accelerate/brake, left stick steers, Y changes view,
-X requests/cancels Comma, and Menu pauses. Keyboard fallback is W/A/S/D, C for view, X for Comma,
-and Esc for pause. Settings includes remapping, dead zones and service restart controls.
+The menu offers Manual driving and Self-driving for free drive and scenarios; the co-driver
+stays on in both. Self-driving holds the prepared scene until fresh camera/model/control data
+and accepted engagement, with Retry or manual driving available if it cannot start.
+Xbox triggers accelerate/brake, left stick steers, Y changes view, X requests/cancels Comma,
+View opens the map and Menu pauses. Keyboard fallback is W/A/S/D, C for view, X for Comma,
+Tab for map and Esc for pause. Settings includes remapping, dead zones and Normal/Rush hour
+traffic; service status and restart controls are in Diagnostics. See the
+[current menu behavior](docs/UNITY_GAME.md#current-menus-and-driving-controls).
 
 The town now uses licensed modeled sedans, hatchbacks, SUVs, pickups, a coach, an ambulance,
 houses/shops, railcars, signal housings, trees and truss bridges. Roads and sidewalks use

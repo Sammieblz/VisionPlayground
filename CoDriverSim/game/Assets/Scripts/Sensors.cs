@@ -98,9 +98,13 @@ namespace CoDriver
     {
         public string severity,
             kind,
-            message;
+            message,
+            source,
+            provenance;
         public bool record;
         public double timestamp;
+        public long frame_id = -1;
+        public int[] evidence;
     }
 
     [Serializable]
@@ -108,7 +112,9 @@ namespace CoDriver
     {
         public int track_id;
         public string label,
-            signal_state;
+            signal_state,
+            source,
+            provenance;
         public float[] box;
         public float score;
     }
@@ -270,6 +276,10 @@ namespace CoDriver
         public string RouteInstruction = "Explore Cedar Grove";
         public MapDefinition Map;
         public Action<byte[], CameraHeader> Captured;
+
+        // Evaluation subscribes to capture identity only. Its actor state never
+        // enters CameraHeader, SensorLink, or the portable observer.
+        public Action<long, double> FrameCaptured;
         RenderTexture target;
         readonly RenderTexture[] displayFrames = new RenderTexture[12];
         readonly long[] displayIds = new long[12];
@@ -304,16 +314,7 @@ namespace CoDriver
             Vehicle = vehicle;
             Session = session;
             Token = token;
-            previousPhysicsVelocity = vehicle.Body.linearVelocity;
-            specificForce = SensorAxes.SpecificForce(
-                vehicle.Body.rotation,
-                Vector3.zero,
-                Physics.gravity
-            );
-            angularVelocity = SensorAxes.AngularVelocity(
-                vehicle.Body.rotation,
-                vehicle.Body.angularVelocity
-            );
+            ResetMotion();
             var g = new GameObject("Independent forward camera");
             g.transform.SetParent(vehicle.transform, false);
             g.transform.localPosition = vehicle.Profile.sensorMount;
@@ -328,6 +329,26 @@ namespace CoDriver
             target.Create();
             Sensor.targetTexture = target;
             Sensor.enabled = false;
+        }
+
+        // A placement is a discontinuity, not measured braking or yaw. Reset
+        // before capturing while physics is stopped for self-driving readiness.
+        public void ResetMotion()
+        {
+            if (!Vehicle || !Vehicle.Body)
+                return;
+            previousPhysicsVelocity = Vehicle.Body.linearVelocity;
+            previousSpeed = Vehicle.Speed;
+            previousCaptureTime = 0;
+            specificForce = SensorAxes.SpecificForce(
+                Vehicle.Body.rotation,
+                Vector3.zero,
+                Physics.gravity
+            );
+            angularVelocity = SensorAxes.AngularVelocity(
+                Vehicle.Body.rotation,
+                Vehicle.Body.angularVelocity
+            );
         }
 
         void FixedUpdate()
@@ -375,6 +396,7 @@ namespace CoDriver
                 Vehicle.Profile.sensorMount.y,
             };
             LatestFrame = header.frame_id;
+            FrameCaptured?.Invoke(header.frame_id, header.timestamp);
             int slot = (int)(LatestFrame % displayFrames.Length);
             if (!displayFrames[slot])
             {

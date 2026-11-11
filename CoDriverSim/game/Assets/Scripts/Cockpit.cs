@@ -27,6 +27,7 @@ namespace CoDriver
         Quaternion wheelRest;
         readonly List<Camera> mirrors = new List<Camera>();
         readonly List<Renderer> mirrorSurfaces = new List<Renderer>();
+        readonly List<MirrorSurface> mirrorDefinitions = new List<MirrorSurface>();
         readonly List<RenderTexture> textures = new List<RenderTexture>();
         GameObject deviceUi;
         float nextMirror;
@@ -122,16 +123,36 @@ namespace CoDriver
                 child.gameObject.layer = 9; // Excluded from the independent AI camera.
         }
 
+        Vector3 MirrorDirection(MirrorSurface fitted, Vector3 eye)
+        {
+            Vector3 defaultEye = vehicle.Profile.driverEye;
+            var rearWindowCentre = new Vector3(
+                0,
+                defaultEye.y + .05f,
+                -vehicle.Profile.wheelbase * .6f
+            );
+            return fitted.DrivingViewDirection(eye, defaultEye, rearWindowCentre);
+        }
+
         void Mirror(int side)
         {
             var camera = new GameObject("Limited mirror camera").AddComponent<Camera>();
             camera.transform.SetParent(vehicle.transform, false);
             var definition = vehicle.VisualDefinition;
+            var fitted = definition?.mirrors?.FirstOrDefault(m => m.side == side && m.mesh);
             camera.transform.localPosition =
-                side == 0 ? new Vector3(0, 1.5f, -2.45f)
+                fitted != null
+                    ? fitted.centre + new Vector3(side * .12f, 0, 0) + fitted.normal * .025f
+                : side == 0 ? new Vector3(0, 1.5f, -2.45f)
                 : definition ? new Vector3(side * 1.075f, 1.26f, .60f)
                 : new Vector3(side * .88f, 1.18f, .55f);
-            camera.transform.localRotation = Quaternion.Euler(2, 180 + side * 12, 0);
+            camera.transform.localRotation =
+                fitted != null
+                    ? Quaternion.LookRotation(
+                        MirrorDirection(fitted, vehicle.Profile.driverEye),
+                        Vector3.up
+                    )
+                    : Quaternion.Euler(2, 180 + side * 12, 0);
             camera.fieldOfView = 55;
             camera.nearClipPlane = .1f;
             camera.farClipPlane = 120;
@@ -141,36 +162,61 @@ namespace CoDriver
             detailDistances[FacadeArchitecture.DetailLayer] = 45;
             camera.layerCullDistances = detailDistances;
             camera.cullingMask = ~((1 << 9) | (1 << 16));
-            camera.GetUniversalAdditionalCameraData().renderShadows = false;
+            var mirrorData = camera.GetUniversalAdditionalCameraData();
+            // Slot 1 is the existing feature-free forward renderer in both
+            // pipeline assets. Tiny mirrors do not need a separate SSAO
+            // depth-normal pass or copies of opaque colour and depth textures.
+            mirrorData.SetRenderer(1);
+            mirrorData.requiresColorTexture = false;
+            mirrorData.requiresDepthTexture = false;
+            mirrorData.renderShadows = false;
             camera.enabled = false;
-            var target = new RenderTexture(256, 128, 16, RenderTextureFormat.ARGB32);
+            int targetHeight =
+                fitted != null
+                    ? Mathf.Clamp(Mathf.RoundToInt(256 * fitted.size.y / fitted.size.x), 64, 192)
+                    : 128;
+            var target = new RenderTexture(256, targetHeight, 16, RenderTextureFormat.ARGB32);
+            camera.aspect = 256f / targetHeight;
+            if (fitted != null)
+                camera.fieldOfView =
+                    2
+                    * Mathf.Atan(
+                        Mathf.Tan((side == 0 ? 35 : 65) * Mathf.Deg2Rad * .5f) / camera.aspect
+                    )
+                    * Mathf.Rad2Deg;
             target.Create();
             textures.Add(target);
             camera.targetTexture = target;
             mirrors.Add(camera);
+            mirrorDefinitions.Add(fitted);
             var surface = GameObject.CreatePrimitive(PrimitiveType.Quad);
             DisposeObject(surface.GetComponent<Collider>());
             surface.name = side == 0 ? "Working rearview mirror" : "Working side mirror";
             surface.transform.SetParent(transform, false);
-            surface.transform.localPosition = definition
-                ? side == 0
-                    ? definition.rearMirrorCentre
-                    : side < 0
-                        ? definition.leftMirrorCentre
+            surface.transform.localPosition =
+                fitted != null ? Vector3.zero
+                : definition
+                    ? side == 0 ? definition.rearMirrorCentre
+                        : side < 0 ? definition.leftMirrorCentre
                         : definition.rightMirrorCentre
                 : new Vector3(side * .86f, 1.14f, .49f);
             var size =
                 side == 0 ? new Vector2(.222f, .048f)
                 : definition ? definition.sideMirrorSize
                 : new Vector2(.21f, .12f);
-            surface.transform.localScale = new Vector3(size.x, size.y, 1);
-            surface.transform.localRotation = definition
-                ? Quaternion.Euler(
-                    side == 0 ? Vector3.zero
-                    : side < 0 ? definition.leftMirrorEuler
-                    : definition.rightMirrorEuler
-                )
+            surface.transform.localScale =
+                fitted != null ? Vector3.one : new Vector3(size.x, size.y, 1);
+            surface.transform.localRotation =
+                fitted != null ? Quaternion.identity
+                : definition
+                    ? Quaternion.Euler(
+                        side == 0 ? Vector3.zero
+                        : side < 0 ? definition.leftMirrorEuler
+                        : definition.rightMirrorEuler
+                    )
                 : Quaternion.Euler(0, -side * 16, 0);
+            if (fitted != null)
+                surface.GetComponent<MeshFilter>().sharedMesh = fitted.mesh;
             var material = new Material(Resources.Load<Material>("RuntimeUnlit"));
             RuntimeResources.Register(gameObject, material);
             material.mainTexture = target;
@@ -204,6 +250,17 @@ namespace CoDriver
             {
                 nextMirror = Time.unscaledTime + .05f; // Shared 20 renders/s budget across all mirrors.
                 int index = mirrorIndex++ % mirrors.Count;
+                var fitted = mirrorDefinitions[index];
+                if (fitted != null)
+                {
+                    var app = CoDriverApp.Instance;
+                    var eye =
+                        vehicle.Profile.driverEye + new Vector3(0, app.SeatHeight, app.SeatForward);
+                    mirrors[index].transform.localRotation = Quaternion.LookRotation(
+                        MirrorDirection(fitted, eye),
+                        Vector3.up
+                    );
+                }
                 // Only the driver camera sees layer 9. Keep each visible mirror's
                 // cadence, but spend no render work on an off-screen side mirror.
                 if (mirrorSurfaces[index].isVisible)

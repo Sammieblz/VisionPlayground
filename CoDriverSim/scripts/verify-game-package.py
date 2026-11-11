@@ -9,6 +9,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 
+def validate_shell_launcher(path: Path):
+    """Hash integrity alone cannot establish that Bash can read a launcher."""
+    if b"\r" in path.read_bytes():
+        raise ValueError("Shell launcher requires LF line endings: " + str(path))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
@@ -33,6 +39,8 @@ def main():
             actual = hashlib.file_digest(stream, "sha256").hexdigest()
         if actual != expected:
             raise ValueError("Package hash mismatch: " + relative)
+        if path.suffix.lower() == ".sh":
+            validate_shell_launcher(path)
     python = root / "runtime/python.exe"
     commands = []
     with tempfile.TemporaryDirectory(prefix="codriver-package-check-") as directory:

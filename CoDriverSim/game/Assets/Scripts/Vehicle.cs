@@ -39,7 +39,15 @@ namespace CoDriver
 
         public bool TryRequest(CommaCommand command, string session, double age, double now)
         {
-            if (command == null || age < 0 || age > .25 || command.session_id != session)
+            if (
+                command == null
+                || !double.IsFinite(age)
+                || age < 0
+                || age > .25
+                || command.session_id != session
+                || !float.IsFinite(command.steering_deg)
+                || !float.IsFinite(command.acceleration_mps2)
+            )
             {
                 Cancel("Comma unavailable: waiting for a fresh connection");
                 return false;
@@ -89,6 +97,7 @@ namespace CoDriver
             }
             if (
                 command == null
+                || !double.IsFinite(age)
                 || age > .25
                 || age < 0
                 || command.session_id != session
@@ -321,6 +330,17 @@ namespace CoDriver
         public int Gear => Dynamics?.Gear ?? 1;
         public float CommandedRoadAngle = float.NaN;
 
+        // The caller has already placed and stopped the rigidbody. Reset commands
+        // and retained drivetrain state before paused camera capture can resume.
+        public void ResetForPlacement()
+        {
+            Throttle = Brake = Steer = SteerAngle = 0;
+            CommandedRoadAngle = float.NaN;
+            Handbrake = Reverse = false;
+            Indicator = 0;
+            Dynamics?.ResetForPlacement();
+        }
+
         public bool TryToggleDirection()
         {
             if (Speed >= .3f)
@@ -330,6 +350,7 @@ namespace CoDriver
         }
 
         Transform[] visuals = new Transform[4];
+        readonly WheelVisualBinding[] wheelBindings = new WheelVisualBinding[4];
         Renderer[] blinkers;
         Material amber,
             dark;
@@ -359,8 +380,10 @@ namespace CoDriver
             var shape = gameObject.AddComponent<BoxCollider>();
             shape.center = Profile.collisionCentre;
             shape.size = Profile.collisionSize;
-            var authored = Profile.visualResource.Length > 0
-                ? Resources.Load<GameObject>(Profile.visualResource) : null;
+            var authored =
+                Profile.visualResource.Length > 0
+                    ? Resources.Load<GameObject>(Profile.visualResource)
+                    : null;
             if (authored)
                 VisualDefinition = Instantiate(authored, transform).GetComponent<AssetDefinition>();
             else
@@ -388,15 +411,22 @@ namespace CoDriver
             Horn.clip = AudioClip.Create("Car horn", samples.Length, 1, 22050, false);
             Horn.clip.SetData(samples, 0);
             for (int i = 0; i < 4; i++)
-                visuals[i] = VisualDefinition && VisualDefinition.wheels.Length == 4
-                    ? VisualDefinition.wheels[i] : Art.Wheel(
-                    transform,
-                    new Vector3(
-                        (i % 2 == 0 ? -1 : 1) * Profile.track / 2,
-                        Profile.radius,
-                        (i < 2 ? 1 : -1) * Profile.wheelbase / 2
-                    )
-                );
+            {
+                visuals[i] =
+                    VisualDefinition && VisualDefinition.wheels.Length == 4
+                        ? VisualDefinition.wheels[i]
+                        : Art.Wheel(
+                            transform,
+                            new Vector3(
+                                (i % 2 == 0 ? -1 : 1) * Profile.track / 2,
+                                Profile.radius,
+                                (i < 2 ? 1 : -1) * Profile.wheelbase / 2
+                            )
+                        );
+                wheelBindings[i] = WheelVisualBinding.Bind(transform, visuals[i], i, Profile);
+            }
+            if (VisualDefinition)
+                VisualDefinition.wheelBindings = wheelBindings;
             amber = Art.Material("Indicator", new Color(1, .55f, .05f), true);
             dark = Art.Material("Indicator off", new Color(.15f, .09f, .02f));
             blinkers = new Renderer[4];
@@ -438,9 +468,7 @@ namespace CoDriver
             for (int i = 0; i < 4; i++)
                 if (Dynamics != null && visuals[i])
                 {
-                    Dynamics.WheelPose(i, out var pos, out var rot);
-                    visuals[i].position = pos;
-                    visuals[i].rotation = rot;
+                    wheelBindings[i].Apply(transform, Dynamics);
                 }
             for (int i = 0; i < 4; i++)
                 if (blinkers != null)

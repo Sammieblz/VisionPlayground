@@ -9,7 +9,9 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
+from codriversim.comfort import GROUND_HAZARDS, MotionEvidence
 from codriversim.contracts import CameraFrame, PerceptionSnapshot, RiskEvent, Track
+from codriversim.visual_cues import VisualCues
 
 CLASSES = {
     0: "person",
@@ -23,6 +25,13 @@ CLASSES = {
     14: "bird",
     15: "cat",
     16: "dog",
+    17: "horse",
+    18: "sheep",
+    19: "cow",
+    20: "elephant",
+    21: "bear",
+    22: "zebra",
+    23: "giraffe",
 }
 
 
@@ -90,11 +99,20 @@ class Observer:
 
         ocr_path = model_path.with_name("text_recognition_CRNN_EN_2021sep.onnx")
         self.signs = SpeedSignReader(ocr_path) if ocr_path.is_file() else None
+        self.cues = VisualCues(self.signs.text if self.signs else None)
+        self.motion = MotionEvidence()
+        self.session = None
+        self.previous_at = -1.0
         self.provenance = {
             "detector": self.model,
             "light_classifier": "HSV-conservative-two-frame-v1",
             "tracker": "IoU-observed-only-memory-0.8s-v2",
             "range": "ground-plane-proposal-50-percent-uncertainty",
+            "comfort": "permitted-ego-sensors-sustained-comfort-v1",
+            "workzone": "orange-white-tapered-cluster-two-frame-v1;heuristic-unvalidated",
+            "wrong_direction": "red-sign-exact-ocr-two-frame-v1;orientation-unverified"
+            if self.signs
+            else "unavailable-without-ocr",
         }
         if self.signs:
             self.provenance["speed_sign_reader"] = "white-rectangle-tight-word-two-frame-v2"
@@ -155,6 +173,7 @@ class Observer:
                 CLASSES[labels[i]],
                 (boxes[i][0], boxes[i][1], boxes[i][0] + boxes[i][2], boxes[i][1] + boxes[i][3]),
                 scores[i],
+                provenance=self.model,
             )
             for i in keep
         ]
@@ -198,10 +217,23 @@ class Observer:
         from codriversim.road import road_risks, validate_road
 
         road = validate_road(road, frame) if road is not None else None
+        if self.session != frame.session_id or frame.timestamp <= self.previous_at:
+            self.tracker = Tracker()
+            self.history.clear()
+            self.lights.clear()
+            self.cues.reset()
+            if self.signs:
+                self.signs.previous = []
+                self.signs.previous_at = -1
+        self.session, self.previous_at = frame.session_id, frame.timestamp
         detected = self._detect(image)
         self.cycle += 1
         if self.signs and self.cycle % 3 == 0:
-            detected.extend(self.signs.detect(image, frame.timestamp))
+            detected.extend(
+                replace(track, provenance=self.provenance["speed_sign_reader"])
+                for track in self.signs.detect(image, frame.timestamp)
+            )
+        detected.extend(self.cues.detect(image, frame.timestamp, read_text=self.cycle % 3 == 0))
         tracks = self.tracker.update(detected, frame.timestamp)
         enriched, risks = [], road_risks(road, frame)
         for track in tracks:
@@ -209,7 +241,7 @@ class Observer:
             bottom = track.box[3] - frame.calibration.cy
             if (
                 bottom > 15
-                and track.label not in {"traffic light", "stop sign", "bird"}
+                and track.label in GROUND_HAZARDS
                 and frame.calibration.source != "uncalibrated"
             ):
                 distance = frame.calibration.height_m * frame.calibration.fy / bottom
@@ -233,11 +265,7 @@ class Observer:
             if prev and distance and prev[1] and 0 < frame.timestamp - prev[0] < 0.6:
                 closing = (prev[1] - distance) / (frame.timestamp - prev[0])
             self.history[track.track_id] = (frame.timestamp, distance)
-            if (
-                distance
-                and in_path
-                and track.label in {"car", "bus", "truck", "train", "person", "dog", "cat"}
-            ):
+            if distance and in_path and track.label in GROUND_HAZARDS:
                 ttc = distance / closing if closing and closing > 1 else None
                 if ttc and ttc < 2.5 and frame.ego.speed_mps > 2:
                     risks.append(
@@ -245,7 +273,7 @@ class Observer:
                             frame.timestamp,
                             "urgent",
                             "closing",
-                            "Closing rapidly ahead — check the road",
+                            "Closing rapidly ahead. Check the road",
                             (track.track_id,),
                             True,
                         )
@@ -261,7 +289,10 @@ class Observer:
                             False,
                         )
                     )
-                elif track.label in {"person", "dog", "cat"} and distance < 25:
+                elif (
+                    track.label not in {"car", "bus", "truck", "train", "motorcycle"}
+                    and distance < 25
+                ):
                     risks.append(
                         RiskEvent(
                             frame.timestamp,
@@ -278,7 +309,7 @@ class Observer:
                         frame.timestamp,
                         "advisory",
                         "signal",
-                        f"Visible {state} signal — check which lane it controls",
+                        f"Visible {state} signal. Check your lane",
                         (track.track_id,),
                     )
                 )
@@ -294,10 +325,36 @@ class Observer:
                         frame.timestamp,
                         "advisory",
                         "speed_sign",
-                        f"Sign reads {track.speed_limit_mph} mph — confirm the posted limit",
+                        f"Sign reads {track.speed_limit_mph} mph. Confirm the limit",
                         (track.track_id,),
                     )
                 )
+            if track.label in {"workzone cue", "wrong direction sign"}:
+                workzone = track.label == "workzone cue"
+                risks.append(
+                    RiskEvent(
+                        frame.timestamp,
+                        "caution",
+                        "workzone" if workzone else "wrong_direction",
+                        "Possible work zone. Check ahead"
+                        if workzone
+                        else "Wrong-way sign visible. Check your direction",
+                        (track.track_id,),
+                        not workzone,
+                        "camera",
+                        track.provenance,
+                        frame.frame_id,
+                    )
+                )
+        risks.extend(self.motion.update(frame, enriched))
+        risks = [
+            replace(
+                risk,
+                frame_id=frame.frame_id if risk.frame_id < 0 else risk.frame_id,
+                provenance=risk.provenance or self.model + ";monocular-heuristic-v1",
+            )
+            for risk in risks
+        ]
         live = {t.track_id for t in enriched}
         self.history = {k: v for k, v in self.history.items() if k in live}
         self.lights = {k: v for k, v in self.lights.items() if k in live}

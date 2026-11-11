@@ -169,7 +169,9 @@ namespace CoDriver.Editor
             Model("SUV", "suv/meshes/suv.obj", new Vector3(-90, 180, 0), 2, 4.4f);
             Model("Ambulance", "ambulance/meshes/ambulance.obj", new Vector3(-90, 0, 0), 2, 4.4f);
             Model("Bus", "bus/meshes/bus.obj", new Vector3(-90, 0, 0), 2, 9.5f);
-            Model("Pickup", "pickup/meshes/pickup.dae", Vector3.zero, 2, 4.4f);
+            // The source hood points +Y in its Z-up frame. Unity's Collada
+            // conversion puts that nose at -Z; normalize it to vehicle +Z.
+            Model("Pickup", "pickup/meshes/pickup.dae", new Vector3(0, 180, 0), 2, 4.4f);
             for (int i = 1; i <= 3; i++)
                 Model(
                     "House" + i,
@@ -450,19 +452,30 @@ namespace CoDriver.Editor
                 }
                 if (name == "Pickup" && wheel)
                 {
-                    var axle = MeshPanels.Cut(
-                        mesh,
-                        new Bounds(new Vector3(0, 0, 5), new Vector3(10, 10, 10))
-                    );
+                    // The source combines an axle pair in one renderer. A single
+                    // centre pivot makes both tires orbit and steer sideways.
+                    // Keep independent hubs in each physical wheel quadrant.
+                    for (int end = -1; end <= 1; end += 2)
+                    for (int side = -1; side <= 1; side += 2)
+                    {
+                        var quadrant = MeshPanels.Cut(
+                            mesh,
+                            new Bounds(new Vector3(side * 5, 0, end * 5), new Vector3(10, 10, 10))
+                        );
+                        string suffix =
+                            (end > 0 ? "Front" : "Rear") + (side < 0 ? "Left" : "Right");
+                        string wheelPath =
+                            Prepared + "Pickup-" + suffix + "-" + group.Key + ".asset";
+                        Save(quadrant.inside, wheelPath);
+                        var hub = new GameObject("Wheel " + suffix);
+                        hub.transform.SetParent(result.transform, false);
+                        hub.AddComponent<MeshFilter>().sharedMesh =
+                            AssetDatabase.LoadAssetAtPath<Mesh>(wheelPath);
+                        hub.AddComponent<MeshRenderer>().sharedMaterial = groupMaterials[group.Key];
+                        UnityEngine.Object.DestroyImmediate(quadrant.outside);
+                    }
                     UnityEngine.Object.DestroyImmediate(mesh);
-                    mesh = axle.outside;
-                    string pathFront = Prepared + "Pickup-front-wheels.asset";
-                    Save(axle.inside, pathFront);
-                    var front = new GameObject("Wheel front axle");
-                    front.transform.SetParent(result.transform, false);
-                    front.AddComponent<MeshFilter>().sharedMesh =
-                        AssetDatabase.LoadAssetAtPath<Mesh>(pathFront);
-                    front.AddComponent<MeshRenderer>().sharedMaterial = groupMaterials[group.Key];
+                    continue;
                 }
                 if ((name == "Bus" || name == "ParkingSedan") && !wheel)
                 {

@@ -23,6 +23,8 @@ namespace CoDriver
         public ConstructionSite Construction;
         public ActivityDoor GarageDoor;
         public int Seed = 21;
+        public TrafficDensity Density = TrafficDensity.Normal;
+        const string DensityPreference = "CoDriver.TrafficDensity";
         public MapDefinition Map;
         public readonly Dictionary<string, Signal> MappedJunctions =
             new Dictionary<string, Signal>();
@@ -77,6 +79,8 @@ namespace CoDriver
             Epoch = Time.time;
             Map ??= MapDefinition.Cedar();
             Player = player;
+            if (player)
+                Density = (TrafficDensity)Mathf.Clamp(PlayerPrefs.GetInt(DensityPreference), 0, 1);
             random = new System.Random(Seed);
             Art.Initialize();
             var sun = new GameObject("Daylight").AddComponent<Light>();
@@ -188,6 +192,7 @@ namespace CoDriver
 
         void FinishWorld()
         {
+            WorldBoundary.Build(this);
             GetComponent<StaticFacadeBatches>()?.Bake();
             PedestrianNavigation.AddStreetFurniture(this);
             var settings = NavMesh.GetSettingsByID(0);
@@ -410,7 +415,7 @@ namespace CoDriver
                         "End barrier",
                         end,
                         new Vector3(0, .65f, 0),
-                        new Vector3(10, 1.3f, .75f),
+                        new Vector3(lane == 0 && direction % 2 == 1 ? 22 : 15, 1.3f, .75f),
                         Art.Concrete
                     );
                     for (int i = -4; i <= 4; i++)
@@ -1301,7 +1306,7 @@ namespace CoDriver
             ParkingCar = AddTraffic("Parking", 14);
             // Preserve the existing scenario actors' indices. Extra citizens are
             // persistent actors, created behind the loading screen, never teleported.
-            for (int i = 15; i < 23; i++)
+            for (int i = 15; i < TrafficPopulation.OrdinaryCount(Density) + 3; i++)
                 AddTraffic(i % 4 == 0 ? "Truck" : "Car", i);
             for (int i = 0; i < 56; i++)
             {
@@ -1339,6 +1344,20 @@ namespace CoDriver
             SpawnPopulation();
         }
 
+        public void SetDensity(TrafficDensity density)
+        {
+            density = density == TrafficDensity.RushHour ? density : TrafficDensity.Normal;
+            if (Density == density)
+                return;
+            Density = density;
+            PlayerPrefs.SetInt(DensityPreference, (int)density);
+            PlayerPrefs.Save();
+            // Settings covers the paused scene. During a drive defer the new
+            // population until its next reset; never replace visible traffic.
+            if (Time.timeScale == 0 && Traffic.Count > 0)
+                ResetActivities();
+        }
+
         public Signal ClosestSignal(Vector3 p)
         {
             Signal best = null;
@@ -1357,7 +1376,32 @@ namespace CoDriver
 
         public bool MayEnter(TrafficActor actor, Signal signal)
         {
-            return signal.Reserve(actor);
+            if (
+                !signal.Allows(actor.transform.position, actor.transform.forward)
+                && !signal.ReservedBy(actor)
+            )
+                return signal.Reserve(actor, requireGreen: true, crossingChecked: true);
+            if (
+                signal.ReservedBy(actor)
+                && Vector3.Dot(
+                    signal.transform.position - actor.transform.position,
+                    actor.transform.forward
+                ) <= 14
+            )
+                return signal.Reserve(actor, requireGreen: true, crossingChecked: true);
+            // Cedar needs the same exit discipline as mapped traffic: a queued
+            // vehicle must not reserve a turn it cannot physically clear.
+            // Include the complete curved vehicle envelope and crossing actors.
+            float centre = actor.Path.NearestDistance(signal.transform.position, actor.Distance);
+            float begin = actor.Distance;
+            float finish = centre + 24;
+            if (actor.Path.Closed && finish < begin)
+                finish += actor.Path.Length;
+            var body = actor.GetComponent<BoxCollider>();
+            bool clear =
+                TrafficClearance.ClearExit(actor.Path, finish, body)
+                && TrafficClearance.ClearJunctionSweep(actor.Path, begin, finish, body);
+            return signal.Reserve(actor, clear, requireGreen: true, crossingChecked: true);
         }
 
         public ActivityDoor NearestDoor(Vector3 position)
@@ -1610,7 +1654,22 @@ namespace CoDriver
 
         public void ReleaseBlockedApproach(Component actor)
         {
-            if (occupant != actor || enteredFrom == null)
+            if (occupant != actor)
+                return;
+            if (Town.Map?.IsDavis != true)
+            {
+                // Yield an uncommitted reservation if its exit becomes blocked.
+                // Once inside, keep priority until the physical body clears.
+                if (
+                    Vector3.Dot(
+                        transform.position - actor.transform.position,
+                        actor.transform.forward
+                    ) > 14
+                )
+                    occupant = null;
+                return;
+            }
+            if (enteredFrom == null)
                 return;
             float remaining =
                 enteredFrom.Path.Length
@@ -1623,7 +1682,12 @@ namespace CoDriver
             }
         }
 
-        public bool Reserve(Component actor, bool approachClear = true)
+        public bool Reserve(
+            Component actor,
+            bool approachClear = true,
+            bool requireGreen = false,
+            bool crossingChecked = false
+        )
         {
             // Only the explicit qualification harness calls this with a Vehicle.
             // This grants a junction reservation, never vehicle control.
@@ -1712,14 +1776,35 @@ namespace CoDriver
                 return false;
             if (!approachClear)
                 return false;
+            // Arrival registration is independent of signal permission. A red
+            // approach keeps its queue position without claiming the junction.
+            bool committed =
+                occupant == actor
+                && (
+                    Town.Map?.IsDavis == true && enteredFrom != null
+                        ? Town.Map.Nearest(
+                            actor.transform.position,
+                            actor.transform.forward,
+                            false
+                        )?.internalLane == true
+                        : Vector3.Dot(
+                            transform.position - actor.transform.position,
+                            actor.transform.forward
+                        ) <= (actor is RailVehicle ? 19.5f : 14)
+                );
+            if (requireGreen && !committed && !GreenFor(actor))
+                return false;
             if (Town.Map?.IsDavis != true)
             {
                 var remaining = transform.position - actor.transform.position;
                 bool entering = Vector3.Dot(remaining, actor.transform.forward) > 14;
-                // A green phase does not let the next vehicle enter an occupied
-                // crosswalk. Let already committed vehicles clear the junction.
+                // A crossing can outlast the green while its far half is already
+                // clear of this route. Ordinary NPCs check their full swept turn
+                // in MayEnter, so a person on another crossing cannot reserve the
+                // entire junction indefinitely. Other callers keep this fallback.
                 if (
                     (!occupant || entering)
+                    && !crossingChecked
                     && Town.Walkers.Any(w =>
                         w.gameObject.activeInHierarchy
                         && w.Crossing
