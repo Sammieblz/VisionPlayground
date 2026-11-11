@@ -2,6 +2,37 @@ using System;
 
 namespace CoDriver
 {
+    // Schedule at most one fresh camera render per display frame. Keep up to
+    // 100 ms of cadence debt across jitter, without queuing obsolete images or
+    // trying to replay all the missed captures after a long stall.
+    public sealed class CameraCadence
+    {
+        const double Interval = .05,
+            RecoveryWindow = .1;
+        double next = double.NaN,
+            last = -1;
+        public long SkippedDeadlines { get; private set; }
+
+        public bool Due(double now)
+        {
+            if (!double.IsFinite(now) || now < 0 || now <= last)
+                return false;
+            if (double.IsNaN(next))
+                next = now;
+            if (now < next)
+                return false;
+            if (now - next > RecoveryWindow)
+            {
+                long skipped = (long)Math.Ceiling((now - next - RecoveryWindow) / Interval);
+                SkippedDeadlines += skipped;
+                next += skipped * Interval;
+            }
+            next += Interval;
+            last = now;
+            return true;
+        }
+    }
+
     // GPU readback completion order is not the capture order. Obsolete pixels
     // must never enter the strictly ordered observation/recording connection.
     public sealed class FrameDeliveryOrder

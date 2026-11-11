@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -5,6 +6,173 @@ namespace CoDriver.Tests
 {
     public class TrafficTests
     {
+        [TestCase(false)]
+        [TestCase(true)]
+        public void EarlierClearApproachWinsEvenWhenLaterQueueUpdatesFirst(bool temporarilyBlocked)
+        {
+            var town = new GameObject("Fair queue town").AddComponent<Town>();
+            var signal = new GameObject("Fair junction").AddComponent<Signal>();
+            var occupied = new GameObject("Occupied turn").AddComponent<TrafficActor>();
+            var earlier = new GameObject("Earlier approach").AddComponent<TrafficActor>();
+            var later = new GameObject("Later approach").AddComponent<TrafficActor>();
+            try
+            {
+                signal.Town = town;
+                signal.Uncontrolled = true;
+                occupied.transform.position = new Vector3(0, 0, -8);
+                earlier.transform.SetPositionAndRotation(
+                    new Vector3(-20, 0, 0),
+                    Quaternion.Euler(0, 90, 0)
+                );
+                later.transform.SetPositionAndRotation(
+                    new Vector3(0, 0, 20),
+                    Quaternion.Euler(0, 180, 0)
+                );
+                Assert.IsTrue(signal.Reserve(occupied));
+                Assert.IsFalse(signal.Reserve(earlier, !temporarilyBlocked));
+                Assert.IsFalse(signal.Reserve(later));
+                Assert.IsFalse(signal.Reserve(earlier, true));
+                occupied.transform.position = new Vector3(0, 0, 40);
+                Assert.IsFalse(
+                    signal.Reserve(later),
+                    "Update order cannot skip the older clear approach"
+                );
+                Assert.IsTrue(signal.Reserve(earlier));
+                earlier.transform.position = new Vector3(40, 0, 0);
+                Assert.IsTrue(signal.Reserve(later));
+            }
+            finally
+            {
+                Object.DestroyImmediate(later.gameObject);
+                Object.DestroyImmediate(earlier.gameObject);
+                Object.DestroyImmediate(occupied.gameObject);
+                Object.DestroyImmediate(signal.gameObject);
+                Object.DestroyImmediate(town.gameObject);
+            }
+        }
+
+        [TestCase("blocked")]
+        [TestCase("red")]
+        [TestCase("inactive")]
+        public void UnreadyEarlierApproachDoesNotPreventClearTraffic(string reason)
+        {
+            var town = new GameObject("Available queue town").AddComponent<Town>();
+            var signal = new GameObject("Available junction").AddComponent<Signal>();
+            var occupied = new GameObject("Occupied turn").AddComponent<TrafficActor>();
+            var earlier = new GameObject("Unready approach").AddComponent<TrafficActor>();
+            var later = new GameObject("Clear approach").AddComponent<TrafficActor>();
+            try
+            {
+                signal.Town = town;
+                signal.Uncontrolled = reason != "red";
+                signal.HoldPhase(0, 100);
+                occupied.transform.position = new Vector3(0, 0, -8);
+                earlier.transform.SetPositionAndRotation(
+                    new Vector3(-20, 0, 0),
+                    Quaternion.Euler(0, 90, 0)
+                );
+                later.transform.SetPositionAndRotation(
+                    new Vector3(0, 0, 20),
+                    Quaternion.Euler(0, 180, 0)
+                );
+                Assert.IsTrue(signal.Reserve(occupied));
+                Assert.IsFalse(signal.Reserve(earlier, reason != "blocked"));
+                if (reason == "inactive")
+                    earlier.gameObject.SetActive(false);
+                Assert.IsFalse(signal.Reserve(later));
+                occupied.transform.position = new Vector3(0, 0, 40);
+                Assert.IsTrue(
+                    signal.Reserve(later),
+                    "An unready request must not lock an empty junction"
+                );
+                if (reason == "blocked")
+                {
+                    Assert.IsFalse(signal.Reserve(earlier, true));
+                    later.transform.position = new Vector3(0, 0, -40);
+                    Assert.IsTrue(
+                        signal.Reserve(earlier),
+                        "The blocked approach can proceed when it clears"
+                    );
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(later.gameObject);
+                Object.DestroyImmediate(earlier.gameObject);
+                Object.DestroyImmediate(occupied.gameObject);
+                Object.DestroyImmediate(signal.gameObject);
+                Object.DestroyImmediate(town.gameObject);
+            }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void LongMappedTurnRetainsReservationUntilRearClears(bool red)
+        {
+            var town = new GameObject("Recorded long junction").AddComponent<Town>();
+            var signal = new GameObject("Recorded junction reservation").AddComponent<Signal>();
+            var truck = new GameObject("Entering truck").AddComponent<TrafficActor>();
+            var car = new GameObject("Conflicting car").AddComponent<TrafficActor>();
+            try
+            {
+                town.Map = MapDefinition.Load("davis-downtown");
+                truck.gameObject.AddComponent<BoxCollider>().size = VehicleProfile
+                    .ForTraffic("Truck")
+                    .collisionSize;
+                car.gameObject.AddComponent<BoxCollider>().size =
+                    new VehicleProfile().collisionSize;
+                signal.Town = town;
+                signal.Uncontrolled = !red;
+                signal.transform.position = new Vector3(89.19f, 0, -366.16f);
+                town.Traffic.Add(truck);
+                town.Traffic.Add(car);
+                truck.transform.SetPositionAndRotation(
+                    new Vector3(130.1272f, .11945f, -356.9485f),
+                    Quaternion.LookRotation(new Vector3(-.97878f, 0, -.20478f))
+                );
+                car.transform.SetPositionAndRotation(
+                    new Vector3(66.9994f, -.0224f, -376.9546f),
+                    Quaternion.LookRotation(new Vector3(.97239f, 0, .23286f))
+                );
+                Assert.IsTrue(signal.Reserve(truck));
+                truck.transform.SetPositionAndRotation(
+                    new Vector3(126.91174f, .11942f, -357.61115f),
+                    Quaternion.LookRotation(new Vector3(-.979526f, 0, -.201297f))
+                );
+                Assert.IsTrue(
+                    town.Map.Nearest(
+                        truck.transform.position,
+                        truck.transform.forward,
+                        false
+                    ).internalLane,
+                    "Recorded truck has crossed onto the junction turn"
+                );
+                if (red)
+                    signal.HoldPhase(40, 100);
+                Assert.IsFalse(
+                    signal.Reserve(car),
+                    "Distance from the junction centre, a new red, or another approach cannot release a committed turn"
+                );
+                var exit = town.Map.lanes.Single(l => l.id == "10746177#1_0");
+                truck.transform.SetPositionAndRotation(
+                    exit.Path.Position(10),
+                    Quaternion.LookRotation(exit.Path.Direction(10))
+                );
+                signal.Uncontrolled = true;
+                Assert.IsTrue(
+                    signal.Reserve(car),
+                    "The reservation releases after the rear clears the exit"
+                );
+            }
+            finally
+            {
+                Object.DestroyImmediate(truck.gameObject);
+                Object.DestroyImmediate(car.gameObject);
+                Object.DestroyImmediate(signal.gameObject);
+                Object.DestroyImmediate(town.gameObject);
+            }
+        }
+
         [Test]
         public void CrossingPriorityStopsApproachesButLetsOccupiedCrossingClear()
         {

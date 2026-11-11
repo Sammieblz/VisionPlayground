@@ -5,6 +5,48 @@ namespace CoDriver.Tests
     public class ServiceMeasurementsTests
     {
         [Test]
+        public void CameraCadenceRecoversFromRenderJitterWithoutDuplicateFrames()
+        {
+            var cadence = new CameraCadence();
+            double now = 20;
+            int captured = 0;
+            for (int frame = 0; frame < 1800; frame++)
+            {
+                // Roughly 30 FPS, with a 150 ms render stall every two seconds.
+                now += frame % 60 == 0 ? .15 : 1.0 / 30;
+                if (cadence.Due(now))
+                    captured++;
+                Assert.IsFalse(
+                    cadence.Due(now),
+                    "The same render time cannot produce a second frame"
+                );
+            }
+            Assert.Greater(captured / (now - 20), 19.5);
+            Assert.LessOrEqual(captured / (now - 20), 20.1);
+        }
+
+        [Test]
+        public void LongCameraStallDoesNotCreateUnboundedCatchUpWork()
+        {
+            var cadence = new CameraCadence();
+            Assert.IsTrue(cadence.Due(0));
+            int captured = 0;
+            for (int frame = 0; frame < 100; frame++)
+                if (cadence.Due(10 + frame * .01))
+                    captured++;
+            Assert.That(
+                captured,
+                Is.InRange(20, 22),
+                "Only the bounded recovery window can be made up"
+            );
+            Assert.Greater(cadence.SkippedDeadlines, 190);
+            Assert.IsFalse(cadence.Due(double.NaN));
+            Assert.IsFalse(cadence.Due(double.PositiveInfinity));
+            Assert.IsFalse(cadence.Due(-1));
+            Assert.IsFalse(cadence.Due(5));
+        }
+
+        [Test]
         public void AServiceThatStopsCannotRetainItsPreviousThroughput()
         {
             var measurements = new ServiceMeasurements();

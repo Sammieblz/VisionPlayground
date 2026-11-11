@@ -86,6 +86,7 @@ namespace CoDriver
                 observer_processed_frames = app.Observation?.processed_frames ?? 0,
                 camera_reordered_drops = app.Sensors.ReorderedDropped,
                 camera_transport_drops = app.CameraTransportDropped,
+                camera_missed_deadlines = app.Sensors.MissedCaptureDeadlines,
                 map = app.Town.Map.id,
                 comma_acceleration = app.Command?.acceleration_mps2 ?? 0,
                 comma_status = app.CommandFresh
@@ -185,6 +186,7 @@ namespace CoDriver
                 observer_processed_frames,
                 camera_reordered_drops,
                 camera_transport_drops;
+            public long camera_missed_deadlines;
             public string observer_transport;
         }
     }

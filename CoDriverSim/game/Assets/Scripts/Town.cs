@@ -1514,6 +1514,15 @@ namespace CoDriver
         int displayedPhase = -1;
         Component occupant;
         MapLane enteredFrom;
+
+        sealed class TurnRequest
+        {
+            public Component Actor;
+            public float LastSeen;
+            public bool Clear;
+        }
+
+        readonly List<TurnRequest> requests = new List<TurnRequest>();
         public float WaitingSetback =>
             occupant is TrafficActor actor && actor.Kind == "Bus" ? 22 : 12;
         public string Reservation =>
@@ -1614,7 +1623,7 @@ namespace CoDriver
             }
         }
 
-        public bool Reserve(Component actor)
+        public bool Reserve(Component actor, bool approachClear = true)
         {
             // Only the explicit qualification harness calls this with a Vehicle.
             // This grants a junction reservation, never vehicle control.
@@ -1624,6 +1633,8 @@ namespace CoDriver
                 && !(actor is RailVehicle rail && rail.Streetcar)
             )
                 return false;
+            if (!approachClear)
+                ReleaseBlockedApproach(actor);
             if (occupant)
             {
                 Vector3 toCentre = transform.position - occupant.transform.position;
@@ -1635,6 +1646,7 @@ namespace CoDriver
                 // Reservations begin within 22 m. Once outside the 24 m exit
                 // boundary, later turns elsewhere must not retain this junction.
                 bool left = toCentre.sqrMagnitude > 24 * 24;
+                bool committedMappedTurn = false;
                 if (Town.Map?.IsDavis == true && enteredFrom != null)
                 {
                     var current = Town.Map.Nearest(
@@ -1643,6 +1655,11 @@ namespace CoDriver
                         false
                     );
                     float halfLength = occupant.GetComponent<BoxCollider>()?.size.z * .5f ?? 3;
+                    // A large mapped junction can have an internal turn more
+                    // than 28 m from its centre. It is already committed, not
+                    // a distant queued approach. Retain it through a red or
+                    // temporary stop until its rear clears the exit lane.
+                    committedMappedTurn = current != null && current.internalLane;
                     left =
                         current != null
                         && current != enteredFrom
@@ -1652,11 +1669,13 @@ namespace CoDriver
                     left |= toCentre.sqrMagnitude > 120 * 120;
                 }
                 bool waitingForRed =
-                    toCentre.sqrMagnitude > approachBoundary * approachBoundary
+                    !committedMappedTurn
+                    && toCentre.sqrMagnitude > approachBoundary * approachBoundary
                     && speed < .3f
                     && !GreenFor(occupant);
                 bool queuedBehindAnother =
-                    Vector3.Dot(toCentre, occupant.transform.forward) > approachBoundary
+                    !committedMappedTurn
+                    && Vector3.Dot(toCentre, occupant.transform.forward) > approachBoundary
                     && !AtFrontOfApproach(occupant);
                 if (
                     left
@@ -1666,7 +1685,32 @@ namespace CoDriver
                 )
                     occupant = null;
             }
+            // Remember arrival order while the junction is occupied. Otherwise
+            // a vehicle whose Update runs first repeatedly beats other queues.
+            // Blocked approaches retain their place but do not hold up a clear
+            // green approach. Requests must keep being renewed by the planner.
+            requests.RemoveAll(r =>
+                !r.Actor || !r.Actor.gameObject.activeInHierarchy || Time.time - r.LastSeen > 1
+            );
+            if (occupant != actor)
+            {
+                var request = requests.Find(r => r.Actor == actor);
+                if (AtFrontOfApproach(actor))
+                {
+                    if (request == null)
+                    {
+                        request = new TurnRequest { Actor = actor };
+                        requests.Add(request);
+                    }
+                    request.LastSeen = Time.time;
+                    request.Clear = approachClear;
+                }
+                else if (request != null)
+                    requests.Remove(request);
+            }
             if (occupant && occupant != actor)
+                return false;
+            if (!approachClear)
                 return false;
             if (Town.Map?.IsDavis != true)
             {
@@ -1688,7 +1732,19 @@ namespace CoDriver
             {
                 if (!AtFrontOfApproach(actor))
                     return false;
+                foreach (var request in requests)
+                {
+                    if (request.Actor == actor)
+                        break;
+                    if (
+                        request.Clear
+                        && GreenFor(request.Actor)
+                        && AtFrontOfApproach(request.Actor)
+                    )
+                        return false;
+                }
                 occupant = actor;
+                requests.RemoveAll(r => r.Actor == actor);
                 enteredFrom =
                     Town.Map?.IsDavis == true
                         ? Town.Map.Nearest(actor.transform.position, actor.transform.forward, false)
@@ -1704,6 +1760,7 @@ namespace CoDriver
         {
             occupant = null;
             enteredFrom = null;
+            requests.Clear();
             forcedUntil = 0;
             if (Mapped != null)
                 Mapped.ForcedRedUntil = 0;

@@ -1396,6 +1396,120 @@ namespace CoDriver.Tests
             );
         }
 
+        [UnityTest]
+        public IEnumerator RecordedDavisConflictingTurnsKeepBodiesSeparateAndBothClear()
+        {
+            Art.Initialize();
+            var town = Own("Recorded Davis access-road merge").AddComponent<Town>();
+            town.Map = MapDefinition.Load("davis-downtown");
+            town.Build(null);
+            var car = town.Traffic[6];
+            var truck = town.Traffic[20];
+            foreach (var actor in town.Traffic)
+                if (actor != car && actor != truck)
+                    actor.gameObject.SetActive(false);
+            foreach (var walker in town.Walkers)
+                walker.gameObject.SetActive(false);
+            town.Train.gameObject.SetActive(false);
+            town.Tram.gameObject.SetActive(false);
+            const string junction = ":cluster_271743555_4268393103_5674148817_95715421_";
+            var exit = town.Map.lanes.Single(l => l.id == "10746177#1_0");
+            foreach (var pair in new[] { (car, "18_0"), (truck, "0_0") })
+            {
+                var turn = town.Map.lanes.Single(l => l.id == junction + pair.Item2);
+                var approach = town.Map.lanes.Single(l => l.next.Contains(turn.id));
+                pair.Item1.Path = new TrackPath(
+                    approach.points.Concat(turn.points).Concat(exit.points),
+                    false
+                );
+            }
+            // Simultaneous permissive greens exercise exclusive physical turn
+            // priority. This is a test signal schedule, not changed Davis timing.
+            foreach (var signal in town.Map.signals)
+                signal.phases = new[]
+                {
+                    new MapPhase
+                    {
+                        duration = 1000,
+                        state = new string('G', signal.phases.Max(p => p.state.Length)),
+                    },
+                };
+            PlaceFixture(
+                car,
+                new Vector3(66.9994f, -.0224f, -376.9546f),
+                new Vector3(.97239f, -.01533f, .23286f)
+            );
+            PlaceFixture(
+                truck,
+                new Vector3(130.1272f, .11945f, -356.9485f),
+                new Vector3(-.97878f, -.00744f, -.20478f)
+            );
+            var reservation = town.MappedJunctions[
+                "cluster_271743555_4268393103_5674148817_95715421"
+            ];
+            Assert.IsTrue(
+                reservation.Reserve(truck),
+                "The truck arrived first in the recorded run"
+            );
+            var carStart = car.transform.position;
+            var truckStart = truck.transform.position;
+            var a = car.GetComponent<BoxCollider>();
+            var b = truck.GetComponent<BoxCollider>();
+            float begin = Time.time;
+            while (Time.time - begin < 60 && (!Cleared(car) || !Cleared(truck)))
+            {
+                yield return new WaitForFixedUpdate();
+                if (
+                    town
+                        .Map.Nearest(car.transform.position, car.transform.forward, false)
+                        .internalLane
+                )
+                {
+                    for (int side = -1; side <= 1; side += 2)
+                    for (int end = -1; end <= 1; end += 2)
+                    {
+                        var corner = truck.transform.TransformPoint(
+                            b.center + new Vector3(side * b.size.x * .5f, 0, end * b.size.z * .5f)
+                        );
+                        Assert.Greater(
+                            Vector3.Dot(corner - exit.Path.Position(0), exit.Path.Direction(0)),
+                            0,
+                            "The conflicting car must wait until the whole truck clears the turn"
+                        );
+                    }
+                }
+                Assert.IsFalse(
+                    Physics.ComputePenetration(
+                        a,
+                        car.transform.position,
+                        car.transform.rotation,
+                        b,
+                        truck.transform.position,
+                        truck.transform.rotation,
+                        out _,
+                        out _
+                    ),
+                    "The merging bodies must remain physically separate"
+                );
+            }
+            Debug.Log(
+                $"CODRIVER_RECORDED_ACCESS_MERGE car={Vector3.Distance(carStart, car.transform.position):F2} truck={Vector3.Distance(truckStart, truck.transform.position):F2} car_clearance={car.Clearance} truck_clearance={truck.Clearance} truck_angle={truck.Dynamics.LastSteering:F2} truck_arc={TrafficClearance.TurningCreepLimit(b, truck.Dynamics.Profile.wheelbase, truck.Dynamics.LastSteering):F2}"
+            );
+            Assert.IsTrue(
+                Cleared(truck),
+                "The truck must finish its mapped turn: " + truck.Clearance
+            );
+            Assert.IsTrue(
+                Cleared(car),
+                "The following car must proceed after the truck clears: " + car.Clearance
+            );
+            bool Cleared(TrafficActor actor) =>
+                Vector3.Dot(
+                    actor.transform.position - exit.Path.Position(0),
+                    exit.Path.Direction(0)
+                ) > 8;
+        }
+
         static void PlaceFixture(TrafficActor actor, Vector3 position, Vector3 forward)
         {
             actor.transform.SetPositionAndRotation(position, Quaternion.LookRotation(forward));

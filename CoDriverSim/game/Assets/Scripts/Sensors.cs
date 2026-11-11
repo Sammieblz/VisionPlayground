@@ -286,9 +286,10 @@ namespace CoDriver
 
         int inFlight;
         readonly FrameDeliveryOrder deliveryOrder = new FrameDeliveryOrder();
+        readonly CameraCadence cadence = new CameraCadence();
         public int ReorderedDropped => deliveryOrder.Dropped;
-        float next,
-            previousSpeed;
+        public long MissedCaptureDeadlines => cadence.SkippedDeadlines;
+        float previousSpeed;
         long frame;
         double previousCaptureTime;
         Vector3 previousPhysicsVelocity,
@@ -349,11 +350,8 @@ namespace CoDriver
 
         void LateUpdate()
         {
-            if (Time.unscaledTime < next)
+            if (!cadence.Due(Time.realtimeSinceStartupAsDouble))
                 return;
-            next += .05f;
-            if (next < Time.unscaledTime - .1f)
-                next = Time.unscaledTime + .05f;
             if (inFlight >= 3)
             {
                 Dropped++;

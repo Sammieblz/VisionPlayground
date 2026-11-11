@@ -142,9 +142,7 @@ namespace CoDriver
                                     exitDistance,
                                     body
                                 );
-                            if (!clear)
-                                junction.ReleaseBlockedApproach(vehicle);
-                            if (!clear || !junction.Reserve(vehicle))
+                            if (!junction.Reserve(vehicle, clear))
                                 target = Mathf.Min(
                                     target,
                                     Mathf.Sqrt(

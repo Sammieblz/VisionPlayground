@@ -1226,9 +1226,7 @@ namespace CoDriver
                         Clearance = clearTurn
                             ? "Clear turn; reservation=" + junction.Reservation
                             : "Blocked turn: " + TrafficClearance.LastBlocker;
-                        if (!clearTurn)
-                            junction.ReleaseBlockedApproach(this);
-                        if (!clearTurn || !junction.Reserve(this))
+                        if (!junction.Reserve(this, clearTurn))
                         {
                             // Leave room for the entire turning bus envelope,
                             // not only its centreline, before claiming the junction.

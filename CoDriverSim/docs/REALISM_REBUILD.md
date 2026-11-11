@@ -33,8 +33,11 @@ misses the near-20 Hz check, and a car/truck conflict inside a mapped junction
 creates a persistent queue. World qualification therefore still fails.
 Its source, `0ba3f72`, passes **145/145 Editor and 35/35 PhysicalWorld checks**,
 including ten ambulance seeds and the 2.51 km, three-stop passenger trip.
-The new recorded vehicle conflict is being reproduced separately; those earlier
-test passes do not qualify the sustained traffic behavior.
+The new vehicle conflict now has a failing physical entry regression and a passing
+reservation correction. The candidate also preserves approach arrival order and
+bounded camera cadence recovery; its complete Editor suite passes **154/154**.
+PhysicalWorld and packaged workload checks are underway. Those earlier test passes
+do not qualify the changed sustained traffic behavior.
 
 Current work is correcting those failures, measuring the combined workload,
 reviewing fresh activity/visual captures and preparing the eligible public
@@ -1481,3 +1484,40 @@ Normal shutdown releases 37 owned IPC files / 194,830,336 bytes. The observer
 records normal connection closure and no package-owned Windows processes remain.
 The new Desktop and Start-menu development shortcuts open this verified package's
 normal menu for manual driving, without a session time limit.
+
+### Junction admission reproduction and candidate correction
+
+The recorded trace shows truck 20 losing its reservation at 688.20 s while already
+on an internal turn, about 38 m from the junction centre. The centre-distance queue
+test misclassifies that committed truck as a distant queued approach and grants
+car 6 a conflicting turn. A stopped turn can also be released by the red-light
+approach test. Internal mapped turns now retain ownership until the existing
+rear-clearance exit rule is satisfied.
+
+`realism-reservation-fixture.xml` fails both recorded Editor cases before the fix.
+The physical approach replay in `realism-reservation-entry-before.xml` also fails:
+the car enters while a truck corner is still 11.87 m before the exit boundary.
+After the correction, all 18 traffic Editor cases pass, and
+`realism-reservation-after-physical.xml` passes the moving-body replay. The truck
+travels 114.82 m, the car 30.39 m, the car waits for every truck corner to clear,
+and neither body penetrates the other. The earlier exact-stuck-pose fixture and
+unsuccessful turning-creep experiment remain retained as failed evidence; the
+creep experiment was removed.
+
+The separate 340-second queue motivates arrival-order tracking: a waiting queue
+head retains its request when temporarily blocked, while clear green approaches
+can pass it. Inactive or unrenewed requests expire. Physical clearance and signal
+rules still apply, and only NPC/qualification drivers request these reservations;
+the observer and Comma actuator interface are unchanged.
+
+Camera scheduling previously discarded all pending cadence recovery when more
+than 100 ms late. The candidate keeps at most 100 ms of recovery and captures only
+fresh renders with actual timestamps, at most once per render frame. Long stalls
+discard excess deadlines rather than accumulating work. Diagnostics record the
+discarded-deadline count. New jitter, duplicate-time and long-stall tests pass;
+this is not yet a measured camera-rate improvement.
+
+The combined candidate passes **154/154 Editor cases** in 59.57 seconds in
+`realism-turn-priority-editor.xml`. PhysicalWorld, packaging and the new complete
+workload remain in progress. The prior failed run remains on `VISUAL_REVIEW.html`,
+alongside explicitly historical activity videos and matched static captures.
