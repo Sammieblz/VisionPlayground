@@ -124,6 +124,7 @@ def main():
         "comma_vehicle_config.py",
         "comma_sim_card.py",
         "comma_sim_manager.py",
+        "install-game-shortcuts.ps1",
     ):
         shutil.copy2(root / "scripts" / name, target / "scripts" / name)
     notices = target / "Notices"
@@ -217,6 +218,7 @@ def main():
         "CoDriverSim development build - release qualification incomplete\n\n"
         "Run CoDriverSim.exe. The bundled Python runtime starts automatically.\n"
         "Keep this entire folder together in a location you can write to.\n"
+        "Optional Desktop/Start-menu shortcuts: run scripts/install-game-shortcuts.ps1 -Package .\n"
         "Select Play for manual driving; Settings selects Davis or Cedar Grove.\n"
         "Xbox: RT accelerate, LT brake, left stick steer, B select reverse while stopped,\n"
         "Y camera, View full map, Menu pause, X request/cancel Comma.\n"

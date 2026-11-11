@@ -36,6 +36,10 @@ folder with its own Python interpreter, observer, models and notices. Installed-
 Comma engagement, service restart and clean exit have been exercised; full release qualification
 remains incomplete. WSL Comma is a separate installation, configurable in `codriversim-app.json`.
 
+After verifying a package, install Desktop and Start-menu shortcuts with
+`scripts/install-game-shortcuts.ps1 -Package C:/CoDriverBuilds/local-preview`.
+They open the normal menu for manual driving, with no session time limit.
+
 To prepare a public development download, build with eligible assets and keep the
 output directory new. The archive command verifies every included file against
 the package manifest and excludes later recordings, logs and unrelated files:

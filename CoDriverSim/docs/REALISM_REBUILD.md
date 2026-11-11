@@ -26,14 +26,15 @@ permission is established. CC0/CC-BY assets retain their individual provenance.
 
 Prepared art, the local Mercedes cockpit, HUD companion, bridge extension and
 revised Davis streets are integrated. The latest completed packaged session,
-`7f74123cc75744cd9e6f60ccbdb42de0`, meets rendering/inference throughput targets
-over 1,878 advancing simulation seconds but fails world qualification: two
-unfinished pedestrian crossings create prolonged queues. The corrected source,
-`0ba3f72`, passes **145/145 Editor and 35/35 PhysicalWorld checks**, including all
-ten ambulance dispatch/return seeds without recorded contact. The additional
-Davis transit blockage is reproduced and corrected; its retest completes 2.51 km,
-three stops, boarding and alighting. No new packaged performance pass is claimed
-for these source changes until the rebuilt workload is measured.
+`94db574ba27f40fc908fb47db3044606`, runs **1,876.75 advancing simulation seconds**
+at **31.70 FPS**, with **19.32 Hz camera delivery / 6.12 Hz detection**. It has no
+pauses, player contacts or sustained pedestrian crossing stalls. Camera delivery
+misses the near-20 Hz check, and a car/truck conflict inside a mapped junction
+creates a persistent queue. World qualification therefore still fails.
+Its source, `0ba3f72`, passes **145/145 Editor and 35/35 PhysicalWorld checks**,
+including ten ambulance seeds and the 2.51 km, three-stop passenger trip.
+The new recorded vehicle conflict is being reproduced separately; those earlier
+test passes do not qualify the sustained traffic behavior.
 
 Current work is correcting those failures, measuring the combined workload,
 reviewing fresh activity/visual captures and preparing the eligible public
@@ -1442,3 +1443,41 @@ and **35/35 PhysicalWorld checks** in 1,686.83 seconds. All ten ambulance seeds,
 passes. The pipeline now proceeds to build/package verification and a new
 controller-off, 1,900-second combined workload. Test passes do not establish its
 future performance result or visual/activity acceptance.
+
+### Corrected package: completed run and new vehicle conflict
+
+`Realism-local-20261111-023650` passes all 2,630 package-file checks and the
+isolated bundled CLI checks. Its code identity is
+`df93a6b0e7e9af4d2457afa7ab46d1662040ab17d43cff01bd16759db2de0029`.
+With the controller confirmed off, session `94db574ba27f40fc908fb47db3044606`
+completes 1,900.01 elapsed seconds, **1,876.75 advancing simulation seconds**,
+and **10,460.70 m**. It uses the qualification driver, not Comma autonomy.
+
+| Measurement | Result |
+| --- | ---: |
+| Mean FPS | 31.70 |
+| Frame p95 / p99 | 58.26 / 85.48 ms |
+| Camera / general detection | 19.32 / 6.12 Hz |
+| Sensor-to-warning p95 | 466.27 ms (919 samples) |
+| Sensor-to-observer p95 | 425.27 ms |
+| Fresh healthy Comma commands | 98.80% of samples |
+| Fresh model / observer | 98.50% / 99.80% of samples |
+| Transport / out-of-order frame drops | 2 / 1 |
+
+There are no pauses, player contacts, sampled road/rail overlaps or unrequested
+reverse movements. The longest sampled pedestrian crossing stall is 2.10 s.
+Parking completes four returns and ambulance dispatch/return cycles occur.
+**This is not a combined pass:** camera delivery is below the reviewer's explicit
+19.5 Hz near-target tolerance. Car 6 and truck 20 mutually stop inside junction
+`cluster_271743555_4268393103_5674148817_95715421`, with each reporting the other's
+body in its path. Their stationary interval reaches **1,182.41 s**. The bus reaches
+four stops but later waits **935.97 s**. A separate busy-junction wait for car 18
+lasts **340.05 s** before clearing. The worst active ambulance wait is **131.73 s**.
+
+`junction-queues-94db574ba27f40fc908fb47db3044606/` preserves the recorded poses,
+lane geometry and clearance histories. Actual-turn clearance and reservation
+lifetime are hypotheses pending reproduction, not established fixes.
+Normal shutdown releases 37 owned IPC files / 194,830,336 bytes. The observer
+records normal connection closure and no package-owned Windows processes remain.
+The new Desktop and Start-menu development shortcuts open this verified package's
+normal menu for manual driving, without a session time limit.
